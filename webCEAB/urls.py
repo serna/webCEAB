@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from . import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', views.index),
+    url(r'^cobros_diarios$', views.cobros_diarios),
+    url(r'^resumen_prospectos$', views.resumen_prospectos),
+    url(r'^inscritos_y_prospectos_por_fechas_de/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<day>[0-9]{2})/a/(?P<year2>[0-9]{4})/(?P<month2>[0-9]{2})/(?P<day2>[0-9]{2})/$',views.reporte_inscritos_prospectos_por_fechas)
 ]

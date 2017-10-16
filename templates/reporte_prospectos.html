@@ -1,0 +1,39 @@
+{% extends 'consultas_diarias.html' %}
+
+	{% block busqueda %}
+
+	{% endblock %}
+
+{% block resultado %}
+
+	<p>Los alumnos que deben de pagar el dia de hoy son:</p>
+	
+	
+		
+
+		<table class = "table table-striped">
+			<thead class="thead-inverse">
+				<tr>
+					<th>Nombre</th>
+					<th>apellido_paterno</th>
+					<th>fecha de registro</th>
+					<th>promotor</th>
+				</tr>
+			</thead>
+
+
+
+			<tbody>
+				{% for item in queryset %}
+					<tr>
+						<td> {{item.nombre}} </td>
+						<td> {{item.apellido_paterno}} </td>
+						<td> {{item.creacion_de_registro}} </td>
+						<td> {{item.promotor}} </td>
+			  		</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+
+{% endblock %}

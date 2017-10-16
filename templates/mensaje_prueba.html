@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block aside %}
+	<aside style="padding-top: 20px">
+		<ul class="list-group">
+	        
+	        
+	        <li class="list-group-item"><a href="#">Ingresos</a></li>
+	    </ul>
+	</aside>
+{% endblock %}
+
+{% block content %}
+		<h2>La informacion recibida es</h2>
+
+		{% block buscar %}
+		<p>El ano inicio es: {{year}} </p>
+		<p>El mes inicio es: {{month}} </p>
+		<p>El dia inicio es: {{day}} </p>
+		<p>El ano final es: {{year2}} </p>
+		<p>El mes final es: {{month2}} </p>
+		<p>El dia final es: {{day2}} </p>
+		{% endblock %}
+
+		{% block resultado %}
+    	{% endblock %}
+
+    	{% block subcontent %}
+    	{% endblock %}
+
+
+{% endblock %}

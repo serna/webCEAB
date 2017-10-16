@@ -1,0 +1,8 @@
+
+{% extends 'consultas_diarias.html' %}
+{% load render_table from django_tables2 %}
+{% block resultado %}
+	<p>Resumen de inscripciones</p>
+		{% render_table queryset %}
+
+{% endblock %}

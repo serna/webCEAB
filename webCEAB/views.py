@@ -1,0 +1,167 @@
+from django.shortcuts import render, get_object_or_404, render_to_response, redirect # is used to looks for the object that is related the call
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import get_template
+from django.template import Context
+import datetime
+from django.core.mail import send_mail
+from controlescolar.models import Estudiante
+from promotoria.models import Aspirantes
+from .forms import rango_fechas_form, preguntas_form
+from .tables import AspiranteTable, EstudianteTable
+import csv
+from django_tables2 import RequestConfig
+from django.urls import reverse
+import csv
+from django.http import HttpResponse
+
+def generate_csvFile(request,datos = None):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    fileName = datos['claveAlumno']+datos['claveExamen']+'.csv'
+    response['Content-Disposition'] = 'attachment; filename=%s'%fileName
+
+    writer = csv.writer(response)
+    writer.writerow([datos['nombre'], datos['claveAlumno'], datos['numeroPreguntas'], datos['claveExamen'], datos['versionExamen']])
+    writer.writerow(datos['listaRespuestas'])
+
+    return response
+
+# Create your views here.
+def index(request):
+	if request.method == 'POST':
+		form = preguntas_form(request.POST)
+		if form.is_valid():
+			nombre = form.cleaned_data['nombre']
+			claveAlumno = form.cleaned_data['clave_de_alumno']
+			numeroPreguntas = form.cleaned_data['numero_de_preguntas']
+			claveExamen = form.cleaned_data['clave_del_examen']
+			versionExamen = form.cleaned_data['version_examen']
+			listaRespuestas = []
+			for i in range(1,201):
+				cadenaPregunta = 'pregunta_%d'%i
+				listaRespuestas.append(form.cleaned_data[cadenaPregunta])
+			
+
+			print(nombre,claveAlumno,numeroPreguntas,claveExamen)
+			datos = {'nombre':nombre,
+			'claveAlumno':claveAlumno,
+			'numeroPreguntas':numeroPreguntas,
+			'claveExamen':claveExamen,
+			'listaRespuestas':listaRespuestas,
+			'versionExamen': versionExamen
+			}
+			return generate_csvFile(request,datos)
+			
+	else:
+		
+		form = preguntas_form()
+		context = {
+		"mensaje": "Ingresa la informacion correspondiente",
+		"form":form,
+		}
+	return render(request, "formulario1.html", context)
+def index_original(request):
+	return render(request, 'index.html', {})
+def cobros_diarios(request):
+	#queryset = Estudiante.objects.filter(estatus = 0)
+	queryset = Estudiante.objects.all()
+	var1 = 5
+	dict1 = {"var1":5}
+	#print("Inicia de consulta")
+	#for item in queryset:
+	#	print("Del estudiante ", item.Aspirante, " los cursos son:")
+	#	for curso in tiem.cursos.all:
+	#		print(curso)
+	context = {"queryset1":queryset,
+	}
+	return render(request, 'cobros_diarios.html', context)
+def cambiaGuionPorComa(fecha):
+	fecha = fecha.str
+	cnt = 0
+	for letra in fecha:
+		if letra=='-':
+			fecha[cnt] = ','
+		cnt += 1
+	print(fecha)
+	return fecha
+def reporte_inscritos_prospectos_por_fechas(request,year,month,day,year2,month2,day2):
+
+	fecha1 = datetime.datetime(int(year),int(month),int(day))
+	fecha2 = datetime.datetime(int(year2),int(month2),int(day2))
+	queryset = Aspirantes.objects.filter(creacion_de_registro__lt = fecha2)
+	queryset = queryset.filter(creacion_de_registro__gt = fecha1)
+	table = AspiranteTable(queryset)
+	#table2 = EstudianteTable(Estudiante.objects.all())
+	RequestConfig(request).configure(table)
+	context = {"queryset":table,
+			 	#"queryset2":table2
+				}
+	
+	return render(request,"reporte_tablas.html", context)
+	#return render(request,"mensaje_prueba.html", context)
+
+def reporte_prospectos(request):
+
+	if request.method == 'POST':
+		form = rango_fechas_form(request.POST)
+		if form.is_valid():
+			fecha1 = form.cleaned_data['fecha_inicial']
+			fecha2 = form.cleaned_data['fecha_final']
+			
+			print(fecha1,type(fecha1))
+			print('Las pruebas resultaron satisfactorias')
+			queryset = Aspirantes.objects.filter(creacion_de_registro__lt = fecha2)
+			queryset = queryset.filter(creacion_de_registro__gt = fecha1)
+			context = {"queryset":queryset,}
+			return render(request,"reporte_prospectos.html", context)
+			
+	else:
+		form = rango_fechas_form()
+
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "formulario_fechas.html", context)
+
+def resumen_prospectos(request):
+	if request.method == 'POST':
+		form = rango_fechas_form(request.POST)
+		if form.is_valid():
+			fecha1 = form.cleaned_data['fecha_inicial']
+			fecha2 = form.cleaned_data['fecha_final']
+			
+			#return render(request,"reporte_tablas.html", context)
+			#return HttpResponseRedirect(reverse('reporte_inscritos_prospectos_por_fechas',
+			#	kwargs={'year':2000,'month':20,'day':20,'year2':3000,'month2':30,'day2':30}))
+			rangoFechas = str(fecha1.year) + '/'
+			if fecha1.month<10:
+				rangoFechas += '0' + str(fecha1.month) + '/'
+			else:
+				rangoFechas += str(fecha1.month) + '/'
+			if fecha1.day<10:
+				rangoFechas += '0' + str(fecha1.day) + '/a/'
+			else:
+				rangoFechas += str(fecha1.day) + '/a/'
+			
+			rangoFechas += str(fecha2.year) + '/'
+			if fecha2.month<10:
+				rangoFechas += '0' + str(fecha2.month) + '/'
+			else:
+				rangoFechas += str(fecha2.month) + '/'
+			if fecha2.day<10:
+				rangoFechas += '0' + str(fecha2.day) + '/'
+			else:
+				rangoFechas += str(fecha2.day) + '/'
+
+			return HttpResponseRedirect('inscritos_y_prospectos_por_fechas_de/'+rangoFechas)
+	else:
+		form = rango_fechas_form()
+
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "formulario_fechas.html", context)
+
+	

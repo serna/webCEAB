@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block aside %}
+	<aside style="padding-top: 20px">
+		<ul class="list-group">
+	        
+	        
+	        <li class="list-group-item"><a href="#">Ingresos</a></li>
+	    </ul>
+	</aside>
+{% endblock %}
+
+{% block content %}
+		<h2>Cobros que se deben de realizar el dia de hoy </h2>
+
+		{% block buscar %}
+		{% endblock %}
+
+		{% block resultado %}
+    	{% endblock %}
+
+    	{% block subcontent %}
+    	{% endblock %}
+
+
+{% endblock %}
