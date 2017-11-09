@@ -37,7 +37,7 @@ def index(request):
 			claveExamen = form.cleaned_data['clave_del_examen']
 			versionExamen = form.cleaned_data['version_examen']
 			listaRespuestas = []
-			for i in range(1,201):
+			for i in range(1,222):
 				cadenaPregunta = 'pregunta_%d'%i
 				listaRespuestas.append(form.cleaned_data[cadenaPregunta])
 			
