@@ -6,13 +6,15 @@ import datetime
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante
 from promotoria.models import Aspirantes
+from contabilidad.models import Egreso
 from .forms import rango_fechas_form, preguntas_form
-from .tables import AspiranteTable, EstudianteTable
+from .tables import AspiranteTable, EstudianteTable, PagosProximosTable
 import csv
 from django_tables2 import RequestConfig
 from django.urls import reverse
 import csv
 from django.http import HttpResponse
+from django.utils import timezone
 
 def generate_csvFile(request,datos = None):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -62,6 +64,22 @@ def index(request):
 	return render(request, "formulario1.html", context)
 def index_original(request):
 	return render(request, 'index.html', {})
+def pagos_proximos(request):
+	queryset = Egreso.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+	suma = 0
+	for item in queryset:
+		suma = suma +item.monto_futuro_a_cubrir
+
+	table = PagosProximosTable(queryset)
+	
+
+	RequestConfig(request).configure(table)
+	context = {"queryset":table,
+			 	"subtitulo":"Resumen de pagos proximos",
+			 	"info": 'La deuda futura es de: ' + str(suma)
+				}
+	return render(request,"reporte_tablas.html", context)
+	#return render(request,"mensaje_prueba.html", context)
 def cobros_diarios(request):
 	#queryset = Estudiante.objects.filter(estatus = 0)
 	queryset = Estudiante.objects.all()

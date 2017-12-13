@@ -1,6 +1,7 @@
 import django_tables2 as tables
 from promotoria.models import Aspirantes
 from controlescolar.models import Estudiante
+from contabilidad.models import Egreso
 class AspiranteTable(tables.Table):
     class Meta:
         model = Aspirantes
@@ -37,3 +38,19 @@ class EstudianteTable(tables.Table):
                 'curso',
                 'estatus',
                 }
+class PagosProximosTable(tables.Table):
+    class Meta:
+        model = Egreso
+        sequence = {
+            'concepto',
+            'monto_futuro_a_cubrir',
+            'proxima_fecha_de_pago'
+
+        }
+        fields = {
+            'concepto',
+            'monto_futuro_a_cubrir',
+            'proxima_fecha_de_pago'
+
+        }
+        

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from controlescolar.models import Curso
-
+#import datetime
 # Create your models here.
 class Proveedor(models.Model):
 	nombre = models.CharField(max_length=100)
@@ -42,13 +42,15 @@ class Egreso(models.Model):
 			('Gastos corrientes','Gastos corrientes (copias, papeleria, ferreteria)'),
 			('Otros','Otros')
 	)
-	numero_registro = models.IntegerField()
-	concepto = models.CharField(max_length = 20)
+	folio_de_recibo = models.IntegerField()
+	concepto = models.CharField(max_length = 40)
 	descripcion = models.CharField(max_length = 100)
 	monto = models.DecimalField(max_digits = 7, decimal_places = 2)
-	fecha = models.DateField()
-	destino = models.ForeignKey(Proveedor)
-	factura = models.BooleanField()
+	fecha = models.DateField(default= timezone.now)
+	pago_hecho_a = models.ForeignKey(Proveedor)
+	factura = models.CharField(max_length = 30)
+	proxima_fecha_de_pago =  models.DateField(default= timezone.now)
+	monto_futuro_a_cubrir =  models.DecimalField(max_digits = 7, decimal_places = 2)
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
 		return self.concepto
