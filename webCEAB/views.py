@@ -6,13 +6,13 @@ import datetime
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante
 from promotoria.models import Aspirantes
-from contabilidad.models import Egreso
+from contabilidad.models import Egreso, Egreso_nomina
+from siad.models import Empleado
 from .forms import rango_fechas_form, preguntas_form
-from .tables import AspiranteTable, EstudianteTable, PagosProximosTable
+from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable
 import csv
 from django_tables2 import RequestConfig
 from django.urls import reverse
-import csv
 from django.http import HttpResponse
 from django.utils import timezone
 
@@ -68,15 +68,22 @@ def pagos_proximos(request):
 	queryset = Egreso.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma = 0
 	for item in queryset:
-		suma = suma +item.monto_futuro_a_cubrir
-
+		suma = suma + item.monto_futuro_a_cubrir
+	queryset2 = Egreso_nomina.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+	suma2 = 0
+	for item in queryset2:
+		suma2 = suma2 + item.monto_futuro_a_cubrir
 	table = PagosProximosTable(queryset)
-	
+	table2 = PagosProximosNominaTable(queryset2)
 
 	RequestConfig(request).configure(table)
+	RequestConfig(request).configure(table2)
 	context = {"queryset":table,
+				'queryset2':table2,
 			 	"subtitulo":"Resumen de pagos proximos",
-			 	"info": 'La deuda futura es de: ' + str(suma)
+			 	"info": 'La deuda futura es de: ' + str(suma+suma2),
+			 	'subtitle1': 'Generales',
+			 	'subtitle2': 'Nomina',
 				}
 	return render(request,"reporte_tablas.html", context)
 	#return render(request,"mensaje_prueba.html", context)
