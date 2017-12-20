@@ -47,7 +47,7 @@ class EgresoGenerales(models.Model):
 	proxima_fecha_de_pago =  models.DateField(default= timezone.now)
 	monto_futuro_a_cubrir =  models.DecimalField(max_digits = 7, decimal_places = 2)
 	realizo_pago = models.ForeignKey(Empleado)
-	movimiento_verificado_por_direccion = models.BooleanField()
+	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
 		return "%s;\t%s;\t%s"%(self.movimiento_verificado_por_direccion,self.concepto,self.fecha)
