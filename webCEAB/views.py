@@ -65,11 +65,11 @@ def index(request):
 def index_original(request):
 	return render(request, 'index.html', {})
 def pagos_proximos(request):
-	queryset = Egreso.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma = 0
 	for item in queryset:
 		suma = suma + item.monto_futuro_a_cubrir
-	queryset2 = Egreso_nomina.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+	queryset2 = EgresoNomina.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma2 = 0
 	for item in queryset2:
 		suma2 = suma2 + item.monto_futuro_a_cubrir
