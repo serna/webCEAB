@@ -36,8 +36,8 @@ class PagosAlumno(models.Model):
 		return str(self.id) + ": " + str(self.monto)
 class Ingreso(models.Model):
 	numero_registro = models.IntegerField()
-class Egreso(models.Model):
-	folio_de_recibo = models.IntegerField()
+class EgresoGenerales(models.Model):
+	folio_de_recibo = models.IntegerField(help_text='Ingresa el folio del recibo de cotejo')
 	concepto = models.CharField(max_length = 40)
 	descripcion = models.CharField(max_length = 100)
 	monto = models.DecimalField(max_digits = 7, decimal_places = 2)
@@ -46,11 +46,13 @@ class Egreso(models.Model):
 	factura = models.CharField(max_length = 30)
 	proxima_fecha_de_pago =  models.DateField(default= timezone.now)
 	monto_futuro_a_cubrir =  models.DecimalField(max_digits = 7, decimal_places = 2)
+	realizo_pago = models.ForeignKey(Empleado)
+	movimiento_verificado_por_direccion = models.BooleanField()
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
-		return self.concepto
+		return "%s;\t%s;\t%s"%(self.movimiento_verificado_por_direccion,self.concepto,self.fecha)
 
-class Egreso_nomina(models.Model):
+class EgresoNomina(models.Model):
 	folio_de_recibo = models.IntegerField()
 	concepto = models.CharField(max_length = 40)
 	monto = models.DecimalField(max_digits = 7, decimal_places = 2)

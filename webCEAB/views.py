@@ -6,7 +6,7 @@ import datetime
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante
 from promotoria.models import Aspirantes
-from contabilidad.models import Egreso, Egreso_nomina
+from contabilidad.models import EgresoGenerales, EgresoNomina
 from siad.models import Empleado
 from .forms import rango_fechas_form, preguntas_form
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable

@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from promotoria.models import Aspirantes
 from controlescolar.models import Estudiante
-from contabilidad.models import Egreso, Egreso_nomina
+from contabilidad.models import EgresoGenerales, EgresoNomina
 class AspiranteTable(tables.Table):
     class Meta:
         model = Aspirantes
@@ -40,7 +40,7 @@ class EstudianteTable(tables.Table):
                 }
 class PagosProximosTable(tables.Table):
     class Meta:
-        model = Egreso
+        model = EgresoGenerales
         sequence = {
             'concepto',
             'monto_futuro_a_cubrir',
@@ -55,7 +55,7 @@ class PagosProximosTable(tables.Table):
         }
 class PagosProximosNominaTable(tables.Table):
     class Meta:
-        model = Egreso_nomina
+        model = EgresoNomina
         sequence = {
             'concepto',
             'monto_futuro_a_cubrir',
