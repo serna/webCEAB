@@ -17,16 +17,16 @@ class EgresoNormalUserForm(ModelForm):
 	"""
 	class Meta:
 		model = EgresoGenerales
-		fields = ['folio_de_recibo','concepto','descripcion','monto',
+		fields = ['folio_de_recibo','concepto','descripcion','monto','fecha',
 			'pago_hecho_a','factura','proxima_fecha_de_pago','monto_futuro_a_cubrir',
-			'fecha']
+			'realizo_pago']
 
 class EgresoSuperUserForm(ModelForm):
 	class Meta:
 		model = EgresoGenerales
-		fields = ['folio_de_recibo','concepto','descripcion','monto',
+		fields = ['folio_de_recibo','concepto','descripcion','monto', 'fecha',
 			'pago_hecho_a','factura','proxima_fecha_de_pago','monto_futuro_a_cubrir',
-			'realizo_pago','movimiento_verificado_por_direccion', 'fecha']
+			'realizo_pago','movimiento_verificado_por_direccion', ]
 
 class EgresoGeneralesAdmin(admin.ModelAdmin):
 	search_fields = ('realizo_pago',)
