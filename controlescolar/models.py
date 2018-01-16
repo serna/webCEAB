@@ -36,14 +36,14 @@ class Materia(models.Model):
 class Curso(models.Model):
 	#alumno = models.ForeignKey(Estudiante)
 	tipo_de_curso = models.ForeignKey(Servicio)
-	costo_curso = models.DecimalField(max_digits = 7,decimal_places=2)
-	adeudo = models.DecimalField(max_digits = 7,decimal_places=2)
+	
+	
 	fecha_de_inicio = models.DateField(default=timezone.now)
 	fecha_de_termino = models.DateField(default=timezone.now )
 	materias = models.ManyToManyField(Materia)
 	boleta = models.TextField(blank=True)
 	def __str__(self):
-		return str(self.id) + ": " +str(self.costo_curso) + ' quedan: ' +str(self.adeudo) 
+		return str(self.id) 
 
 class Estudiante(models.Model):
 	fecha_de_registro = models.DateField(default=timezone.now)

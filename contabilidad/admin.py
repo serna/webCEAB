@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina
+from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina, Tarjeton
 class PagosAlumnoAdmin(admin.ModelAdmin):
-	raw_id_fields = ('curso_a_pagar',)
+	raw_id_fields = ('alumno',)
 
 admin.site.register(Proveedor)
 admin.site.register(PagosAlumno,PagosAlumnoAdmin)
-
+admin.site.register(Tarjeton)
 admin.site.register(EgresoNomina)
 
 class EgresoNormalUserForm(ModelForm):

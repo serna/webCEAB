@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
-from controlescolar.models import Curso
+from controlescolar.models import Curso, Estudiante
 from siad.models import Empleado
+from django.utils import timezone
 #import datetime
 # Create your models here.
 class Proveedor(models.Model):
@@ -20,20 +21,23 @@ class Proveedor(models.Model):
 		verbose_name_plural = "Proveedores" 
 
 class PagosAlumno(models.Model):
-	#alumno = models.ForeignKey(Alumno)
-	#opcionesEsquema = (
-	#		('Semanal','Semanal'),
-	#		('Quincenal','Quincenal'),
-	#		('Mensual','Mensual'),
-	#		('Un solo pago','Un solo pago'),
-	#		('Otro', 'otro'),
-	#)
-	#esquema = models.CharField(max_length = 10,choices = opcionesEsquema,default = 'Semanal')
+	opciones= (
+			('Efectivo','Efectivo'),
+			('Deposito','Deposito'),
+			('Transferencia','Transferencia'),
+			('Cheque','Cheque'),
+			('Otro', 'Otro'),
+	)
+	alumno = models.ForeignKey(Estudiante)
 	fecha_pago = models.DateField(default=timezone.now)
 	monto = models.DecimalField(max_digits = 7,decimal_places=2)
-	curso_a_pagar = models.ForeignKey(Curso)
-	def __str__(self):
-		return str(self.id) + ": " + str(self.monto)
+	forma_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Efectivo')
+	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
+	def __str__(self): 
+		return str(self.alumno.id) +': ' + str(self.monto)
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Pagos de alumnos"
 class Ingreso(models.Model):
 	numero_registro = models.IntegerField()
 class EgresoGenerales(models.Model):
@@ -51,7 +55,9 @@ class EgresoGenerales(models.Model):
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
 		return "%s;\t%s;\t%s"%(self.movimiento_verificado_por_direccion,self.concepto,self.fecha)
-
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Egresos generales"
 class EgresoNomina(models.Model):
 	folio_de_recibo = models.IntegerField()
 	concepto = models.CharField(max_length = 40)
@@ -63,3 +69,27 @@ class EgresoNomina(models.Model):
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
 		return self.concepto
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Egresos nominas"
+class Tarjeton(models.Model):
+	opciones= (
+			('Semanal','Semanal'),
+			('Quincenal','Quincenal'),
+			('Mensual','Mensual'),
+			('Un solo pago','Un solo pago'),
+			('Otro', 'Otro'),
+	)
+	alumno = models.OneToOneField(Estudiante)
+	inicio =  models.DateField(default= timezone.now,help_text='Fecha a partir de la cual se programaran los siguientes pagos')
+	descripcion = models.CharField(max_length = 100,default = 'Creacion: ' + str(timezone.now),help_text='Descripcion breve relativa al tarjeton')
+	Esquema_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
+	monto =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto total del servicio')
+	pago_periodico = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cuanto pagara en cada semana, quincena o mes')
+	monto_cubierto = models.BooleanField(default = False,help_text='Activa esta casilla si el alumno ha cubierto la totalidad del monto')
+	pagos = models.ManyToManyField(PagosAlumno,help_text='Estos son los pagos que ha realizado el alumno',blank  = True)
+	def __str__(self):
+		return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Tarjetones"	

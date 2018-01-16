@@ -6,10 +6,10 @@ import datetime
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante
 from promotoria.models import Aspirantes
-from contabilidad.models import EgresoGenerales, EgresoNomina
+from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 from siad.models import Empleado
 from .forms import rango_fechas_form, preguntas_form
-from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable
+from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
 from django.urls import reverse
@@ -29,6 +29,21 @@ def generate_csvFile(request,datos = None):
     return response
 
 # Create your views here.
+def cobros_vencidos(request,dias):
+
+	queryset = Tarjeton.objects.filter(monto_cubierto = False)
+	queryset = queryset.filter()
+	table = PagospendientesTable(queryset)
+	
+
+	RequestConfig(request).configure(table)
+
+	context = {"queryset":table,
+			 	"subtitulo":"Resumen de pagos proximos",
+			 	'subtitle1': 'Generales',
+			 	'subtitle2': 'La consulta es de:' + str(dias),
+				}
+	return render(request,"consultaUnaTabla.html", context)
 def index(request):
 	if request.method == 'POST':
 		form = preguntas_form(request.POST)

@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from promotoria.models import Aspirantes
 from controlescolar.models import Estudiante
-from contabilidad.models import EgresoGenerales, EgresoNomina
+from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 class AspiranteTable(tables.Table):
     class Meta:
         model = Aspirantes
@@ -67,4 +67,23 @@ class PagosProximosNominaTable(tables.Table):
             'monto_futuro_a_cubrir',
             'proxima_fecha_de_pago'
 
-        }     
+        }
+class PagospendientesTable(tables.Table):
+    class Meta:
+        model = Tarjeton
+        sequence = {
+            'alumno',
+            'inicio',
+            'Esquema_de_pago',
+            'monto',
+            'monto_cubierto',
+
+        }
+        fields = {
+            'alumno',
+            'inicio',
+            'Esquema_de_pago',
+            'monto',
+            'monto_cubierto',
+        } 
+        
