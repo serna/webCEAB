@@ -33,6 +33,7 @@ def pago_realizado_signal(sender, instance, **kwargs):
 			Esquema_de_pago = 'Semanal',
 			monto = 1000,
 			monto_cubierto = 0,
+			pago_periodico = 0,
 			
 			)
 		tarjetonNuevo.save()
@@ -47,7 +48,8 @@ def pago_realizado_signal(sender, instance, **kwargs):
 			inicio = queryset[0].inicio,
 			Esquema_de_pago = queryset[0].Esquema_de_pago,
 			monto_cubierto = queryset[0].monto_cubierto,
-			monto = queryset[0].monto)
+			monto = queryset[0].monto,
+			pago_periodico = queryset[0].pago_periodico)
 		print('Agregando/actualizando un pago en el tarjeton de un alumno')	
 		tarjetonExistente.save()
 		tarjetonExistente.pagos.add(instance)

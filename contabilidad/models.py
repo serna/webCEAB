@@ -34,7 +34,8 @@ class PagosAlumno(models.Model):
 	forma_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Efectivo')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
 	def __str__(self): 
-		return str(self.alumno.id) +': ' + str(self.monto)
+		#return str(self.alumno.id) +': ' + str(self.monto)
+		return str(self.monto)
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Pagos de alumnos"

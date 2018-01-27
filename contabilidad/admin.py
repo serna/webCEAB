@@ -6,8 +6,22 @@ class PagosAlumnoAdmin(admin.ModelAdmin):
 
 admin.site.register(Proveedor)
 admin.site.register(PagosAlumno,PagosAlumnoAdmin)
-admin.site.register(Tarjeton)
+#admin.site.register(Tarjeton)
 admin.site.register(EgresoNomina)
+
+class TarjetonAdmin(admin.ModelAdmin):
+#	list_filter = ('plantelRegistro')
+
+	#raw_id_fields = ('Aspirante',)
+	#search_fields = ('Estudiante_id',)
+	#filter_horizontal = ('cursos',)
+	def get_readonly_fields(self, request, obj=None):
+		if request.user.is_superuser:
+			return []
+		if obj: #This is the case when obj is already created i.e. it's an edit
+			return ['pagos',]
+		else:
+			return []
 
 class EgresoNormalUserForm(ModelForm):
 	""" Form definition for normal user
@@ -37,3 +51,4 @@ class EgresoGeneralesAdmin(admin.ModelAdmin):
 			kwargs['form'] = EgresoNormalUserForm
 		return super(EgresoGeneralesAdmin, self).get_form(request, obj, **kwargs)
 admin.site.register(EgresoGenerales,EgresoGeneralesAdmin)
+admin.site.register(Tarjeton,TarjetonAdmin)
