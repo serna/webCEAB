@@ -71,19 +71,19 @@ class PagosProximosNominaTable(tables.Table):
 class PagospendientesTable(tables.Table):
     class Meta:
         model = Tarjeton
-        sequence = {
-            'alumno',
-            'inicio',
-            'Esquema_de_pago',
-            'monto',
-            'monto_cubierto',
-
-        }
+        
         fields = {
             'alumno',
             'inicio',
-            'Esquema_de_pago',
-            'monto',
-            'monto_cubierto',
+            'esquema_de_pago',
+            'proxima_fecha_de_pago',
+            'pagos_atrasados',
         } 
-        
+        sequence = {
+            'alumno',
+            'inicio',
+            'esquema_de_pago',
+            'proxima_fecha_de_pago',
+            'pagos_atrasados',
+
+        }

@@ -32,7 +32,7 @@ class Materia(models.Model):
 	#diasClase = models.CharField(max_length = 30,choices = opcionesDias,default = 'Lunes a viernes')
 	def __str__(self):
 		#return "%s;\t inicia %s\t termina %s\t, de %s\t a %s" % (self.nombre , self.fecha_inicio, self.fecha_termino, self.horario_inicio, self.horario_fin)
-		return  "%s"%(str(self.id)+": "+str(self.nombre[:4])+"/"+str(self.fecha_inicio) + "/" +str(self.horario_inicio)  )
+		return  "%s"%(str(self.id)+": "+str(self.nombre[:4])+"/ inicia: "+str(self.fecha_inicio) + "/" +str(self.horario_inicio) + "/ termina: " + str(self.fecha_termino))
 class Curso(models.Model):
 	#alumno = models.ForeignKey(Estudiante)
 	tipo_de_curso = models.ForeignKey(Servicio)

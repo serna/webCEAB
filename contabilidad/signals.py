@@ -98,12 +98,15 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		#	if item.concepto=='Colegiatura':
 		#		pagado+=item.monto
 		#print('El alumno ha pagado en colegiaturas: ',pagado)
+		colegiaturaPagada = 0
 		for item in queryset[0].pagos.all():
 			if item.concepto=="Colegiatura":
 				pagado += item.monto
+			else:
+				colegiaturaPagada = item.monto
 		print("El alumno ha pagado en colegiaturas: ",pagado)
 		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-			monto=queryset[0].monto,
+			monto=queryset[0].monto-colegiaturaPagada,
 			colegiatura=queryset[0].pago_periodico,
 			esquema=queryset[0].esquema_de_pago,
 			pagado=pagado)
