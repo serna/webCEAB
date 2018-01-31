@@ -22,17 +22,23 @@ class Proveedor(models.Model):
 
 class PagosAlumno(models.Model):
 	opciones= (
-			('Efectivo','Efectivo'),
-			('Deposito','Deposito'),
-			('Transferencia','Transferencia'),
-			('Cheque','Cheque'),
-			('Otro', 'Otro'),
+		('Efectivo','Efectivo'),
+		('Deposito','Deposito'),
+		('Transferencia','Transferencia'),
+		('Cheque','Cheque'),
+		('Otro', 'Otro'),
+	)
+	opcionesConcepto = (
+		('Inscripcion','Inscripcion'),
+		('Colegiatura','Colegiatura'),
 	)
 	alumno = models.ForeignKey(Estudiante)
 	fecha_pago = models.DateField(default=timezone.now)
+	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
 	monto = models.DecimalField(max_digits = 7,decimal_places=2)
-	forma_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Efectivo')
+	forma_de_pago = models.CharField(max_length = 20,choices = opciones,default = 'Efectivo')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
+	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	def __str__(self): 
 		#return str(self.alumno.id) +': ' + str(self.monto)
 		return str(self.monto)
@@ -84,11 +90,13 @@ class Tarjeton(models.Model):
 	alumno = models.OneToOneField(Estudiante)
 	inicio =  models.DateField(default= timezone.now,help_text='Fecha a partir de la cual se programaran los siguientes pagos')
 	descripcion = models.CharField(max_length = 100,default = 'Creacion: ' + str(timezone.now),help_text='Descripcion breve relativa al tarjeton')
-	Esquema_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
+	esquema_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
 	monto =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto total del servicio')
 	pago_periodico = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cuanto pagara en cada semana, quincena o mes')
 	monto_cubierto = models.BooleanField(default = False,help_text='Activa esta casilla si el alumno ha cubierto la totalidad del monto')
 	pagos = models.ManyToManyField(PagosAlumno,help_text='Estos son los pagos que ha realizado el alumno',blank  = True)
+	proxima_fecha_de_pago =  models.DateField(default= timezone.now) 
+	pagos_atrasados = models.IntegerField(default = 0)
 	def __str__(self):
 		return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
 	class Meta: 
