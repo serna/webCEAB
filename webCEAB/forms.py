@@ -10,17 +10,20 @@ class HorizRadioRenderer(forms.RadioSelect.renderer):
     def render(self):
             """Outputs radios"""
             return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+class form_acceso_alumno(forms.Form):
+	numero_de_alumno = forms.CharField(label = 'Ingresa tu numero de alumno')
+	clave_de_alumno = forms.CharField(label = 'Ingresa clave de alumno')
 
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget())
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
-	nombre = forms.CharField(widget=forms.TextInput())
-	clave_de_alumno = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
+	#nombre = forms.CharField(widget=forms.TextInput())
+	#clave_de_alumno = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
 	numero_de_preguntas = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
 	clave_del_examen = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
-	version_examen = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
+	#version_examen = forms.CharField(widget=forms.NumberInput(attrs={'size': '4'}))
 	pregunta_1 = forms.ChoiceField(widget=forms.RadioSelect(renderer=HorizRadioRenderer),choices=optionChoices, required=False)
 	pregunta_2 = forms.ChoiceField(widget=forms.RadioSelect(renderer=HorizRadioRenderer),choices=optionChoices, required=False)
 	pregunta_3 = forms.ChoiceField(widget=forms.RadioSelect(renderer=HorizRadioRenderer),choices=optionChoices, required=False)

@@ -4,17 +4,18 @@ from django.template.loader import get_template
 from django.template import Context
 import datetime
 from django.core.mail import send_mail
-from controlescolar.models import Estudiante
+from controlescolar.models import Estudiante, Curso, Materia
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 from siad.models import Empleado
-from .forms import rango_fechas_form, preguntas_form
+from .forms import rango_fechas_form, preguntas_form, form_acceso_alumno
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
 from django.urls import reverse
 from django.http import HttpResponse
 from django.utils import timezone
+from .modules import rutinas as rut
 
 def generate_csvFile(request,datos = None):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -44,20 +45,35 @@ def cobros_vencidos(request,dias):
 			 	'subtitle2': 'La consulta es de:' + str(dias),
 				}
 	return render(request,"consultaUnaTabla.html", context)
-def index(request):
+#def index(request):
+def evaluacion_digital(request,alumno,materia):
+	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta" 
+	"""
 	if request.method == 'POST':
 		form = preguntas_form(request.POST)
 		if form.is_valid():
-			nombre = form.cleaned_data['nombre']
-			claveAlumno = form.cleaned_data['clave_de_alumno']
+			queryset = Estudiante.objects.filter(id = alumno)
+			if len(queryset)==0:
+				print('NO EXISTE ESE ALUMNO')
+				return render(request, 'msg_registro_inexistente.html')
+			nombre = str(queryset[0])
+			claveAlumno = str(queryset[0].numero_de_control)
+
+			#nombre = form.cleaned_data['nombre']
+			#claveAlumno = form.cleaned_data['clave_de_alumno']
 			numeroPreguntas = form.cleaned_data['numero_de_preguntas']
 			claveExamen = form.cleaned_data['clave_del_examen']
-			versionExamen = form.cleaned_data['version_examen']
+			#versionExamen = form.cleaned_data['version_examen']
 			listaRespuestas = []
 			for i in range(1,222):
 				cadenaPregunta = 'pregunta_%d'%i
-				listaRespuestas.append(form.cleaned_data[cadenaPregunta])
-			
+				valor = form.cleaned_data[cadenaPregunta]
+				if valor == '':
+					calor = -1
+				else:
+					valor=int(valor)
+				listaRespuestas.append(valor)
+			print(listaRespuestas)
 
 			print(nombre,claveAlumno,numeroPreguntas,claveExamen)
 			datos = {'nombre':nombre,
@@ -65,20 +81,97 @@ def index(request):
 			'numeroPreguntas':numeroPreguntas,
 			'claveExamen':claveExamen,
 			'listaRespuestas':listaRespuestas,
-			'versionExamen': versionExamen
 			}
-			return generate_csvFile(request,datos)
+			calif,incorr= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= claveAlumno,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
+			print('nnnnnnnnnnnnnnnnnnnnn',calif)
+			#return generate_csvFile(request,datos)
+			context={
+				'mensaje': "Tus resultados",
+				'calificacion':calif,
+				'incorrectas':incorr,
+			}
+			#return(request,'base2.html',context)
 			
 	else:
-		
+		queryset = Estudiante.objects.filter(id = alumno)
+		if len(queryset)==0:
+			print('NO EXISTE ESE ALUMNO')
+			return render(request, 'msg_registro_inexistente.html')
+		alumno_str = queryset[0]
+		queryset2 = Materia.objects.filter(id=materia)
+		materia_str = queryset2[0].nombre 
 		form = preguntas_form()
 		context = {
 		"mensaje": "Ingresa la informacion correspondiente",
 		"form":form,
+		"alumno":alumno_str,
+		"materia":materia_str,
 		}
 	return render(request, "formulario1.html", context)
 def index_original(request):
+	#return render(request, 'index.html', {})
+	return render(request,'menuOpcionesAcceso.html',{})
+def consultas(request):
 	return render(request, 'index.html', {})
+def registro_inexistente(request):
+	return render(request, 'msg_registro_inexistente.html')
+def accesoAlumno(request):
+	if request.method == 'POST':
+		form = form_acceso_alumno(request.POST)
+		if form.is_valid():
+			numero = form.cleaned_data['numero_de_alumno']
+			clave = form.cleaned_data['clave_de_alumno']
+			print('FORMMULARIO ACCESO ALUMNOS')
+			print("alumno",numero,'clave',clave)
+			
+			queryset = Estudiante.objects.filter(id = numero)
+			if len(queryset)==0:
+				print('NO EXISTE ESE ALUMNO')
+
+				return render(request, 'msg_registro_inexistente.html')
+			else:
+				cursos = queryset[0].cursos.all()
+				print("Los cursos del alumno son: ",cursos)
+				if len(cursos)==0:
+					print("No tiene ningun servicio activado este alumno")
+					context={
+						"msg":"No tienes ningun curso dado de alta!!!"
+					}
+					return render(request, 'msg_registro_inexistente.html',context)
+				print(queryset)
+			queryset2 = Curso.objects.filter(id=cursos[0].id)
+
+			print('Las materias del alumno son: ')
+			print(queryset2[0].materias.all())
+			materias = []
+			for item in queryset2[0].materias.all():
+				
+				claveMateria = str(item).split(":")[0]
+				print(item,claveMateria)
+				# send the claveMateria alogn with the alumno id
+				link = 'eval/' + str(numero) + "/"+str(claveMateria)
+				materias.append([item,claveMateria,link])
+			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
+			#context = {"queryset":queryset,}
+
+			context = {'numero':numero,
+			'clave':clave,
+			'nombre': queryset[0].Aspirante,
+			'materias': materias,
+			
+			}
+
+			return render(request,"menu_alumno.html", context)
+			
+	else:
+		form = form_acceso_alumno()
+		context = {
+		"mensaje": "Ingresa los datos",
+		"form":form,
+		}
+	#return render(request, "formulario_fechas.html", context)
+	return render(request, 'form_acceso_alumno.html', context)
+
 def pagos_proximos(request):
 	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma = 0

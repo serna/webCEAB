@@ -20,6 +20,7 @@ def materias_cambiaron(sender, instance,**kwargs):
 		global lista_materias
 		lista_materias = ''
 		for item in instance.materias.all():
+			item = str(item).split(':')[0]
 			lista_materias += str(item)
 			lista_materias += '\n'
 		#print(lista_materias)

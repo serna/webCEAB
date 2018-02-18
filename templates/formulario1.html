@@ -1,7 +1,7 @@
 {% extends "index2.html" %}
 {% block buscar %}
 
-
+	<p>Examen del alumno: {{alumno}}, correspondiente a la materia: {{materia}}</p>
 	<form action="" method="POST">
 		{% csrf_token %}
 		{{form.as_p}}

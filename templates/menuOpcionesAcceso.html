@@ -17,16 +17,19 @@
 				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">			
 	        </div>
 	    
-	        
+	        <nav class="col-md-12">
+		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px" >
+					<li class="active"><a href="/alumnos">Alumnos</a></li>
+					<li class="active"><a href="/consultas">Consultas</a></li>
+					
+					
+				</ul>
+			</nav>
 		</header>
     	
         <section class="col-md-12">
         	
-            {{mensaje}}
-            <p>Calificacion</p>
-            {{calificacion}}
-            <p>Incorrectas</p>
-            {{incorrectas}}
+            
             {% block content %}
             {% endblock %}
 
@@ -44,9 +47,7 @@
 		<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
 
 
-		{% block buscar %}
 
-		{% endblock %}
 
 	</body> 
 </html>

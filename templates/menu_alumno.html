@@ -17,16 +17,32 @@
 				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">			
 	        </div>
 	    
-	        
+	        <nav class="col-md-12">
+		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+			        <h3> Bienvenido: {{nombre}} </h3>
+			        <h5> Tus materias son: </h5>
+			        <table style="width:30%">
+			        	<tr>
+						  	<th> Materia</th>
+						  	<th> Intentos </th>
+						  	<th> Link </th>
+						 </tr>
+				        {% for materia in materias %}
+				        	<tr>
+							  	<td> {{materia.0}}</td>
+							  	<td> {{materia.1}} </td>
+							  	
+							  	<td><a href="{{materia.2}}" > examen</a></td>
+							 </tr>
+						{% endfor %}
+					</table>
+				</ul>
+			</nav>
 		</header>
     	
         <section class="col-md-12">
         	
-            {{mensaje}}
-            <p>Calificacion</p>
-            {{calificacion}}
-            <p>Incorrectas</p>
-            {{incorrectas}}
+            
             {% block content %}
             {% endblock %}
 
@@ -44,9 +60,7 @@
 		<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
 
 
-		{% block buscar %}
 
-		{% endblock %}
 
 	</body> 
 </html>
