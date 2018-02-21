@@ -10,23 +10,23 @@ from .models import Estudiante, Documentacion, Curso
 #	Boleta.objects.create(alumno=instance)
 #	Documentacion.objects.create(alumno=instance)
 
-def materias_cambiaron(sender, instance,**kwargs):
+#def materias_cambiaron(sender, instance,**kwargs):
     # Do something
 	#instance = kwargs.pop('instance', None)
 #	pk_set = kwargs.pop('pk_set', None)
 	#print("LAS LLAVES ARGUMENTO SON: " + str(instance) + str(instance.materias.all()))
 	#print(lista_materias)
-	if len(instance.boleta) == 0: # just do it the first time the instance is created
-		global lista_materias
-		lista_materias = ''
-		for item in instance.materias.all():
-			item = str(item).split(':')[0]
-			lista_materias += str(item)
-			lista_materias += '\n'
+	#if len(instance.boleta) == 0: # just do it the first time the instance is created
+		#global lista_materias
+		#lista_materias = ''
+		#for item in instance.materias.all():
+			#item = str(item).split(':')[0]
+			#lista_materias += str(item)
+			#lista_materias += '\n'
 		#print(lista_materias)
-		instance.boleta = lista_materias
-		instance.save()
-m2m_changed.connect(materias_cambiaron, sender=Curso.materias.through)
+		#instance.boleta = lista_materias
+		#instance.save()
+#m2m_changed.connect(materias_cambiaron, sender=Curso.materias.through)
 
 
 

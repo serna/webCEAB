@@ -5,7 +5,7 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	noContestadas = []
 	correctas = []
 	incorrectas = []
-	cnt = 1
+	
 	respuestas = {0:"a",1:"b",2:"c",3:"d",-1:"No res",-2:"Inval"}
 	#scrambleOnlyAnswer = 0
 	if claveExamen[0]==0:
@@ -35,17 +35,21 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	print("Las respuestas correctas son: ",listaRespuestasCorrectas)
 	#print listaRespuestas[0],listaRespuestas[1],listaRespuestas[2],listaRespuestas[3],listaRespuestas[4]
 	print("n\t","corret\t","Alumno\t","Calificacion")
+	cnt = 1
 	for item in listaRespuestasAlumno:
+		if cnt>nPreguntas:
+			break
+		if item == '':
+			print( "No contestada")
+			noContestadas.append(cnt)
+			cnt+=1
+			continue
 		if cnt>nPreguntas:
 			break
 		print(cnt,"\t",respuestas[listaRespuestasCorrectas[cnt-1]],"\t",respuestas[item],"\t",)
 		if item==listaRespuestasCorrectas[cnt-1]:
 			print("Correcta")
 			correctas.append(str(cnt)+" ("+respuestas[item]+"), ")
-		elif item==-1:
-			
-			print( "No contestada")
-			noContestadas.append(cnt)
 		elif item==-2:
 			invalidas.append(cnt)
 			print( "Invalida")
@@ -63,7 +67,7 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	print("Clave alumno", claveAlumno)
 	print("Clave examen",claveExamen)
 	print("Total de preguntas", nPreguntas)
-	return calificacion,incorrectas
+	return calificacion,incorrectas,correctas,noContestadas
 
 		
 	
@@ -80,7 +84,7 @@ def evaluacionDigital(nombreAlumno,claveAlumno,claveExamen,nPreguntas,materia,li
 	  claveAlumno = "0" + claveAlumno
 	print( "La clave del alumno: ", claveAlumno)
 	
-	print( "Las respuestas del alumno son: ",listaPreguntas	)
+	#print( "Las respuestas del alumno son: ",listaPreguntas	)
 	
 	if versionExamen==2016:
 		parametro = '0'
@@ -89,3 +93,40 @@ def evaluacionDigital(nombreAlumno,claveAlumno,claveExamen,nPreguntas,materia,li
         
 	print( 'version del examen', versionExamen,parametro)
 	return evaluate(int(nPreguntas),claveExamen,claveAlumno,listaPreguntas,materia,parametro)
+
+
+def agrega_calificacion(boleta,idMateria,calificacion):
+	boletaNueva = ""
+	materiaEncontrada = 0 # variable bandera para saber si existe la materia en la boleta
+
+	for linea in boleta:
+		#print("La linea contiene",linea)
+		if len(linea.split())<1:
+			continue
+		print("la linea contiene: ",linea.split())
+		materia = linea.split()[0]
+		if linea[-1]=='\r':
+			linea = linea[:-1]
+		print("LA MATERIA ESTA PRESENTE",materia)
+		if int(materia)==int(idMateria):
+			print('SI ESTA LA MATERIA DENTRO DE LA BOLETA')
+			# si encontramos la materia en la n-esima linea de la boleta
+			# verificamos el numero de intentos en esa materia
+			nIntentos = len(linea.split())
+			print('EL NUMERO DE INTENTOS ES ',nIntentos)
+			materiaEncontrada = 1 # si esta dada de alta la materia en la boleta del curso
+			if nIntentos<3+1: # si se han hecho menos de 3+1 intentos
+				boletaNueva += linea + " " + str(calificacion) +'\n'
+				print('EL NUMERO DE INTENTOS NO SOBREPASA EL PERMITIDO')
+				print("Se agrega la linea",linea+' '+str(calificacion))
+			else:
+				print('Mas intentos de los permitidos, imprimiendo la linea',linea)
+				boletaNueva += linea +'\n'
+		else:
+			# si no encontramos la materia en la n-esima linea de la boleta entonces
+			# no modificamos la boleta y la dejamos como estaba
+			boletaNueva += linea +'\n'
+	if materiaEncontrada == 0:
+		print('NO SE ENCONTRO LA MATERIA DENTRO DE LA BOLETA')
+		boletaNueva += '\n'+str(idMateria) + " " + str(calificacion)+'\n'
+	return boletaNueva

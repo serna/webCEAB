@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "­//W3C//DTD HTML 4.01//EN">
 
-{% load render_table from django_tables2 %}
+
 {% load static %}
 <html lang="es"> 
 	<head>
@@ -22,13 +22,11 @@
     	
         <section class="col-md-12">
         	
-            {{mensaje}}
-            <p>Calificacion</p>
-            {{calificacion}}
-            <p>Incorrectas</p>
-            {{incorrectas}}
-            {% block content %}
+
+        	{% block content %}
             {% endblock %}
+
+            
 
    		</section>
 	  

@@ -1,0 +1,89 @@
+[33mcommit 6ae485457dab530a50be7cc6154b6d08b342eb65[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Feb 21 15:56:24 2018 -0600
+
+    Se ha logrado programar las rutinas necesarias para que las calificaciones de los alumnos se llenen de manera automatica en la correspondiente boleta.
+
+[33mcommit f19c29a5e2820ed83216e81aee46050538fc05fe[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Sun Feb 18 09:10:13 2018 -0600
+
+    Entrega parcial a la maestra en donde el alumno ya puede evaluarse de manera directa desde el sistema
+
+[33mcommit 6d028c520e2b3fcb80635fff410758f983a9dbf8[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Jan 31 14:11:17 2018 -0600
+
+    Se corrigio un error en la consulta creada para verificar los pagos atrasados de los alumnos
+
+[33mcommit 99ce1cf2e1ea350a23451d9c68b8d13436c50ef9[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Jan 31 13:38:47 2018 -0600
+
+    Se ha implementado la metodologia para poder ver pagos atrasados de los alumnos
+
+[33mcommit 4e5aceb6f5fe858fb61d5d5b6b004d4d7de0ac4d[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Sat Jan 27 09:28:14 2018 -0600
+
+    Entrega con maestra para implementacion inicial
+
+[33mcommit 26ce62ad69a4c65386f267b06c6e698437e46ad1[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Tue Jan 16 12:47:48 2018 -0600
+
+    se actulizo el pago de alumno y esta en construccion las consultas para verificar cobros atrazados
+
+[33mcommit e29dc1fe5093a213c8c4481be0b6a50a2e95614c[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Dec 20 13:47:00 2017 -0600
+
+    Se corrigio otro error en el campo de verificacion de direccion, este campo se usa para que el administrador este enterado de movimientos criticos dentro de CEAB
+
+[33mcommit 4db09954f2e8edeff2b3d8ebc454a52097adaa3e[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Dec 20 13:26:55 2017 -0600
+
+    Se corrigio otro error en el sistema, previo a presentacion con la maestra
+
+[33mcommit 5e1988f1f54f625b3a897891a64465ff94938587[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Dec 20 13:15:24 2017 -0600
+
+    Se corrigio un error en las vistas de webCEAB
+
+[33mcommit 36eea1b8940641c1a8a077b3919c76f3c09248c0[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Dec 20 13:10:48 2017 -0600
+
+    Se agrego un campo booleano que permite verificar si un movimiento fue avalado por direccion
+
+[33mcommit ae921385c16e3e12618891e6a088ac5c0ec65abd[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Mon Dec 18 08:39:04 2017 -0600
+
+    Se agrego la consulta que informa acerca de los pagos de nomina
+
+[33mcommit 7b5fac6a4eddd92b0f60eae610a4e61c09bfd529[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Tue Dec 12 22:19:14 2017 -0600
+
+    Se agrego la consulta de pagos proximos para revision con la maestra
+
+[33mcommit c6fa4bd9144c53fb8376b0c276036c8fe63c4672[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Nov 8 20:28:42 2017 -0600
+
+    se agrego en el formulario la capacidad de almacenar hasta 221 preguntas
+
+[33mcommit 03adabf4396538094931d45eb47df2941edcc69d[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Mon Oct 16 13:53:28 2017 -0500
+
+    Se implemento una plataforma para poder hacer evaluaciones digitales, esta es la primer etapa para eventualmente incorporarla con el sistema ceab
+
+[33mcommit 6f131bb0f4b9f23b87feb09dfd73e398846d01a1[m
+Author: cesar <serna@fisica.ugto.mx>
+Date:   Wed Aug 9 19:55:15 2017 -0500
+
+    Commit para subir proyecto al servidor

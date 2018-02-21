@@ -73,7 +73,7 @@ def evaluacion_digital(request,alumno,materia):
 				else:
 					valor=int(valor)
 				listaRespuestas.append(valor)
-			print(listaRespuestas)
+			#print(listaRespuestas)
 
 			print(nombre,claveAlumno,numeroPreguntas,claveExamen)
 			datos = {'nombre':nombre,
@@ -82,16 +82,45 @@ def evaluacion_digital(request,alumno,materia):
 			'claveExamen':claveExamen,
 			'listaRespuestas':listaRespuestas,
 			}
-			calif,incorr= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= claveAlumno,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
-			print('nnnnnnnnnnnnnnnnnnnnn',calif)
+			calif,incorr,correc,noContestadas= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= claveAlumno,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
+			#print('nnnnnnnnnnnnnnnnnnnnn',calif)
 			#return generate_csvFile(request,datos)
+			queryset2 = Materia.objects.filter(id=materia)
+			materiaNombre = queryset2[0].nombre
+			lista = [
+			["Nombre del alumno: ",nombre],
+			["Materia: ",materiaNombre],
+			["Calificacion",calif],
+			["Incorrectas",incorr],
+			["Correctas",correc],
+			["Sin contestar",noContestadas]
+			]
 			context={
-				'mensaje': "Tus resultados",
-				'calificacion':calif,
-				'incorrectas':incorr,
+				'mensaje': "El resultado de la evaluacion es:",
+				'lista':lista,
 			}
-			#return(request,'base2.html',context)
+			# ahora que se ha evaluado el examen es necesario asentar la calificacion en la boleta
+			# 1.- Hacer la consulta para saber que curso le corresponde al alumno
+			# 2.- En el curso correspondiente se debe de verificar dos cosas:
+			#     2.1.- Verificar si la materia ya esta dada de alta en la boleta.
+			#     2.2.- Verificar que el alumno no tenga mas de tres intentos.
+			# 3.- Asentar la calificacion en la boleta
+			curso = queryset[0].cursos.all() # punto 1 cumplido.
+			print("El alumno tiene dados de alta n cursos: ",len(curso),curso)
+			print('EL CONTENIDO DEL CURSO ES:')
+			curso = curso[len(curso)-1]
+			#print(curso,curso.materias.all())
+			boleta = str(curso.boleta)
 			
+			print('EL CONTENIDO DE LA BOLETA ESSSS:')
+			print(boleta.split('\n'))
+			print(boleta.split('\r'))
+			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif)
+			print('Boleta antigua',boleta)
+			print('SEPARADOR ENTRE BOLETAS')
+			print('Boleta Nueva',boletaNueva)
+			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+			return render(request,'impresion_lista_2d.html',context)
 	else:
 		queryset = Estudiante.objects.filter(id = alumno)
 		if len(queryset)==0:
@@ -139,11 +168,13 @@ def accesoAlumno(request):
 					}
 					return render(request, 'msg_registro_inexistente.html',context)
 				print(queryset)
-			queryset2 = Curso.objects.filter(id=cursos[0].id)
+			index = len(cursos)-1
+			queryset2 = Curso.objects.filter(id=cursos[index].id)
 
 			print('Las materias del alumno son: ')
 			print(queryset2[0].materias.all())
 			materias = []
+			
 			for item in queryset2[0].materias.all():
 				
 				claveMateria = str(item).split(":")[0]
