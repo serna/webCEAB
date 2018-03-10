@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from siad.models import Plantel,Empleado,Empresa,Documento,Estatus,Servicio
 from promotoria.models import Aspirantes
+#from contabilidad.models import Tarjeton
 from decimal import Decimal
 
 
@@ -50,11 +51,13 @@ class Estudiante(models.Model):
 	plantel = models.ForeignKey(Plantel, null = True)
 	Aspirante = models.OneToOneField(Aspirantes,null = True)
 	#Nombre = models.CharField(max_length=20, null=True,blank=True,default=Aspirante.nombre)
+	contrasena = models.CharField(max_length=20,null = True, default = '0') 
 	numero_de_control = models.IntegerField(null = True)
+	matricula = models.CharField(max_length=20,null = True, default = '0')
 	curp = models.CharField(max_length=20, null = True)
 	calle = models.CharField(max_length=100, null = True)
 	colonia = models.CharField(max_length=100, null = True)
-	entre_calles = models.CharField(max_length=100, null = True)
+	#entre_calles = models.CharField(max_length=100, null = True)
 	cp = models.CharField(max_length=5, null = True)
 	edad = models.IntegerField(null = True)
 	grad_estudios = models.CharField(max_length = 50, null = True)
@@ -73,7 +76,7 @@ class Estudiante(models.Model):
 	#servicio_interes = models.CharField(max_length = 20,choices = opciones_servicio,default = 'Colbach')
 	cursos = models.ManyToManyField(Curso)
 	estatus = models.ForeignKey(Estatus)
-	
+	#tarjeton = models.OneToOneField(Tarjeton)
 	def __str__(self):
 		#return self.Aspirante.nombre ######################################################
 		return "%d %s %s %s %s" % (self.id,self.Aspirante.nombre,self.Aspirante.apellido_paterno,self.Aspirante.apellido_materno,self.curp)

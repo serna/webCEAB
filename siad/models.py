@@ -84,3 +84,10 @@ class Servicio(models.Model):
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Servicios" 
+class FormaDePago(models.Model):
+	forma_de_pago = models.CharField(max_length = 50)
+	def __str__(self):
+		return self.forma_de_pago
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Formas de pago" 

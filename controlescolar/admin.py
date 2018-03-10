@@ -29,7 +29,7 @@ class CursoAdmin(admin.ModelAdmin):
 		if request.user.is_superuser:
 			return []
 		if obj: #This is the case when obj is already created i.e. it's an edit
-			return ['tipo_de_curso','costo_curso','adeudo','fecha_de_inicio','fecha_de_termino',]
+			return ['tipo_de_curso','adeudo','fecha_de_inicio','fecha_de_termino',]
 		else:
 			return []
 

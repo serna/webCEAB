@@ -150,7 +150,7 @@ def accesoAlumno(request):
 		if form.is_valid():
 			numero = form.cleaned_data['numero_de_alumno']
 			clave = form.cleaned_data['clave_de_alumno']
-			print('FORMMULARIO ACCESO ALUMNOS')
+			print('FORMULARIO ACCESO ALUMNOS')
 			print("alumno",numero,'clave',clave)
 			
 			queryset = Estudiante.objects.filter(id = numero)
@@ -159,6 +159,12 @@ def accesoAlumno(request):
 
 				return render(request, 'msg_registro_inexistente.html')
 			else:
+				contrasena = queryset[0].contrasena
+				print(contrasena)
+				if contrasena!=clave:
+					print('La clave de acceso es incorrecta')
+
+					return render(request, 'msg_registro_inexistente.html')	
 				cursos = queryset[0].cursos.all()
 				print("Los cursos del alumno son: ",cursos)
 				if len(cursos)==0:
