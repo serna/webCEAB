@@ -208,7 +208,70 @@ def accesoAlumno(request):
 		}
 	#return render(request, "formulario_fechas.html", context)
 	return render(request, 'form_acceso_alumno.html', context)
+def accesoPromotor(request):
+	if request.method == 'POST':
+		form = form_acceso_alumno(request.POST)
+		if form.is_valid():
+			numero = form.cleaned_data['numero_de_alumno']
+			clave = form.cleaned_data['clave_de_alumno']
+			print('FORMULARIO ACCESO ALUMNOS')
+			print("alumno",numero,'clave',clave)
+			
+			queryset = Empleado.objects.filter(id = numero)
+			if len(queryset)==0:
+				print('NO EXISTE ESE PROMOTOR')
 
+				return render(request, 'msg_registro_inexistente.html')
+			else:
+				contrasena = queryset[0].contrasena
+				print(contrasena)
+				if contrasena!=clave:
+					print('La clave de acceso del promotor es incorrecta')
+					return render(request, 'msg_registro_inexistente.html')	
+				prospectos = Aspirantes.objects.filter(promotor = queryset[0])
+				print("Los prospectos del promotor son: ",prospectos)
+				if len(prospectos)==0:
+					print("No tiene ningun prospecto")
+					context={
+						"msg":"No tienes ningun prospecto registrado!!!"
+					}
+					return render(request, 'msg_registro_inexistente.html',context)
+				print(queryset)
+			index = len(prospectos)-1
+			#queryset2 = Curso.objects.filter(id=cursos[index].id)
+
+			print('Las prospectos son: ')
+			print(prospectos)
+		
+			
+			#for item in prospectos:
+				
+				#claveMateria = str(item).split(":")[0]
+				#print(item,claveMateria)
+				# send the claveMateria alogn with the alumno id
+				
+				#link = 'eval/' + str(numero) + "/"+str(claveMateria)
+				#materias.append([item,claveMateria,link])
+			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
+			#context = {"queryset":queryset,}
+
+			context = {'numero':numero,
+			'clave':clave,
+			'nombre': queryset[0],
+			'materias': prospectos,
+			
+			}
+
+			return render(request,"menu_promotor.html", context)
+			
+	else:
+		form = form_acceso_alumno()
+		context = {
+		"mensaje": "Ingresa los datos",
+		"form":form,
+		}
+	#return render(request, "formulario_fechas.html", context)
+	return render(request, 'form_acceso_alumno.html', context)
 def pagos_proximos(request):
 	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma = 0

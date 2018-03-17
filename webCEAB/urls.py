@@ -22,8 +22,8 @@ urlpatterns = [
     url(r'^$', views.index_original),
     url(r'^consultas$', views.consultas),
     url(r'^registroInexistente$', views.registro_inexistente),
-    
     url(r'^alumnos$', views.accesoAlumno),
+    url(r'^promotores$', views.accesoPromotor),
     url(r'^cobros_diarios$', views.cobros_diarios),
     url(r'^pagos_proximos$', views.pagos_proximos),
     url(r'^cobros_vencidos/(?P<dias>\d+)$', views.cobros_vencidos),

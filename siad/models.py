@@ -4,6 +4,7 @@ from django.utils import timezone
 
 class Plantel(models.Model):
 	nombre = models.CharField(max_length = 50)
+
 	rfc = models.CharField(max_length = 20)
 	calle = models.CharField(max_length=100)
 	colonia = models.CharField(max_length=100)
@@ -19,6 +20,7 @@ class Plantel(models.Model):
 
 class Empleado(models.Model):
 	nombre = models.CharField(max_length=30)
+	contrasena = models.CharField(max_length=20,null = True, default = '0') 
 	plantel = models.ForeignKey(Plantel)
 	nombre = models.CharField(max_length=30)
 	apellido_paterno = models.CharField(max_length=20)

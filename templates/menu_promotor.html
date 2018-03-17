@@ -18,12 +18,23 @@
 	        </div>
 	    
 	        <nav class="col-md-12">
-		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px" >
-					<li class="active"><a href="/alumnos">Alumnos</a></li>
-					<li class="active"><a href="/promotores">Promotores</a></li>
-					<li class="active"><a href="/consultas">Consultas</a></li>
-					
-					
+		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+			        <h3> Bienvenido: {{nombre}} </h3>
+			        <h5> Los prospectos registrados son: </h5>
+			        <table style="width:30%">
+			        	<tr>
+						  	<th> Nombre</th>
+						  	
+						 </tr>
+				        {% for materia in materias %}
+				        	<tr>
+							  	<td> {{materia}}</td>
+							  	
+							  	
+							  	
+							 </tr>
+						{% endfor %}
+					</table>
 				</ul>
 			</nav>
 		</header>
