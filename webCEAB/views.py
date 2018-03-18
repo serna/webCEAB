@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.utils import timezone
 from .modules import rutinas as rut
+from datetime import timedelta
 
 def generate_csvFile(request,datos = None):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -175,6 +176,7 @@ def accesoAlumno(request):
 					return render(request, 'msg_registro_inexistente.html',context)
 				print(queryset)
 			index = len(cursos)-1
+			# si un alumno tiene varios cursos
 			queryset2 = Curso.objects.filter(id=cursos[index].id)
 
 			print('Las materias del alumno son: ')
@@ -186,6 +188,10 @@ def accesoAlumno(request):
 				claveMateria = str(item).split(":")[0]
 				print(item,claveMateria)
 				# send the claveMateria alogn with the alumno id
+				periodoValido = timedelta(days=14)
+				link = ''
+				#if item.fecha_termino + periodoValido < timezone.now():
+					# si la fecha de evaluacion digital ya caduco
 				link = 'eval/' + str(numero) + "/"+str(claveMateria)
 				materias.append([item,claveMateria,link])
 			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)

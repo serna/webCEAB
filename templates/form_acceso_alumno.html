@@ -1,5 +1,10 @@
-<form action="" method="POST">
-	{% csrf_token %}
-	{{form.as_p}}
-	<input type="submit" value="Enviar" />
-</form>
+{% extends "base_sencilla.html" %}
+{% block content %}	
+	<h3> Bienvenido: {{nombre}} </h3>
+	<h5> Registra la información correspondiente: </h5>
+	<form action="" method="POST">
+		{% csrf_token %}
+		{{form.as_p}}
+		<input type="submit" value="Enviar" />
+	</form>
+{% endblock %}

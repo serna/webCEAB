@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "­//W3C//DTD HTML 4.01//EN">
+
+{% load render_table from django_tables2 %}
+{% load static %}
+<html lang="es"> 
+	<head>
+
+
+		<title>Sistema CEAB</title>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+	 </head>
+	<body>
+		<header class="row" style="padding-top: 10px; padding-bottom: 20px">
+				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">			
+	        </div>
+	    
+	        <nav class="col-md-12">
+		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+			      	
+			        {% block content %}
+
+			        
+            		{% endblock %}
+				</ul>
+			</nav>
+		</header>
+    	
+        <section class="col-md-12">
+        	
+            
+            
+
+   		</section>
+	  
+	 
+		<footer>
+        {% block footer %}
+        	<p style="margin-left: 40px" >  <br></p>
+        {% endblock %}
+        </footer>
+	    <!-- Latest compiled and minified JavaScript -->
+		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+
+
+
+
+	</body> 
+</html>

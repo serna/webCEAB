@@ -11,8 +11,8 @@ class HorizRadioRenderer(forms.RadioSelect.renderer):
             """Outputs radios"""
             return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
 class form_acceso_alumno(forms.Form):
-	numero_de_alumno = forms.CharField(label = 'Ingresa tu numero de alumno')
-	clave_de_alumno = forms.CharField(label = 'Ingresa clave de alumno')
+	numero_de_alumno = forms.CharField(label = 'Ingresa tu numero de identificacion')
+	clave_de_alumno = forms.CharField(label = 'Ingresa tu contrasena')
 
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())
