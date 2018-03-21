@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from siad.models import Plantel, Empleado, Empresa, FormaContacto
 from django.core.urlresolvers import reverse
+
 class Aspirantes(models.Model):
 	#plantel = models.ForeignKey(Plantel)
 	nombre = models.CharField(max_length=30)
@@ -13,8 +14,8 @@ class Aspirantes(models.Model):
 	forma_contacto = models.ForeignKey(FormaContacto)
 	telefono = models.CharField(max_length = 10)
 	celular = models.CharField(max_length = 13)
-	
-
+	lugar_de_residencia = models.CharField(max_length = 20,default = 'Guanajuato' ,help_text='Ingresa el estado en el cual reside el aspirante')
+	plantel = models.ForeignKey(Plantel, null = True)
 	class Meta:
 		verbose_name_plural = "Prospectos" 
 		#ordering=["apellidoPaterno"]

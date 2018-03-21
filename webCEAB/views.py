@@ -90,11 +90,12 @@ def evaluacion_digital(request,alumno,materia):
 			materiaNombre = queryset2[0].nombre
 			lista = [
 			["Nombre del alumno: ",nombre],
+			["Folio del alumno: ",claveAlumno],
 			["Materia: ",materiaNombre],
 			["Calificacion",calif],
-			["Incorrectas",incorr],
-			["Correctas",correc],
-			["Sin contestar",noContestadas]
+			["Incorrectas(%d)"%(len(incorr)),incorr],
+			["Correctas(%d)"%(len(correc)),correc],
+			["Sin contestar(%d)"%(len(noContestadas)),noContestadas]
 			]
 			context={
 				'mensaje': "El resultado de la evaluacion es:",
@@ -189,8 +190,10 @@ def accesoAlumno(request):
 				print(item,claveMateria)
 				# send the claveMateria alogn with the alumno id
 				periodoValido = timedelta(days=14)
+				fechaLimite = periodoValido+item.fecha_termino
+				print('La fecha limite es: ',fechaLimite)
 				link = ''
-				#if item.fecha_termino + periodoValido < timezone.now():
+				#if fechaLimite > datetime.now():
 					# si la fecha de evaluacion digital ya caduco
 				link = 'eval/' + str(numero) + "/"+str(claveMateria)
 				materias.append([item,claveMateria,link])

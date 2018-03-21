@@ -29,7 +29,7 @@ class Empleado(models.Model):
 	puesto = models.CharField(max_length = 50)
 	sueldo = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
-		return "%s %s "%(self.nombre,self.apellido_paterno)
+		return "%d: %s %s "%(self.pk,self.nombre,self.apellido_paterno)
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Empleados" 
