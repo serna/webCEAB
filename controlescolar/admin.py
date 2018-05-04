@@ -10,8 +10,8 @@ class EstudianteAdmin(admin.ModelAdmin):
 		if request.user.is_superuser:
 			return []
 		if obj: #This is the case when obj is already created i.e. it's an edit
-			return ['Aspirante','estatus','fecha_de_registro','plantel','numero_de_control','cursos','empresa','entre_calles','cp','edad','grad_estudios','estado_civil','numero_de_hijos','curp','calle','colonia',]
-		else:
+			return ['Aspirante','estatus','fecha_de_registro','plantel','numero_de_control','cursos','empresa','cp','edad','estado_civil','numero_de_hijos','curp','calle','colonia',]
+		else:	
 			return []
 #class BoletaAdmin(admin.ModelAdmin):
 #	raw_id_fields = ('alumno',)

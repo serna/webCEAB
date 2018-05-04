@@ -60,7 +60,7 @@ class Estudiante(models.Model):
 	#entre_calles = models.CharField(max_length=100, null = True)
 	cp = models.CharField(max_length=5, null = True)
 	edad = models.IntegerField(null = True)
-	grad_estudios = models.CharField(max_length = 50, null = True)
+	grado_estudios = models.CharField(max_length = 50, null = True)
 	estado_civil = models.CharField(max_length = 30, null = True)
 	email = models.CharField(max_length=50, null = True)
 	numero_de_hijos = models.IntegerField(null = True)
@@ -74,7 +74,7 @@ class Estudiante(models.Model):
 			('Otro','Otro'),
 	)
 	#servicio_interes = models.CharField(max_length = 20,choices = opciones_servicio,default = 'Colbach')
-	cursos = models.ManyToManyField(Curso)
+	cursos = models.ManyToManyField(Curso,null=True,blank=True)
 	estatus = models.ForeignKey(Estatus)
 	#tarjeton = models.OneToOneField(Tarjeton)
 	def __str__(self):

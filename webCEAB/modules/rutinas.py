@@ -5,7 +5,7 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	noContestadas = []
 	correctas = []
 	incorrectas = []
-	
+	cnt = 1
 	respuestas = {0:"a",1:"b",2:"c",3:"d",-1:"No res",-2:"Inval"}
 	#scrambleOnlyAnswer = 0
 	if claveExamen[0]==0:
@@ -28,14 +28,15 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	listaRespuestasCorrectas = []
 	#lista = range(len(lista))
 	#if scrambleOnlyAnswer==0:
+	print('Antes de desordenar', lista)
 	random.shuffle(lista) # this change the order of the questions randomly
+	print('despues de desordenar',lista)
 	#random.seed(semilla)
 	for i in range(nPreguntas):
 		listaRespuestasCorrectas.append(random.randint(0,3))
-	print("Las respuestas correctas son: ",listaRespuestasCorrectas)
+	print ("Las respuestas correctas son: ",listaRespuestasCorrectas)
 	#print listaRespuestas[0],listaRespuestas[1],listaRespuestas[2],listaRespuestas[3],listaRespuestas[4]
-	print("n\t","corret\t","Alumno\t","Calificacion")
-	cnt = 1
+	print( "n\t","corret\t","Alumno\t","Calificacion")
 	for item in listaRespuestasAlumno:
 		if cnt>nPreguntas:
 			break

@@ -93,9 +93,9 @@ def evaluacion_digital(request,alumno,materia):
 			["Folio del alumno: ",claveAlumno],
 			["Materia: ",materiaNombre],
 			["Calificacion",calif],
-			["Incorrectas(%d)"%(len(incorr)),incorr],
-			["Correctas(%d)"%(len(correc)),correc],
-			["Sin contestar(%d)"%(len(noContestadas)),noContestadas]
+			["Incorrectas (%d)"%(len(incorr)),incorr],
+			["Correctas (%d)"%(len(correc)),correc],
+			["Sin contestar (%d)"%(len(noContestadas)),noContestadas]
 			]
 			context={
 				'mensaje': "El resultado de la evaluacion es:",
@@ -183,20 +183,48 @@ def accesoAlumno(request):
 			print('Las materias del alumno son: ')
 			print(queryset2[0].materias.all())
 			materias = []
-			
+			boleta = queryset2[0].boleta
+			lineas = []
+			cadena = ''
+			print('La boleta contiene:',boleta)
+			for caracter in boleta:
+				cadena += caracter
+				if caracter =='\n':
+					lineas.append(str(cadena[:-1]))
+					cadena = ''
+			boleta = lineas
+			print('La boleta contiene:',boleta)
 			for item in queryset2[0].materias.all():
 				
 				claveMateria = str(item).split(":")[0]
-				print(item,claveMateria)
+				#print(item,claveMateria)
 				# send the claveMateria alogn with the alumno id
 				periodoValido = timedelta(days=14)
 				fechaLimite = periodoValido+item.fecha_termino
-				print('La fecha limite es: ',fechaLimite)
+				#print('La fecha limite es: ',fechaLimite)
+				etiqueta = ''
 				link = ''
-				#if fechaLimite > datetime.now():
+				print(fechaLimite)
+				print(datetime.datetime.now())
+				if fechaLimite < datetime.datetime.now().date():
 					# si la fecha de evaluacion digital ya caduco
-				link = 'eval/' + str(numero) + "/"+str(claveMateria)
-				materias.append([item,claveMateria,link])
+					etiqueta = 'Fuera de fechas'
+				else:
+					link = 'eval/' + str(numero) + "/"+str(claveMateria)
+				#Ahora buscamos la materia en la boleta y verificamos el numero de intentos
+				#print("La boleta del alumno es: ", boleta)
+				for linea in boleta:
+					print("la linea contiene: ", linea)
+					mat = linea.split()[0]
+					intentos = len(linea.split())-1
+					if int(mat) == int(claveMateria):
+						print('coincidieron')
+						if intentos >= 3:
+							etiqueta = 'sin mas intentos'
+						else:
+							link = 'eval/' + str(numero) + "/"+str(claveMateria)
+
+				materias.append([item,claveMateria,link,etiqueta])
 			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
 			#context = {"queryset":queryset,}
 
