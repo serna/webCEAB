@@ -2,20 +2,22 @@ from django.contrib import admin
 from .models import Aspirantes
 
 class AspirantesAdmin(admin.ModelAdmin):
-#	list_filter = ('plantelRegistro')
-	#raw_id_fields = ('plantel',)
-	search_fields = ('nombre','apellidoPaterno')
-#class CaracteristicaAdmin(admin.ModelAdmin):
-	#fields = ('aspirante','descripcion',)
-#	readonly_fields = ('aspirante',)
 	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
 		if request.user.is_superuser:
-			return []
-		if obj: #This is the case when obj is already created i.e. it's an edit
-			return ['nombre','apellido_paterno','apellido_materno','creacion_de_registro',
-			'promotor','forma_contacto','telefono','celular',]
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
 		else:
-			return []
+			readOnlyFields = []
+		
+		return readOnlyFields
 	
 
 admin.site.register(Aspirantes,AspirantesAdmin)
