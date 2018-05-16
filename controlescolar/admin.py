@@ -1,43 +1,87 @@
 from django.contrib import admin
 from .models import Estudiante, Materia, Servicio, Curso,  Documentacion
-class EstudianteAdmin(admin.ModelAdmin):
-#	list_filter = ('plantelRegistro')
 
-	raw_id_fields = ('Aspirante',)
-	search_fields = ('Estudiante_id',)
-	filter_horizontal = ('cursos',)
+
+class CursosAdmin(admin.ModelAdmin):
 	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
 		if request.user.is_superuser:
-			return []
-		if obj: #This is the case when obj is already created i.e. it's an edit
-			return ['Aspirante','estatus','fecha_de_registro','plantel','numero_de_control','cursos','empresa','cp','edad','estado_civil','numero_de_hijos','curp','calle','colonia',]
-		else:	
-			return []
-#class BoletaAdmin(admin.ModelAdmin):
-#	raw_id_fields = ('alumno',)
-	#search_fields = ('alumno__Aspirante__id',)
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
+		else:
+			readOnlyFields = []
+		readOnlyFields.append('materias')
+		return readOnlyFields
+admin.site.register(Curso,CursosAdmin)
 
 class DocumentacionAdmin(admin.ModelAdmin):
-	raw_id_fields = ('alumno',)
-	search_fields = ('alumno_id',)
-	filter_horizontal = ('documentacion_entregada',) 
-class CursoAdmin(admin.ModelAdmin):
-	#raw_id_fields = ('alumno',)
-	search_fields = ('id',)
-	filter_horizontal = ('materias',) 
 	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
 		if request.user.is_superuser:
-			return []
-		if obj: #This is the case when obj is already created i.e. it's an edit
-			return ['tipo_de_curso','adeudo','fecha_de_inicio','fecha_de_termino',]
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
 		else:
-			return []
-
-
-
-admin.site.register(Estudiante,EstudianteAdmin)
-admin.site.register(Materia)
-admin.site.register(Servicio)
-admin.site.register(Curso,CursoAdmin)
-#admin.site.register(Boleta,BoletaAdmin)
+			readOnlyFields = []
+		return readOnlyFields
 admin.site.register(Documentacion,DocumentacionAdmin)
+
+class EstudianteAdmin(admin.ModelAdmin):
+	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
+		if request.user.is_superuser:
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
+		else:
+			readOnlyFields = []
+		readOnlyFields.append('cursos')
+		return readOnlyFields
+admin.site.register(Estudiante,EstudianteAdmin)
+
+class MateriasAdmin(admin.ModelAdmin):
+	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
+		if request.user.is_superuser:
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
+		else:
+			readOnlyFields = []
+		return readOnlyFields
+admin.site.register(Materia,MateriasAdmin)
+
+
+
+
+
+#admin.site.register(Estudiante,EstudianteAdmin)
+
+admin.site.register(Servicio)
+
+#admin.site.register(Boleta,BoletaAdmin)

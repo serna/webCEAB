@@ -192,11 +192,14 @@ def accesoAlumno(request):
 				if caracter =='\n':
 					lineas.append(str(cadena[:-1]))
 					cadena = ''
+			cadena += caracter
+			lineas.append(str(cadena[:-1]))
 			boleta = lineas
 			print('La boleta contiene:',boleta)
 			for item in queryset2[0].materias.all():
-				
+
 				claveMateria = str(item).split(":")[0]
+				print('\nLa materia que se esta analizando es: ',claveMateria)
 				#print(item,claveMateria)
 				# send the claveMateria alogn with the alumno id
 				periodoValido = timedelta(days=14)
@@ -204,27 +207,39 @@ def accesoAlumno(request):
 				#print('La fecha limite es: ',fechaLimite)
 				etiqueta = ''
 				link = ''
-				print(fechaLimite)
-				print(datetime.datetime.now())
+				
+				print('La fecha limite para aplicar examen: ',fechaLimite)
+				print('La fecha de hoy: ',datetime.datetime.now())
 				if fechaLimite < datetime.datetime.now().date():
 					# si la fecha de evaluacion digital ya caduco
-					etiqueta = 'Fuera de fechas'
+					etiqueta += 'Fuera de fechas, '
+					habilitaLink = 0
 				else:
-					link = 'eval/' + str(numero) + "/"+str(claveMateria)
+					habilitaLink = 1
 				#Ahora buscamos la materia en la boleta y verificamos el numero de intentos
 				#print("La boleta del alumno es: ", boleta)
+				intentos = 0
 				for linea in boleta:
-					print("la linea contiene: ", linea)
+					if len(linea)==0:
+						continue
+					print("la linea de la boleta contiene: ", linea)
 					mat = linea.split()[0]
-					intentos = len(linea.split())-1
+					
 					if int(mat) == int(claveMateria):
-						print('coincidieron')
+						intentos = len(linea.split())-1
+						print('coincidieron la materia ',int(mat), ' con ',int(claveMateria), intentos)
 						if intentos >= 3:
-							etiqueta = 'sin mas intentos'
+							print('Ya no tiene mas intentos')
+							etiqueta += 'sin mas intentos'
+							habilitaLink = 0
+							break
 						else:
-							link = 'eval/' + str(numero) + "/"+str(claveMateria)
-
-				materias.append([item,claveMateria,link,etiqueta])
+							print('Todavia tiene mas intentos, ha hecho ',intentos,' intentos')
+							habilitaLink = 1
+							break
+				if habilitaLink==1:
+					link = 'eval/' + str(numero) + "/"+str(claveMateria)
+				materias.append([item,intentos,link,etiqueta])
 			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
 			#context = {"queryset":queryset,}
 

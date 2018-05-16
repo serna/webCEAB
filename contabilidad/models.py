@@ -36,7 +36,7 @@ class PagosAlumno(models.Model):
 	fecha_pago = models.DateField(default=timezone.now)
 	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
 	monto = models.DecimalField(max_digits = 7,decimal_places=2)
-	forma_de_pago1 = models.ForeignKey(FormaDePago)
+	forma_de_pago = models.ForeignKey(FormaDePago)
 	folio = models.CharField(max_length = 10,choices = opcionesConcepto,default = '0000')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
