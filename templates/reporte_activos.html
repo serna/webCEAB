@@ -1,0 +1,41 @@
+{% extends 'consultas_diarias.html' %}
+
+	{% block busqueda %}
+
+	{% endblock %}
+
+{% block resultado %}
+
+	<h2>{{mensaje}}</h2>
+	
+	
+		
+
+		<table class = "table table-striped">
+			<thead class="thead-inverse">
+				<tr>
+					{% for item in encabezados %}
+					
+						<th> {{item}} </td>
+			  		
+					{% endfor %}
+					
+				</tr>
+			</thead>
+
+
+
+			<tbody>
+				{% for item in queryset %}
+					<tr>
+						<td> {{item}} </td>
+						<td> {{item.horario}} </td>
+						<td> {{item.fecha_de_inicio}} </td>
+						<td> {{item.fecha_de_termino}} </td>
+			  		</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+
+{% endblock %}

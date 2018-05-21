@@ -21,14 +21,18 @@
 		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
 			        <h3> Bienvenido: {{nombre}} </h3>
 			        <h5> Los prospectos registrados son: </h5>
-			        <table style="width:30%">
+			        <table style="width:50%">
 			        	<tr>
 						  	<th> Nombre</th>
+						  	<th> Celular</th>
+						  	<th> Fecha de creacion</th>
 						  	
 						 </tr>
-				        {% for materia in materias %}
+				        {% for prospecto in prospectos %}
 				        	<tr>
-							  	<td> {{materia}}</td>
+							  	<td> {{prospecto}} </td> 
+							  	<td> {{prospecto.celular}} </td> 
+							  	<td> {{prospecto.creacion_de_registro}}</td>
 							  	
 							  	
 							  	

@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
-from siad.models import Plantel,Empleado,Empresa,Documento,Estatus,Servicio
+from siad.models import Plantel,Empleado,Empresa,Documento,Estatus,Servicio, Horario
 from promotoria.models import Aspirantes
 #from contabilidad.models import Tarjeton
 from decimal import Decimal
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class Materia(models.Model):
 	nombre = models.CharField(max_length = 50)
@@ -37,14 +37,20 @@ class Materia(models.Model):
 class Curso(models.Model):
 	#alumno = models.ForeignKey(Estudiante)
 	tipo_de_curso = models.ForeignKey(Servicio)
-	
-	
 	fecha_de_inicio = models.DateField(default=timezone.now)
 	fecha_de_termino = models.DateField(default=timezone.now )
-	materias = models.ManyToManyField(Materia)
+	horario = models.ForeignKey(Horario,blank=True, null = True)
+	materias = models.ManyToManyField(Materia,blank=True)
 	boleta = models.TextField(blank=True)
 	def __str__(self):
-		return str(self.id) 
+		
+		try:
+			self.estudiante
+			nombre = str(self.estudiante)
+		except ObjectDoesNotExist:
+			nombre = 'Curso no asignado'
+
+		return str(str(self.id) + ': ' + nombre) 
 
 class Estudiante(models.Model):
 	fecha_de_registro = models.DateField(default=timezone.now)
@@ -74,7 +80,7 @@ class Estudiante(models.Model):
 			('Otro','Otro'),
 	)
 	#servicio_interes = models.CharField(max_length = 20,choices = opciones_servicio,default = 'Colbach')
-	cursos = models.ManyToManyField(Curso,null=True,blank=True)
+	curso = models.OneToOneField(Curso,null=True,blank=True)
 	estatus = models.ForeignKey(Estatus)
 	#tarjeton = models.OneToOneField(Tarjeton)
 	def __str__(self):

@@ -37,12 +37,12 @@ class PagosAlumno(models.Model):
 	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
 	monto = models.DecimalField(max_digits = 7,decimal_places=2)
 	forma_de_pago = models.ForeignKey(FormaDePago)
-	folio = models.CharField(max_length = 10,choices = opcionesConcepto,default = '0000')
+	folio = models.CharField(max_length = 10,default = '0000')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	def __str__(self): 
 		#return str(self.alumno.id) +': ' + str(self.monto)
-		return str(self.id)+":" +str(self.monto)
+		return str(self.id)+":" +str(self.monto) +":" +str(self.fecha_pago) + "\n"
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Pagos de alumnos"

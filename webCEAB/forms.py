@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django import forms
 from django.utils.safestring import mark_safe
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
@@ -17,6 +18,9 @@ class form_acceso_alumno(forms.Form):
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget())
+class fecha_form(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
 	#nombre = forms.CharField(widget=forms.TextInput())

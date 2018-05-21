@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 from siad.models import Empleado
-from .forms import rango_fechas_form, preguntas_form, form_acceso_alumno
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -186,6 +186,7 @@ def accesoAlumno(request):
 			boleta = queryset2[0].boleta
 			lineas = []
 			cadena = ''
+			caracter = ''
 			print('La boleta contiene:',boleta)
 			for caracter in boleta:
 				cadena += caracter
@@ -266,8 +267,6 @@ def accesoPromotor(request):
 		if form.is_valid():
 			numero = form.cleaned_data['numero_de_alumno']
 			clave = form.cleaned_data['clave_de_alumno']
-			print('FORMULARIO ACCESO ALUMNOS')
-			print("alumno",numero,'clave',clave)
 			
 			queryset = Empleado.objects.filter(id = numero)
 			if len(queryset)==0:
@@ -294,23 +293,10 @@ def accesoPromotor(request):
 
 			print('Las prospectos son: ')
 			print(prospectos)
-		
-			
-			#for item in prospectos:
-				
-				#claveMateria = str(item).split(":")[0]
-				#print(item,claveMateria)
-				# send the claveMateria alogn with the alumno id
-				
-				#link = 'eval/' + str(numero) + "/"+str(claveMateria)
-				#materias.append([item,claveMateria,link])
-			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
-			#context = {"queryset":queryset,}
-
 			context = {'numero':numero,
 			'clave':clave,
 			'nombre': queryset[0],
-			'materias': prospectos,
+			'prospectos': prospectos,
 			
 			}
 
@@ -381,12 +367,10 @@ def reporte_inscritos_prospectos_por_fechas(request,year,month,day,year2,month2,
 	context = {"queryset":table,
 			 	#"queryset2":table2
 				}
-	
 	return render(request,"reporte_tablas.html", context)
 	#return render(request,"mensaje_prueba.html", context)
 
 def reporte_prospectos(request):
-
 	if request.method == 'POST':
 		form = rango_fechas_form(request.POST)
 		if form.is_valid():
@@ -408,7 +392,28 @@ def reporte_prospectos(request):
 		"form":form,
 		}
 	return render(request, "formulario_fechas.html", context)
+def reporte_con_servicio(request):
+	if request.method == 'POST':
+		form = fecha_form(request.POST)
+		if form.is_valid():
+			fecha = form.cleaned_data['fecha']
+			queryset = Curso.objects.filter(fecha_de_termino__gt = fecha)
+			#queryset = Estudiante.objects.filter(curso__fecha_de_termino__gt = fecha)
+			#queryset = Estudiante.objects.all()
+			context = {"queryset":queryset,
+						'encabezados': ['Nombre', 'horario', 'fecha de inicio','fecha de termino'],
+						'mensaje': 'Estos alumnos estan activos actualmente'}
+			print(queryset)
+			#print(queryset[0].Estudiante_set.all())
 
+			return render(request,"reporte_activos.html", context)
+	else:
+		form = fecha_form()
+		context = {
+		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
+		"form":form,
+		}
+	return render(request, "formulario_fechas.html", context)
 def resumen_prospectos(request):
 	if request.method == 'POST':
 		form = rango_fechas_form(request.POST)

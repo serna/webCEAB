@@ -66,10 +66,10 @@ class PagosAlumnoAdmin(admin.ModelAdmin):
 		elif obj:
 			for f in self.model._meta.fields:
 				# et all fields as readoonly for all not superuser
-				if f.name != 'id' :
+				if f.name != 'id':
 					readOnlyFields.append(f.name)
 		else:
-			readOnlyFields = []
+			readOnlyFields = ['movimiento_verificado_por_direccion','cancelado']
 		return readOnlyFields
 admin.site.register(PagosAlumno,PagosAlumnoAdmin)
 #admin.site.register(Tarjeton)
