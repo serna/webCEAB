@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 from siad.models import Empleado
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -17,6 +17,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from .modules import rutinas as rut
 from datetime import timedelta
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 def generate_csvFile(request,datos = None):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -403,7 +405,7 @@ def reporte_con_servicio(request):
 			context = {"queryset":queryset,
 						'encabezados': ['Nombre', 'horario', 'fecha de inicio','fecha de termino'],
 						'mensaje': 'Estos alumnos estan activos actualmente'}
-			print(queryset)
+			#print(queryset)
 			#print(queryset[0].Estudiante_set.all())
 
 			return render(request,"reporte_activos.html", context)
@@ -414,6 +416,89 @@ def reporte_con_servicio(request):
 		"form":form,
 		}
 	return render(request, "formulario_fechas.html", context)
+def captura_calificacion(request):
+	if request.method == 'POST':
+		form = form_captura_cal(request.POST)
+		if form.is_valid():
+			materia = form.cleaned_data['materia']
+			alumno = form.cleaned_data['alumno']
+			calif = form.cleaned_data['calificacion']
+			alumno = int(alumno)
+			# primero verificamos que ese alumno tiene dada de alta esa materia
+			try:
+				queryset = Estudiante.objects.get(id = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe ese alumno en la base de datos',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			# Luego verificamos que el alumno tenga esa materia dada de alta en su curso
+			if not(queryset.curso.materias.filter(id=materia).exists()):
+				context = {'mensaje': 'El alumno no tiene registrada esa materia',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			# actualizamos la calificacion en el curso correspondiente
+			curso = Curso.objects.get(estudiante = alumno)
+			boleta = str(curso.boleta)
+			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,force=1)
+			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+			# si todo se ha verificado correctamente entonces regresamos al menu principal
+			messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
+			context = {"queryset":queryset,
+						'encabezados': ['Nombre', 'horario', 'fecha de inicio','fecha de termino'],
+						'mensaje': 'Estos alumnos estan activos actualmente'}
+			#print(queryset)
+			#print(queryset[0].Estudiante_set.all())
+
+			return HttpResponseRedirect('captura_calificacion')
+	else:
+		form = form_captura_cal()
+		context = {
+		"mensaje": "Ingresa los datos correpsondientes.",
+		"form":form,
+		}
+	return render(request, "formulario_captura_calificacion.html", context)
+def boleta_alumno(request):
+	if request.method == 'POST':
+		form = form_boleta_alumno(request.POST)
+		if form.is_valid():
+			alumno = form.cleaned_data['alumno']
+			alumno = int(alumno)
+			# verificamos que este alumnol exista
+			try:
+				queryset = Estudiante.objects.get(id = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe ese alumno en la base de datos',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			# ahora imprimimos el contenido de su boleta 
+			curso = Curso.objects.get(estudiante = alumno)
+			boleta = str(curso.boleta)
+			#print("La boleta contiene:\n",boleta)
+			calificaciones = []
+			for item in boleta.split('\n'):
+				if len(item)!=0:
+					materia = item.split()[0]
+					try: # buscamos la materia correspondiente en la base de datos
+						queryset = Materia.objects.get(id = materia)
+					except ObjectDoesNotExist:
+						context = {'mensaje': 'Ocurrio un problema con la base de datos, notificar al desarrollador',}
+						return render(request, 'msg_registro_inexistente.html',context)
+					lista = [str(queryset.id) + ' ' + queryset.nombre]+['-']*4
+					# llenamos las calificaciones correspondientes a cada intento
+					for i in range(len(item.split())-1):
+						lista[i+1]=item.split()[i+1]
+					calificaciones.append(lista)
+			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
+			context = {'encabezados': ['Materia', '1ra','2da','3ra','extra'],
+						'filas': calificaciones,}
+			#print(queryset)
+			#print(queryset[0].Estudiante_set.all())
+
+			return render(request,"tabla_general.html", context)
+	else:
+		form = form_boleta_alumno()
+		context = {
+		"mensaje": "De que alumno quieres consultar la boleta",
+		"form":form,
+		}
+	return render(request, "formulario_captura_calificacion.html", context)	
 def resumen_prospectos(request):
 	if request.method == 'POST':
 		form = rango_fechas_form(request.POST)

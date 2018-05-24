@@ -96,7 +96,17 @@ def evaluacionDigital(nombreAlumno,claveAlumno,claveExamen,nPreguntas,materia,li
 	return evaluate(int(nPreguntas),claveExamen,claveAlumno,listaPreguntas,materia,parametro)
 
 
-def agrega_calificacion(boleta,idMateria,calificacion):
+def agrega_calificacion(boleta,idMateria,calificacion,force = 0):
+	""" Agrega una calificacion a la boleta del alumno
+
+		Esta funcion recibe el contenido de la boleta, la materia y la calificacion
+		el algoritmo permite asignar la calificacion a la materia y tiene un condi-
+		cional que limita a tener maximo tres calificaciones.
+
+		Si force = 1, entonces se agreaga una calificacion independientemente de
+		que el alumno ya haya utilizado sus tres intentos, esto permite asignar una
+		calificacion de manera manual si direccion ceab lo autoriza.
+	"""
 	boletaNueva = ""
 	materiaEncontrada = 0 # variable bandera para saber si existe la materia en la boleta
 
@@ -116,7 +126,7 @@ def agrega_calificacion(boleta,idMateria,calificacion):
 			nIntentos = len(linea.split())
 			print('EL NUMERO DE INTENTOS ES ',nIntentos)
 			materiaEncontrada = 1 # si esta dada de alta la materia en la boleta del curso
-			if nIntentos<3+1: # si se han hecho menos de 3+1 intentos
+			if nIntentos<3+1 or force==1: # si se han hecho menos de 3+1 intentos
 				boletaNueva += linea + " " + str(calificacion) +'\n'
 				print('EL NUMERO DE INTENTOS NO SOBREPASA EL PERMITIDO')
 				print("Se agrega la linea",linea+' '+str(calificacion))

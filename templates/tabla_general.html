@@ -1,0 +1,40 @@
+{% extends 'consultas_diarias.html' %}
+
+	{% block busqueda %}
+
+	{% endblock %}
+
+{% block resultado %}
+
+	<h2>{{mensaje}}</h2>
+	
+	
+		
+
+		<table class = "table table-striped">
+			<thead class="thead-inverse">
+				<tr>
+					{% for item in encabezados %}
+					
+						<td> {{item}} </td>
+			  		
+					{% endfor %}
+					
+				</tr>
+			</thead>
+
+
+
+			<tbody>
+				{% for fila in filas %}
+					<tr>
+					{% for cad in fila %}
+						<td> {{cad}} </td>
+					{% endfor %}
+			  		</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+
+{% endblock %}

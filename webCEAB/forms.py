@@ -21,6 +21,14 @@ class rango_fechas_form(forms.Form):
 class fecha_form(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+class form_captura_cal(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	alumno = forms.IntegerField()
+	materia = forms.IntegerField()
+	calificacion = forms.DecimalField(max_value = 10.0, min_value = 0.0, max_digits = 3)
+class form_boleta_alumno(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	alumno = forms.IntegerField()	
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
 	#nombre = forms.CharField(widget=forms.TextInput())
