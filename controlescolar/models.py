@@ -85,7 +85,7 @@ class Estudiante(models.Model):
 	#tarjeton = models.OneToOneField(Tarjeton)
 	def __str__(self):
 		#return self.Aspirante.nombre ######################################################
-		return "%d %s %s %s %s" % (self.id,self.Aspirante.nombre,self.Aspirante.apellido_paterno,self.Aspirante.apellido_materno,self.curp)
+		return "%d %s %s %s" % (self.id,self.Aspirante.nombre,self.Aspirante.apellido_paterno,self.Aspirante.apellido_materno)
 
 
 #class Servicio(models.Model):
@@ -143,6 +143,7 @@ class Estudiante(models.Model):
 #		return str(self.alumno)
 
 class Documentacion(models.Model):
+	
 	alumno = models.OneToOneField(Estudiante)
 	documentacion_completa = models.BooleanField(default=False)
 	documentacion_entregada = models.ManyToManyField(Documento)

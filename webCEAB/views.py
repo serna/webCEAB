@@ -467,8 +467,13 @@ def boleta_alumno(request):
 			except ObjectDoesNotExist:
 				context = {'mensaje': 'No existe ese alumno en la base de datos',}
 				return render(request, 'msg_registro_inexistente.html',context)
-			# ahora imprimimos el contenido de su boleta 
-			curso = Curso.objects.get(estudiante = alumno)
+			# ahora imprimimos el contenido de su boleta, pero verificamos que si tenga un curso activo.
+			try:
+				curso = Curso.objects.get(estudiante = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'El alumno ' + str(queryset) +' no tiene ningun curso registrado',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			
 			boleta = str(curso.boleta)
 			#print("La boleta contiene:\n",boleta)
 			calificaciones = []
@@ -483,7 +488,8 @@ def boleta_alumno(request):
 					lista = [str(queryset.id) + ' ' + queryset.nombre]+['-']*4
 					# llenamos las calificaciones correspondientes a cada intento
 					for i in range(len(item.split())-1):
-						lista[i+1]=item.split()[i+1]
+						if i<4:
+							lista[i+1]=item.split()[i+1]
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
 			context = {'encabezados': ['Materia', '1ra','2da','3ra','extra'],

@@ -10,6 +10,7 @@ class Aspirantes(models.Model):
 	apellido_paterno = models.CharField(max_length=20)
 	apellido_materno = models.CharField(max_length=20)
 	creacion_de_registro = models.DateField(default=timezone.now)
+	descripcion = models.CharField(max_length = 60,blank = True)
 	promotor = models.ForeignKey(Empleado)
 	forma_contacto = models.ForeignKey(FormaContacto)
 	telefono = models.CharField(max_length = 10)

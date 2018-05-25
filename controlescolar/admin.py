@@ -26,6 +26,7 @@ class CursosAdmin(admin.ModelAdmin):
 admin.site.register(Curso,CursosAdmin)
 
 class DocumentacionAdmin(admin.ModelAdmin):
+	filter_horizontal = ('documentacion_entregada',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []
@@ -36,7 +37,7 @@ class DocumentacionAdmin(admin.ModelAdmin):
 		elif obj:
 			for f in self.model._meta.fields:
 				# et all fields as readoonly for all not superuser
-				if f.name != 'id' :
+				if f.name != 'id' and f.name != 'documentacion_completa':
 					readOnlyFields.append(f.name)
 		else:
 			readOnlyFields = []
