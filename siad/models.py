@@ -99,3 +99,9 @@ class FormaDePago(models.Model):
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Formas de pago" 
+#class Concepto(models.Model):
+#	concepto = models.CharField(max_length = 50)
+#	def __str__(self):
+#		return self.concepto
+#	class Meta: 
+#		verbose_name_plural = "Conceptos" 
