@@ -15,12 +15,12 @@ class CursosAdmin(admin.ModelAdmin):
 		elif obj:
 			for f in self.model._meta.fields:
 				# et all fields as readoonly for all not superuser
-				if f.name != 'id' :
+				if f.name != 'id' and f.name != 'materias':
 					readOnlyFields.append(f.name)
 			
 		else:
 			readOnlyFields = []
-			readOnlyFields.append('materias')
+			#readOnlyFields.append('materias')
 		readOnlyFields.append('boleta')
 		return readOnlyFields
 admin.site.register(Curso,CursosAdmin)

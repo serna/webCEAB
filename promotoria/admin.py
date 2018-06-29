@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Aspirantes
 
 class AspirantesAdmin(admin.ModelAdmin):
+	search_fields = ('nombre',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []

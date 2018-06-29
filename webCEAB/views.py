@@ -169,20 +169,23 @@ def accesoAlumno(request):
 					print('La clave de acceso es incorrecta')
 
 					return render(request, 'msg_registro_inexistente.html')	
-				cursos = queryset[0].cursos.all()
-				print("Los cursos del alumno son: ",cursos)
-				if len(cursos)==0:
-					print("No tiene ningun servicio activado este alumno")
-					context={
-						"msg":"No tienes ningun curso dado de alta!!!"
-					}
-					return render(request, 'msg_registro_inexistente.html',context)
-				print(queryset)
-			index = len(cursos)-1
+				#cursos = queryset[0].cursos.all()
+				#print("Los cursos del alumno son: ",cursos)
+				#if len(cursos)==0:
+				#	print("No tiene ningun servicio activado este alumno")
+				#	context={
+				#		"msg":"No tienes ningun curso dado de alta!!!"
+				#	}
+				#	return render(request, 'msg_registro_inexistente.html',context)
+				#print(queryset)
+			#index = len(cursos)-1
 			# si un alumno tiene varios cursos
-			queryset2 = Curso.objects.filter(id=cursos[index].id)
-
-			print('Las materias del alumno son: ')
+			queryset2 = Curso.objects.filter(estudiante=numero)
+			if len(queryset2)==0:
+				context = {'titulo': 'REGISTRO INVALIDO',
+						   'mensaje': 'El alumno no tiene ningun curso dado de alta'}
+				return render(request, 'msg_registro_inexistente.html',context)
+			print('Las materias del alumno son: ',queryset2)
 			print(queryset2[0].materias.all())
 			materias = []
 			boleta = queryset2[0].boleta
@@ -245,10 +248,12 @@ def accesoAlumno(request):
 				materias.append([item,intentos,link,etiqueta])
 			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
 			#context = {"queryset":queryset,}
-
+			index = str(queryset[0].Aspirante).find(' ')
+			if index == -1:
+				index = 0
 			context = {'numero':numero,
 			'clave':clave,
-			'nombre': queryset[0].Aspirante,
+			'nombre': str(queryset[0].Aspirante)[index:],
 			'materias': materias,
 			
 			}
