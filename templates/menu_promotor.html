@@ -14,41 +14,24 @@
 	 </head>
 	<body>
 		<header class="row" style="padding-top: 10px; padding-bottom: 20px">
-				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">			
-	        </div>
-	    
-	        <nav class="col-md-12">
-		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
-			        <h3> Bienvenido: {{nombre}} </h3>
-			        <h5> Los prospectos registrados son: </h5>
-			        <table style="width:50%">
-			        	<tr>
-						  	<th> Nombre</th>
-						  	<th> Celular</th>
-						  	<th> Fecha de creacion</th>
-						  	
-						 </tr>
-				        {% for prospecto in prospectos %}
-				        	<tr>
-							  	<td> {{prospecto}} </td> 
-							  	<td> {{prospecto.celular}} </td> 
-							  	<td> {{prospecto.creacion_de_registro}}</td>
-							  	
-							  	
-							  	
-							 </tr>
-						{% endfor %}
-					</table>
+				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">	
+			<nav class="col-md-12">
+		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px" >
+					<li class="active"><a href="/prospectos_promotor">Prospectos</a></li>
+					<li class="active"><a href="/promotores">Inscritos</a></li>
+					<li class="active"><a href="/admin">Captura</a></li>
 				</ul>
 			</nav>
 		</header>
     	
         <section class="col-md-12">
         	
-            
-            {% block content %}
-            {% endblock %}
-
+    	     <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+    	     	{% block content %}
+	        	
+	        	{% endblock %}
+		        
+			</ul>
    		</section>
 	  
 	 

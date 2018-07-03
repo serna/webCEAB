@@ -159,16 +159,22 @@ def accesoAlumno(request):
 			
 			queryset = Estudiante.objects.filter(id = numero)
 			if len(queryset)==0:
-				print('NO EXISTE ESE ALUMNO')
+				context = {
+					'titulo': "Registro inexistente",
+					'mensaje': "Ese alumno no existe en la base de datos",
+				}
 
-				return render(request, 'msg_registro_inexistente.html')
+				return render(request, 'msg_registro_inexistente.html',context)
 			else:
 				contrasena = queryset[0].contrasena
 				print(contrasena)
 				if contrasena!=clave:
-					print('La clave de acceso es incorrecta')
+					context = {
+					'titulo': "Informacion invalida",
+					'mensaje': "La contrasena no es correcta",
+					}
 
-					return render(request, 'msg_registro_inexistente.html')	
+					return render(request, 'msg_registro_inexistente.html',context)	
 				#cursos = queryset[0].cursos.all()
 				#print("Los cursos del alumno son: ",cursos)
 				#if len(cursos)==0:
@@ -251,12 +257,56 @@ def accesoAlumno(request):
 			index = str(queryset[0].Aspirante).find(' ')
 			if index == -1:
 				index = 0
+			nombreAlumno=str(queryset[0].Aspirante)[index:]
+			################## Seccion de informacion de la boleta #################
+
+			alumno = numero
+			# verificamos que este alumnol exista
+			try:
+				queryset = Estudiante.objects.get(id = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe ese alumno en la base de datos',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			# ahora imprimimos el contenido de su boleta, pero verificamos que si tenga un curso activo.
+			try:
+				curso = Curso.objects.get(estudiante = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'El alumno ' + str(queryset) +' no tiene ningun curso registrado',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			
+			boleta = str(curso.boleta)
+			#print("La boleta contiene:\n",boleta)
+			calificaciones = []
+			for item in boleta.split('\n'):
+				if len(item)!=0:
+					materia = item.split()[0]
+					try: # buscamos la materia correspondiente en la base de datos
+						queryset = Materia.objects.get(id = materia)
+					except ObjectDoesNotExist:
+						context = {'mensaje': 'Ocurrio un problema con la base de datos, notificar al desarrollador',}
+						return render(request, 'msg_registro_inexistente.html',context)
+					lista = [str(queryset.id) + ' ' + queryset.nombre]+['-']*4
+					# llenamos las calificaciones correspondientes a cada intento
+					for i in range(len(item.split())-1):
+						if i<4:
+							lista[i+1]=item.split()[i+1]
+					calificaciones.append(lista)
+			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
+			
+
+			########################################################################
+
+
 			context = {'numero':numero,
 			'clave':clave,
-			'nombre': str(queryset[0].Aspirante)[index:],
+			'nombre': nombreAlumno,
 			'materias': materias,
-			
+			'encabezados': ['Materia', 'Intentos', 'Link'],
+			'encabezados2': ['Materia', '1ra','2da','3ra','extra'],
+			'filas': calificaciones,
 			}
+
+
 
 			return render(request,"menu_alumno.html", context)
 			
@@ -268,7 +318,38 @@ def accesoAlumno(request):
 		}
 	#return render(request, "formulario_fechas.html", context)
 	return render(request, 'form_acceso_alumno.html', context)
-def accesoPromotor(request):
+def prospectos_promotor(request):
+	numero = request.session['idPromotor']
+	numero = int(numero)
+	
+	queryset = Empleado.objects.filter(id = numero)
+	if len(queryset)==0:
+		print('NO EXISTE ESE PROMOTOR en la consulta de prospectos')
+
+		return render(request, 'msg_registro_inexistente.html')
+	prospectos = Aspirantes.objects.filter(promotor = queryset[0])
+	#print("Los prospectos del promotor son: ",prospectos)
+	if len(prospectos)==0:
+		print("No tiene ningun prospecto")
+		context={
+			"msg":"No tienes ningun prospecto registrado!!!"
+		}
+		return render(request, 'msg_registro_inexistente.html',context)
+	#print(queryset)
+	index = len(prospectos)-1
+	#queryset2 = Curso.objects.filter(id=cursos[index].id)
+
+	#print('Las prospectos son: ')
+	#print(prospectos)
+	context = {'numero':numero,
+	'nombre': queryset[0],
+	'prospectos': prospectos,
+	
+	}
+
+	return render(request,"prospectos_promotor.html", context)
+
+def menu_promotor(request):
 	if request.method == 'POST':
 		form = form_acceso_alumno(request.POST)
 		if form.is_valid():
@@ -286,28 +367,9 @@ def accesoPromotor(request):
 				if contrasena!=clave:
 					print('La clave de acceso del promotor es incorrecta')
 					return render(request, 'msg_registro_inexistente.html')	
-				prospectos = Aspirantes.objects.filter(promotor = queryset[0])
-				print("Los prospectos del promotor son: ",prospectos)
-				if len(prospectos)==0:
-					print("No tiene ningun prospecto")
-					context={
-						"msg":"No tienes ningun prospecto registrado!!!"
-					}
-					return render(request, 'msg_registro_inexistente.html',context)
-				print(queryset)
-			index = len(prospectos)-1
-			#queryset2 = Curso.objects.filter(id=cursos[index].id)
-
-			print('Las prospectos son: ')
-			print(prospectos)
-			context = {'numero':numero,
-			'clave':clave,
-			'nombre': queryset[0],
-			'prospectos': prospectos,
-			
-			}
-
-			return render(request,"menu_promotor.html", context)
+			request.session['idPromotor'] = numero
+			print("El numero del promotor es: ", request.session['idPromotor'])
+			return render(request,"menu_promotor.html")
 			
 	else:
 		form = form_acceso_alumno()
@@ -317,6 +379,7 @@ def accesoPromotor(request):
 		}
 	#return render(request, "formulario_fechas.html", context)
 	return render(request, 'form_acceso_alumno.html', context)
+
 def pagos_proximos(request):
 	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
 	suma = 0

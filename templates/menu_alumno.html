@@ -15,18 +15,24 @@
 	<body>
 		<header class="row" style="padding-top: 10px; padding-bottom: 20px">
 				<img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo">			
-	        </div>
-	    
-	        <nav class="col-md-12">
-		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
-			        <h3> Bienvenido: {{nombre}} </h3>
-			        <h5> Tus materias son: </h5>
-			        <table style="width:30%">
-			        	<tr>
-						  	<th> Materia</th>
-						  	<th> Intentos </th>
-						  	<th> Link </th>
-						 </tr>
+	        
+	    </header>
+
+	    <section class="col-md-12">
+	        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+		        <h3> Bienvenido: {{nombre}} </h3>
+		        <h4> Las materias activas son: </h4>
+
+		        <table class = "table table-striped">
+		        	<thead class="thead-inverse">
+						<tr>
+							{% for item in encabezados %}
+								<th> {{item}} </th>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+				
 				        {% for materia in materias %}
 				        	<tr>
 							  	<td> {{materia.0}}</td>
@@ -36,19 +42,40 @@
 							  	{% else %}
 							  		<td><a href="{{materia.2}}" > examen</a></td>
 							  	{% endif %}
-							  	}
+							  	
 							 </tr>
 						{% endfor %}
-					</table>
-				</ul>
-			</nav>
-		</header>
+					</tbody>
+				</table>
+			</ul>
+			
+		</section>
     	
         <section class="col-md-12">
-        	
+        	<ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px">
+		        <h4> Tu boleta: </h4>
+
+		        <table class = "table table-striped">
+					<thead class="thead-inverse">
+						<tr>
+							{% for item in encabezados2 %}
+								<td> {{item}} </td>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for fila in filas %}
+							<tr>
+							{% for cad in fila %}
+								<td> {{cad}} </td>
+							{% endfor %}
+					  		</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</ul>
             
-            {% block content %}
-            {% endblock %}
+            
 
    		</section>
 	  
