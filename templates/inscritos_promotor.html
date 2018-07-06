@@ -1,0 +1,30 @@
+
+{% extends 'menu_promotor.html' %}
+
+{% block content %}
+	<h3> Bienvenido: {{nombre}} </h3>
+    <h5> Tus prospectos inscritos: </h5>
+    <table class = "table table-striped">
+    	<thead class="thead-inverse">
+			<tr>
+				<th> Nombre</th>
+			  	<th> Fecha de inscripcion</th>
+			  	<th> Plantel</th>
+			</tr>
+		</thead>
+		<tbody>
+	
+	        {% for item in inscritos %}
+	        	<tr>
+				  	<td> {{item.Aspirante}} </td> 
+				  	<td> {{item.fecha_de_registro}} </td> 
+				  	<td> {{item.plantel}}</td>
+				  	
+				  	
+				  	
+				 </tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	
+{% endblock %}

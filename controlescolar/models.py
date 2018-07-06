@@ -7,6 +7,16 @@ from promotoria.models import Aspirantes
 from decimal import Decimal
 from django.core.exceptions import ObjectDoesNotExist
 
+class Catalogo(models.Model):
+	nombre_del_examen = models.CharField(max_length = 60)
+	clave_del_examen = models.CharField(max_length=4,null = True)
+	numero_de_reactivos = models.IntegerField(null=True,default=10)
+	def __str__(self):
+		#return "%s;\t inicia %s\t termina %s\t, de %s\t a %s" % (self.nombre , self.fecha_inicio, self.fecha_termino, self.horario_inicio, self.horario_fin)
+		return  "%s"%(str(self.clave_del_examen)+": "+str(self.nombre_del_examen))
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Catologo de materias"
 class Materia(models.Model):
 	nombre = models.CharField(max_length = 50)
 	fecha_inicio = models.DateField()
@@ -23,8 +33,9 @@ class Materia(models.Model):
 	)
 	horario_inicio = models.TimeField()#choices = opcionesHorarios,default = '7:00:00')
 	horario_fin = models.TimeField()#choices = opcionesHorarios,default = '9:00:00')
-	clave_de_la_materia = models.CharField(max_length = 4,null=True,default = '0000',help_text='Ingresa aqui la clave de la materia')
-	numero_de_preguntas = models.IntegerField(null = True,default = 0,help_text='Numero de preguntas del examen de la materia')
+	examen = models.ForeignKey(Catalogo,null=True)
+	#clave_de_la_materia = models.CharField(max_length = 4,null=True,default = '0000',help_text='Ingresa aqui la clave de la materia')
+	#numero_de_preguntas = models.IntegerField(null = True,default = 0,help_text='Numero de preguntas del examen de la materia')
 	#opcionesDias = (
 	#		('Lunes a viernes','Lunes a viernes'),
 	#		('Sabado y domingo','Sabado y domingo'),

@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Estudiante, Materia, Servicio, Curso,  Documentacion
+from .models import Estudiante, Materia, Servicio, Curso,  Documentacion, Catalogo
 
-
+admin.site.register(Catalogo)
 class CursosAdmin(admin.ModelAdmin):
 	filter_horizontal = ('materias',)
 	def get_readonly_fields(self, request, obj=None):

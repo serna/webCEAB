@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^alumnos$', views.accesoAlumno),
     url(r'^promotores$', views.menu_promotor),
     url(r'^prospectos_promotor$', views.prospectos_promotor),
+    url(r'^inscritos_promotor$', views.inscritos_promotor),
     url(r'^cobros_diarios$', views.cobros_diarios),
     url(r'^pagos_proximos$', views.pagos_proximos),
     url(r'^cobros_vencidos/(?P<dias>\d+)$', views.cobros_vencidos),

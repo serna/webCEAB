@@ -105,7 +105,7 @@ def agrega_calificacion(boleta,idMateria,calificacion,force = 0):
 
 		Si force = 1, entonces se agreaga una calificacion independientemente de
 		que el alumno ya haya utilizado sus tres intentos, esto permite asignar una
-		calificacion de manera manual si direccion ceab lo autoriza.
+		calificacion de manera manual si direccion direccion lo autoriza.
 	"""
 	boletaNueva = ""
 	materiaEncontrada = 0 # variable bandera para saber si existe la materia en la boleta
@@ -126,13 +126,17 @@ def agrega_calificacion(boleta,idMateria,calificacion,force = 0):
 			nIntentos = len(linea.split())
 			print('EL NUMERO DE INTENTOS ES ',nIntentos)
 			materiaEncontrada = 1 # si esta dada de alta la materia en la boleta del curso
-			if nIntentos<3+1 or force==1: # si se han hecho menos de 3+1 intentos
+			if nIntentos<=3:  # si se han hecho menos de 3+1 intentos
 				boletaNueva += linea + " " + str(calificacion) +'\n'
 				print('EL NUMERO DE INTENTOS NO SOBREPASA EL PERMITIDO')
 				print("Se agrega la linea",linea+' '+str(calificacion))
+			elif force==1 and nIntentos<=4:
+				# si ya tiene 
+				boletaNueva += linea + " " + str(calificacion) +'\n'
 			else:
 				print('Mas intentos de los permitidos, imprimiendo la linea',linea)
 				boletaNueva += linea +'\n'
+				return -1 # regresa -1 para indicar que no despligue el resultado de la evaluacion
 		else:
 			# si no encontramos la materia en la n-esima linea de la boleta entonces
 			# no modificamos la boleta y la dejamos como estaba

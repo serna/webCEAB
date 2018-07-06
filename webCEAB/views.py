@@ -109,11 +109,11 @@ def evaluacion_digital(request,alumno,materia):
 			#     2.1.- Verificar si la materia ya esta dada de alta en la boleta.
 			#     2.2.- Verificar que el alumno no tenga mas de tres intentos.
 			# 3.- Asentar la calificacion en la boleta
-			curso = queryset[0].cursos.all() # punto 1 cumplido.
-			print("El alumno tiene dados de alta n cursos: ",len(curso),curso)
+			################################################
+			curso = queryset[0].curso # punto 1 cumplido.
 			print('EL CONTENIDO DEL CURSO ES:')
-			curso = curso[len(curso)-1]
-			#print(curso,curso.materias.all())
+			curso = curso
+			print(curso,curso.materias.all())
 			boleta = str(curso.boleta)
 			
 			print('EL CONTENIDO DE LA BOLETA ESSSS:')
@@ -123,16 +123,24 @@ def evaluacion_digital(request,alumno,materia):
 			print('Boleta antigua',boleta)
 			print('SEPARADOR ENTRE BOLETAS')
 			print('Boleta Nueva',boletaNueva)
+			if boletaNueva == -1:
+				context = {
+					'titulo': "NO MAS INTENTOS",
+					'mensaje': "Solo se permiten tres evaluaciones por materia",
+				}
+
+				return render(request, 'msg_registro_inexistente.html',context)
+				 
 			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
 			return render(request,'impresion_lista_2d.html',context)
 	else:
-		queryset = Estudiante.objects.filter(id = alumno)
-		if len(queryset)==0:
+		alumnos = Estudiante.objects.filter(id = alumno)
+		if len(alumnos)==0:
 			print('NO EXISTE ESE ALUMNO')
 			return render(request, 'msg_registro_inexistente.html')
-		alumno_str = queryset[0]
-		queryset2 = Materia.objects.filter(id=materia)
-		materia_str = queryset2[0].nombre 
+		alumno_str = alumnos[0]
+		materias = Materia.objects.filter(id=materia)
+		materia_str = materias[0].nombre 
 		form = preguntas_form()
 		context = {
 		"mensaje": "Ingresa la informacion correspondiente",
@@ -318,15 +326,33 @@ def accesoAlumno(request):
 		}
 	#return render(request, "formulario_fechas.html", context)
 	return render(request, 'form_acceso_alumno.html', context)
-def prospectos_promotor(request):
-	numero = request.session['idPromotor']
-	numero = int(numero)
+def inscritos_promotor(request):
+	idPromotor = int(request.session['idPromotor'])
+	queryset = Empleado.objects.filter(id = idPromotor)
+	if len(queryset)==0:
+		context = {
+		'titulo': 'Registro inexistente',
+		'mensaje': 'La contrasena o el numero de promotor son incorrectos',}
+		return render(request, 'msg_registro_inexistente.html')
 	
-	queryset = Empleado.objects.filter(id = numero)
+	inscritos = Estudiante.objects.filter(Aspirante__promotor = queryset[0])
+	print('Los incsritos son: ',inscritos)
+	context = {
+	'nombre': queryset[0],
+	'inscritos': inscritos,
+	}
+	return render(request,"inscritos_promotor.html", context)
+	
+def prospectos_promotor(request):
+	idPromotor = int(request.session['idPromotor'])
+	queryset = Empleado.objects.filter(id = idPromotor)
 	if len(queryset)==0:
 		print('NO EXISTE ESE PROMOTOR en la consulta de prospectos')
-
+		context = {
+		'titulo': 'Registro inexistente',
+		'mensaje': 'La contrasena o el numero de promotor son incorrectos',}
 		return render(request, 'msg_registro_inexistente.html')
+	
 	prospectos = Aspirantes.objects.filter(promotor = queryset[0])
 	#print("Los prospectos del promotor son: ",prospectos)
 	if len(prospectos)==0:
@@ -335,16 +361,10 @@ def prospectos_promotor(request):
 			"msg":"No tienes ningun prospecto registrado!!!"
 		}
 		return render(request, 'msg_registro_inexistente.html',context)
-	#print(queryset)
-	index = len(prospectos)-1
-	#queryset2 = Curso.objects.filter(id=cursos[index].id)
 
-	#print('Las prospectos son: ')
-	#print(prospectos)
-	context = {'numero':numero,
+	context = {
 	'nombre': queryset[0],
 	'prospectos': prospectos,
-	
 	}
 
 	return render(request,"prospectos_promotor.html", context)
@@ -506,14 +526,13 @@ def captura_calificacion(request):
 			curso = Curso.objects.get(estudiante = alumno)
 			boleta = str(curso.boleta)
 			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,force=1)
-			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+			if boletaNueva == -1:
+				messages.add_message(request, messages.INFO, 'La materia ya contenia la calificacion extra, ya no es posible esitar esta!')
+				return HttpResponseRedirect('captura_calificacion')
+			else:
+				Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
 			# si todo se ha verificado correctamente entonces regresamos al menu principal
-			messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
-			context = {"queryset":queryset,
-						'encabezados': ['Nombre', 'horario', 'fecha de inicio','fecha de termino'],
-						'mensaje': 'Estos alumnos estan activos actualmente'}
-			#print(queryset)
-			#print(queryset[0].Estudiante_set.all())
+				messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
 
 			return HttpResponseRedirect('captura_calificacion')
 	else:
@@ -531,7 +550,7 @@ def boleta_alumno(request):
 			alumno = int(alumno)
 			# verificamos que este alumnol exista
 			try:
-				queryset = Estudiante.objects.get(id = alumno)
+				queryset1 = Estudiante.objects.get(id = alumno)
 			except ObjectDoesNotExist:
 				context = {'mensaje': 'No existe ese alumno en la base de datos',}
 				return render(request, 'msg_registro_inexistente.html',context)
@@ -539,7 +558,7 @@ def boleta_alumno(request):
 			try:
 				curso = Curso.objects.get(estudiante = alumno)
 			except ObjectDoesNotExist:
-				context = {'mensaje': 'El alumno ' + str(queryset) +' no tiene ningun curso registrado',}
+				context = {'mensaje': 'El alumno ' + str(queryset1) +' no tiene ningun curso registrado',}
 				return render(request, 'msg_registro_inexistente.html',context)
 			
 			boleta = str(curso.boleta)
@@ -560,8 +579,11 @@ def boleta_alumno(request):
 							lista[i+1]=item.split()[i+1]
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
-			context = {'encabezados': ['Materia', '1ra','2da','3ra','extra'],
-						'filas': calificaciones,}
+			context = {
+			'nombreAlumno': queryset1,
+			'encabezados': ['Materia', '1ra','2da','3ra','extra'],
+			'filas': calificaciones,
+			}
 			#print(queryset)
 			#print(queryset[0].Estudiante_set.all())
 
