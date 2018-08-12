@@ -79,7 +79,7 @@ class Estudiante(models.Model):
 	#entre_calles = models.CharField(max_length=100, null = True)
 	cp = models.CharField(max_length=5, null = True)
 	edad = models.IntegerField(null = True)
-	grado_estudios = models.CharField(max_length = 50, null = True)
+	grado_estudios = models.CharField(max_length = 50, null = True,blank=True)
 	estado_civil = models.CharField(max_length = 30, null = True)
 	email = models.CharField(max_length=50, null = True)
 	numero_de_hijos = models.IntegerField(null = True)

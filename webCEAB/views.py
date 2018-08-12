@@ -20,6 +20,32 @@ from datetime import timedelta
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+def genera_pdf(request):
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+
+	buffer = BytesIO()
+
+	# Create the PDF object, using the BytesIO object as its "file."
+	p = canvas.Canvas(buffer)
+
+	# Draw things on the PDF. Here's where the PDF generation happens.
+	# See the ReportLab documentation for the full list of functionality.
+	p.drawString(100, 100, "Hello world.")
+
+	# Close the PDF object cleanly.
+	p.showPage()
+	p.save()
+
+	# Get the value of the BytesIO buffer and write it to the response.
+	pdf = buffer.getvalue()
+	buffer.close()
+	response.write(pdf)
+	return response
 def generate_csvFile(request,datos = None):
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(content_type='text/csv')
@@ -36,18 +62,14 @@ def generate_csvFile(request,datos = None):
 def cobros_vencidos(request,dias):
 
 	queryset = Tarjeton.objects.filter(monto_cubierto = False)
-	queryset = queryset.filter()
-	table = PagospendientesTable(queryset)
 	
-
-	RequestConfig(request).configure(table)
-
-	context = {"queryset":table,
-			 	"subtitulo":"Resumen de pagos proximos",
+	
+	context = {"queryset":queryset,
+			 	"subtitulo":"Pagos vencidos",
 			 	'subtitle1': 'Generales',
-			 	'subtitle2': 'La consulta es de:' + str(dias),
+			 	
 				}
-	return render(request,"consultaUnaTabla.html", context)
+	return render(request,"cobros_vencidos.html", context)
 #def index(request):
 def evaluacion_digital(request,alumno,materia):
 	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta" 
@@ -68,6 +90,7 @@ def evaluacion_digital(request,alumno,materia):
 			claveExamen = form.cleaned_data['clave_del_examen']
 			#versionExamen = form.cleaned_data['version_examen']
 			listaRespuestas = []
+			cadenaRespuestas = ""
 			for i in range(1,222):
 				cadenaPregunta = 'pregunta_%d'%i
 				valor = form.cleaned_data[cadenaPregunta]
@@ -76,9 +99,12 @@ def evaluacion_digital(request,alumno,materia):
 				else:
 					valor=int(valor)
 				listaRespuestas.append(valor)
-			#print(listaRespuestas)
-
-			print(nombre,claveAlumno,numeroPreguntas,claveExamen)
+				cadenaRespuestas += str(valor)
+			print("respuestas enviadas son:" ,cadenaRespuestas)
+			encriptado = rut.encripta(cadenaRespuestas)
+			print("respuestas encriptadas son:" ,encriptado)
+			print('Las respuestas desencriptadas son:',rut.desencripta(encriptado))
+			#print(nombre,claveAlumno,numeroPreguntas,claveExamen)
 			datos = {'nombre':nombre,
 			'claveAlumno':claveAlumno,
 			'numeroPreguntas':numeroPreguntas,
@@ -86,7 +112,6 @@ def evaluacion_digital(request,alumno,materia):
 			'listaRespuestas':listaRespuestas,
 			}
 			calif,incorr,correc,noContestadas= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= claveAlumno,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
-			#print('nnnnnnnnnnnnnnnnnnnnn',calif)
 			#return generate_csvFile(request,datos)
 			queryset2 = Materia.objects.filter(id=materia)
 			materiaNombre = queryset2[0].nombre
@@ -132,6 +157,7 @@ def evaluacion_digital(request,alumno,materia):
 				return render(request, 'msg_registro_inexistente.html',context)
 				 
 			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+			
 			return render(request,'impresion_lista_2d.html',context)
 	else:
 		alumnos = Estudiante.objects.filter(id = alumno)

@@ -93,7 +93,7 @@ class Tarjeton(models.Model):
 	alumno = models.OneToOneField(Estudiante)
 	inicio =  models.DateField(default= timezone.now,help_text='Fecha a partir de la cual se programaran los siguientes pagos')
 	descripcion = models.CharField(max_length = 100,default = 'Creacion: ' + str(timezone.now())[:16],help_text='Descripcion breve relativa al tarjeton')
-	esquema_de_pago = models.CharField(max_length = 10,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
+	esquema_de_pago = models.CharField(max_length = 20,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
 	monto =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto total del servicio')
 	pago_periodico = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cuanto pagara en cada semana, quincena o mes')
 	monto_cubierto = models.BooleanField(default = False,help_text='Activa esta casilla si el alumno ha cubierto la totalidad del monto')

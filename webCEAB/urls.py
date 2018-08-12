@@ -28,6 +28,8 @@ urlpatterns = [
     url(r'^inscritos_promotor$', views.inscritos_promotor),
     url(r'^cobros_diarios$', views.cobros_diarios),
     url(r'^pagos_proximos$', views.pagos_proximos),
+    url(r'^genera_pdf$', views.genera_pdf),
+
     url(r'^cobros_vencidos/(?P<dias>\d+)$', views.cobros_vencidos),
     url(r'^eval/(?P<alumno>\d+)/(?P<materia>\d+)$', views.evaluacion_digital),
     url(r'^resumen_prospectos$', views.resumen_prospectos),

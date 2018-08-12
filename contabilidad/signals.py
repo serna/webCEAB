@@ -19,7 +19,7 @@ import time
 #		except Curso.DoesNotExist:
 #			print("No se pudo realizar la operacion de actualizar el monto")
 #		print(obj)
-def calcula_proxima_fecha_pago(inicio,monto,colegiatura,esquema,pagado):
+def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagado):
 	""" Computes the next date of payment
 
 		inicio [date]: date since it would be computed the payments
@@ -31,9 +31,9 @@ def calcula_proxima_fecha_pago(inicio,monto,colegiatura,esquema,pagado):
 		It returns the next date of payment and the number of delayed payments
 	"""
 	opciones= {
-		'Semanal':timedelta(days=30, hours=10),
-		'Quincenal':timedelta(days=15),
-		'Mensual':timedelta(days=30, hours=10),
+		'Semanal':timedelta(days=7, hours=10),
+		'Quincenal':timedelta(days=14),
+		'Mensual':timedelta(days=28, hours=10),
 		'Un solo pago':timedelta(days=0, hours=10),
 		'Otro': timedelta(days=30, hours=10),
 	}
@@ -44,22 +44,24 @@ def calcula_proxima_fecha_pago(inicio,monto,colegiatura,esquema,pagado):
 	#print('La fecha de inicio es:',inicio)
 	#print('La fecha de hoy es:',fechaCalculo)
 	#print('Han pasado ', fechaCalculo-inicio, ' dias')
-	pag = int((fechaCalculo-inicio)/esquema) # pagos que ya tendrian que estar hechos
-	#print('Se tendrian que tener registrados ', pag , ' pagos')
-	#print('Equivalente a ', pag*pagoPeriodico, ' pesos')
+	nPag = int((fechaCalculo-inicio)/esquema) # pagos que ya tendrian que estar hechos
+	if nPag>montoTotal/pagoPeriodico:
+		nPag = int(round(montoTotal/pagoPeriodico))
+	print('Se tendrian que tener registrados ', nPag , ' pagos')
+	print('Equivalente a ', nPag*pagoPeriodico, ' pesos')
 
-	if pag*pagoPeriodico>pagado:
+	if nPag*pagoPeriodico>pagado:
 		# El alumno esta atrasado en pagos, calculamos la ultima fecha en la que debio hacer un pago
 		
 		pagosHechos = int(pagado/pagoPeriodico)
-		print("El alumno tiene pagos atrasados: ", pag-pagosHechos)
+		print("El alumno tiene pagos atrasados: ", nPag-pagosHechos)
 		nextDate = inicio+(pagosHechos+1)*esquema
 	else:
 		# El alumno esta al corriente de sus pagos, calculamos su siguiente fecha de pago
 		pagosHechos = int(pagado/pagoPeriodico)
 		print('El alumno esta al corriente en sus pagos')
 		nextDate = inicio+(pagosHechos+1)*esquema
-	return nextDate, pag-pagosHechos
+	return nextDate, nPag-pagosHechos
 
 @receiver(post_save, sender = PagosAlumno)
 def pago_realizado_signal(sender, instance, **kwargs):
@@ -80,7 +82,7 @@ def pago_realizado_signal(sender, instance, **kwargs):
 			esquema_de_pago = 'Semanal',
 			monto = 1000,
 			monto_cubierto = False,
-			pago_periodico = 500,
+			pago_periodico = 100,
 			proxima_fecha_de_pago =  proximaFecha ,
 			pagos_atrasados = pagosAtrasados,
 			
@@ -92,22 +94,23 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		#queryset = Tarjeton.objects.filter(alumno = instance.alumno)
 	else:
 		# if the tarjeton exists
-		print("los pagos que ha hecho son: ", queryset[0].pagos)
-		pagado = 0
+		print("los pagos que ha hecho son: ", queryset[0].pagos.all())
+		pagado = instance.monto
 		#for item in  queryset[0].pagos.all():
 		#	if item.concepto=='Colegiatura':
 		#		pagado+=item.monto
 		#print('El alumno ha pagado en colegiaturas: ',pagado)
-		colegiaturaPagada = 0
 		for item in queryset[0].pagos.all():
-			if item.concepto=="Colegiatura":
-				pagado += item.monto
-			else:
-				colegiaturaPagada = item.monto
+			pagado += item.monto
+			
 		print("El alumno ha pagado en colegiaturas: ",pagado)
+		montoColeg = queryset[0].pago_periodico
+		if montoColeg == 0:
+			montoColeg = 1
 		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-			monto=queryset[0].monto-colegiaturaPagada,
-			colegiatura=queryset[0].pago_periodico,
+			montoTotal = queryset[0].monto,
+			monto=queryset[0].monto-pagado,
+			colegiatura=montoColeg,
 			esquema=queryset[0].esquema_de_pago,
 			pagado=pagado)
 		tarjetonExistente = Tarjeton(id = queryset[0].id,
