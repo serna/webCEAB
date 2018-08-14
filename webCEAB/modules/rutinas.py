@@ -95,10 +95,30 @@ def evaluacionDigital(nombreAlumno,claveAlumno,claveExamen,nPreguntas,materia,li
 	#print( 'version del examen', versionExamen,parametro)
 	return evaluate(int(nPreguntas),claveExamen,claveAlumno,listaPreguntas,materia,parametro)
 
+def creaNuevaLinea(linea, calificacion,respuestasEncriptadas):
+	""" esta funcion agrega una calificacion a la variable linea
 
-def agrega_calificacion(boleta,idMateria,calificacion,force = 0):
+		linea [string]: una cadena que contiene las calificaciones de alguna materia
+		calificacion [float]: una calificacion con dos cifras decimales
+		return [string]: regresa una linea que tiene correctamente codificada la ultima calificacion
+
+		El formato de la variable linea es:
+		021 10 x(!_ 
+		021: clave de la materia
+		10: primer calificacion de esa materia
+		x(!_: resouestas del cuestionario codificadas en ascii
+	"""
+	elementos = len(linea.split())
+	lineaNueva = ""
+	for i in range(elementos - 1):
+		lineaNueva += linea.split()[i] + " " # usamos un espacio para separar la informacio 
+	lineaNueva += str(calificacion) + ' ' # usamos un espacio para separar la informacio
+	lineaNueva += respuestasEncriptadas + '\n' # la linea no termina con espacio sino con un enter
+	return lineaNueva
+def agrega_calificacion(boleta,idMateria,calificacion,respuestas,force = 0):
 	""" Agrega una calificacion a la boleta del alumno
-
+		
+		respuestas [string]: Esta variable contiene todas las respuestas del cuestionario que acaba de responder el alumno
 		Esta funcion recibe el contenido de la boleta, la materia y la calificacion
 		el algoritmo permite asignar la calificacion a la materia y tiene un condi-
 		cional que limita a tener maximo tres calificaciones.
@@ -109,39 +129,44 @@ def agrega_calificacion(boleta,idMateria,calificacion,force = 0):
 	"""
 	boletaNueva = ""
 	materiaEncontrada = 0 # variable bandera para saber si existe la materia en la boleta
-
+	respuestasEncriptadas = encripta(respuestas)
 	for linea in boleta:
 		if len(linea.split())<1: # si no hay ninguna materia registrada en la boleta
 			continue
 		materia = linea.split()[0]
-		if linea[-1]=='\r':
-			linea = linea[:-1]
-		#print("LA MATERIA ESTA PRESENTE",materia)
-		if int(materia)==int(idMateria):
-			#print('SI ESTA LA MATERIA DENTRO DE LA BOLETA')
+		if linea[-1]=='\r': # si la ultima linea es un enter (o formalmente un retorno de carro)
+			linea = linea[:-1] # no contamos el ultimo caracter, en este caso el retorno de carro
+		if int(materia)==int(idMateria): # buscamos la materia correspondiente al examen que hizo el alumno
 			# si encontramos la materia en la n-esima linea de la boleta
-			# verificamos el numero de intentos en esa materia
-			nIntentos = len(linea.split())
-			#print('EL NUMERO DE INTENTOS ES ',nIntentos)
-			materiaEncontrada = 1 # si esta dada de alta la materia en la boleta del curso
-			if nIntentos<=3:  # si se han hecho menos de 3+1 intentos
-				boletaNueva += linea + " " + str(calificacion) +'\n'
-				#print('EL NUMERO DE INTENTOS NO SOBREPASA EL PERMITIDO')
-				#print("Se agrega la linea",linea+' '+str(calificacion))
-			elif force==1 and nIntentos<=4:
-				# si ya tiene 
-				boletaNueva += linea + " " + str(calificacion) +'\n'
+			# verificamos el numero de intentos en esa materia. para ello consideremos que si la 
+			# materia esta en la boleta es porque el alumno ha intentado al menos una vez resolver el cuestionario
+			# por lo tanto, la linea de la meateria contiene la clave de la materia, una calificacion (al menos una)
+			# y las respuestas codificadas en ascii, es decir tiene al menos tres elementos
+			nElementos = len(linea.split())
+			print('El numero de elementos en la linea de la boleta es: ',nElementos)
+			if nElementos<3: # si hay menos de tres elementos en la linea de la materia
+				print('SE HA CORROMPIDO LA INFORMACION EN LA BOLETA DEL ALUMNO')
+			materiaEncontrada = 1 # Esta variable bandera indica que la materia esta en la boleta del curso
+			nIntentos = nElementos - 2 
+			if nIntentos<=3:  # si se han hecho menos de 3+1 intentos, entonces se agrega la nueva calificacion
+				#boletaNueva += linea + " " + str(calificacion) +'\n'
+				boletaNueva = creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
+			elif force==1 and nIntentos<=4: 
+				# si direccion evalua con una calificacion extraordinaria
+				boletaNueva = creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
 			else:
-				#print('Mas intentos de los permitidos, imprimiendo la linea',linea)
+				# Mas intentos de los permitidos
 				boletaNueva += linea +'\n'
 				return -1 # regresa -1 para indicar que no despligue el resultado de la evaluacion
+
+
 		else:
 			# si no encontramos la materia en la n-esima linea de la boleta entonces
 			# no modificamos la boleta y la dejamos como estaba
 			boletaNueva += linea +'\n'
 	if materiaEncontrada == 0:
-		#print('NO SE ENCONTRO LA MATERIA DENTRO DE LA BOLETA')
-		boletaNueva += '\n'+str(idMateria) + " " + str(calificacion)+'\n'
+		# si es la primera vez que se evalua esa materia
+		boletaNueva += str(idMateria) + " " + str(calificacion)+'\n'
 	return boletaNueva
 def desencripta(respuestas):
 	""" Convierte una cadena en ascii a su correspondiente desencriptado de respuestas

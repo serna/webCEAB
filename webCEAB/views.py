@@ -91,7 +91,7 @@ def evaluacion_digital(request,alumno,materia):
 			#versionExamen = form.cleaned_data['version_examen']
 			listaRespuestas = []
 			cadenaRespuestas = ""
-			for i in range(1,222):
+			for i in range(1,int(numeroPreguntas)+1):
 				cadenaPregunta = 'pregunta_%d'%i
 				valor = form.cleaned_data[cadenaPregunta]
 				if valor == '':
@@ -144,7 +144,7 @@ def evaluacion_digital(request,alumno,materia):
 			print('EL CONTENIDO DE LA BOLETA ESSSS:')
 			print(boleta.split('\n'))
 			print(boleta.split('\r'))
-			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif)
+			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,cadenaRespuestas)
 			print('Boleta antigua',boleta)
 			print('SEPARADOR ENTRE BOLETAS')
 			print('Boleta Nueva',boletaNueva)
@@ -167,7 +167,28 @@ def evaluacion_digital(request,alumno,materia):
 		alumno_str = alumnos[0]
 		materias = Materia.objects.filter(id=materia)
 		materia_str = materias[0].nombre 
-		form = preguntas_form()
+		curso = Curso.objects.get(estudiante = alumnos)
+		boleta=curso.boleta
+		print("El contenido de la coleta es:",boleta.split('\n'))
+		materiaEncontrada= 0
+		for linea in boleta.split('\n'):
+			print('La linea contiene',linea)
+			mat = linea.split()[0]
+			print('La materia en la boleta es',mat,' la materia en la consulta es ',materia)
+			if int(mat)==int(materia):
+				respuestasDesencriptadas = rut.desencripta(linea.split()[-1])
+				materiaEncontrada = 1
+				break
+		respuestasDict = {}
+		cnt = 1
+		for i in respuestasDesencriptadas:
+			cadena = 'pregunta_'+str(cnt)
+			respuestasDict[cadena] = i
+			cnt+=1
+		if materiaEncontrada==1:
+			form = preguntas_form(initial=respuestasDict)
+		else:
+			form = preguntas_form()
 		context = {
 		"mensaje": "Ingresa la informacion correspondiente",
 		"form":form,
@@ -272,7 +293,7 @@ def accesoAlumno(request):
 					mat = linea.split()[0]
 					
 					if int(mat) == int(claveMateria):
-						intentos = len(linea.split())-1
+						intentos = len(linea.split())-2
 						print('coincidieron la materia ',int(mat), ' con ',int(claveMateria), intentos)
 						if intentos >= 3:
 							print('Ya no tiene mas intentos')
@@ -321,7 +342,7 @@ def accesoAlumno(request):
 						return render(request, 'msg_registro_inexistente.html',context)
 					lista = [str(queryset.id) + ' ' + queryset.nombre]+['-']*4
 					# llenamos las calificaciones correspondientes a cada intento
-					for i in range(len(item.split())-1):
+					for i in range(len(item.split())-2):
 						if i<4:
 							lista[i+1]=item.split()[i+1]
 					calificaciones.append(lista)
@@ -600,7 +621,7 @@ def boleta_alumno(request):
 						return render(request, 'msg_registro_inexistente.html',context)
 					lista = [str(queryset.id) + ' ' + queryset.nombre]+['-']*4
 					# llenamos las calificaciones correspondientes a cada intento
-					for i in range(len(item.split())-1):
+					for i in range(len(item.split())-2):
 						if i<4:
 							lista[i+1]=item.split()[i+1]
 					calificaciones.append(lista)
