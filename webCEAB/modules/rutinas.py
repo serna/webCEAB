@@ -45,8 +45,7 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 			noContestadas.append(cnt)
 			cnt+=1
 			continue
-		if cnt>nPreguntas:
-			break
+		
 		#print(cnt,"\t",respuestas[listaRespuestasCorrectas[cnt-1]],"\t",respuestas[item],"\t",)
 		if item==listaRespuestasCorrectas[cnt-1]:
 			#print("Correcta")
@@ -166,7 +165,7 @@ def agrega_calificacion(boleta,idMateria,calificacion,respuestas,force = 0):
 			boletaNueva += linea +'\n'
 	if materiaEncontrada == 0:
 		# si es la primera vez que se evalua esa materia
-		boletaNueva += str(idMateria) + " " + str(calificacion)+'\n'
+		boletaNueva += str(idMateria) + " " + str(calificacion)+  " " + str(respuestasEncriptadas) + '\n'
 	return boletaNueva
 def desencripta(respuestas):
 	""" Convierte una cadena en ascii a su correspondiente desencriptado de respuestas

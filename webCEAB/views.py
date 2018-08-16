@@ -21,7 +21,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
 from io import BytesIO
-from reportlab.pdfgen import canvas
+#from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 def genera_pdf(request):
 	# Create the HttpResponse object with the appropriate PDF headers.
@@ -572,7 +572,7 @@ def captura_calificacion(request):
 			# actualizamos la calificacion en el curso correspondiente
 			curso = Curso.objects.get(estudiante = alumno)
 			boleta = str(curso.boleta)
-			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,force=1)
+			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,respuestas='000',force=1)
 			if boletaNueva == -1:
 				messages.add_message(request, messages.INFO, 'La materia ya contenia la calificacion extra, ya no es posible esitar esta!')
 				return HttpResponseRedirect('captura_calificacion')
