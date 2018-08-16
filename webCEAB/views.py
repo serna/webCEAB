@@ -200,7 +200,15 @@ def index_original(request):
 	#return render(request, 'index.html', {})
 	return render(request,'menuOpcionesAcceso.html',{})
 def consultas(request):
-	return render(request, 'index.html', {})
+	if request.user.is_authenticated():
+		return render(request, 'index.html', {})
+	else:
+		context = {
+			'titulo': "Entra primero a tu cuenta en admin",
+			'mensaje': "Para poder acceder a esta seccion debes de entrar primero en tu cuenta de admin",
+		}
+
+		return render(request, 'msg_registro_inexistente.html',context)
 def registro_inexistente(request):
 	return render(request, 'msg_registro_inexistente.html')
 def accesoAlumno(request):
