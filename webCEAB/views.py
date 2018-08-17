@@ -169,22 +169,24 @@ def evaluacion_digital(request,alumno,materia):
 		materia_str = materias[0].nombre 
 		curso = Curso.objects.get(estudiante = alumnos)
 		boleta=curso.boleta
-		print("El contenido de la coleta es:",boleta.split('\n'))
+		print("El contenido de la coleta essss:",boleta.split('\n'))
 		materiaEncontrada= 0
 		for linea in boleta.split('\n'):
-			print('La linea contiene',linea)
-			mat = linea.split()[0]
-			print('La materia en la boleta es',mat,' la materia en la consulta es ',materia)
-			if int(mat)==int(materia):
-				respuestasDesencriptadas = rut.desencripta(linea.split()[-1])
-				materiaEncontrada = 1
-				break
+			if len(linea)!=0 : # si la linea contiene informacion
+				print('La linea contiene',linea)
+				mat = linea.split()[0]
+				print('La materia en la boleta es',mat,' la materia en la consulta es ',materia)
+				if int(mat)==int(materia):
+					respuestasDesencriptadas = rut.desencripta(linea.split()[-1])
+					materiaEncontrada = 1
+					break
 		respuestasDict = {}
 		cnt = 1
-		for i in respuestasDesencriptadas:
-			cadena = 'pregunta_'+str(cnt)
-			respuestasDict[cadena] = i
-			cnt+=1
+		if materiaEncontrada==1:
+			for i in respuestasDesencriptadas:
+				cadena = 'pregunta_'+str(cnt)
+				respuestasDict[cadena] = i
+				cnt+=1
 		if materiaEncontrada==1:
 			form = preguntas_form(initial=respuestasDict)
 		else:
