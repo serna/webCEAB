@@ -198,6 +198,134 @@ def evaluacion_digital(request,alumno,materia):
 		"materia":materia_str,
 		}
 	return render(request, "formulario1.html", context)
+def evaluacion_digital2(request,alumno,materia):
+	""" This function get the answers from the test-form and return the corresponding grade
+
+		
+	"""
+	if request.method == 'POST':
+		form = preguntas_form(request.POST)
+		if form.is_valid():
+			queryset = Estudiante.objects.filter(id = alumno)
+			if len(queryset)==0:
+				print('NO EXISTE ESE ALUMNO')
+				return render(request, 'msg_registro_inexistente.html')
+			nombre = str(queryset[0])
+			claveAlumno = str(queryset[0].numero_de_control)
+			#nombre = form.cleaned_data['nombre']
+			#claveAlumno = form.cleaned_data['clave_de_alumno']
+			numeroPreguntas = form.cleaned_data['numero_de_preguntas']
+			claveExamen = form.cleaned_data['clave_del_examen']
+			#versionExamen = form.cleaned_data['version_examen']
+			listaRespuestas = []
+			cadenaRespuestas = ""
+			for i in range(1,int(numeroPreguntas)+1):
+				cadenaPregunta = 'pregunta_%d'%i
+				valor = form.cleaned_data[cadenaPregunta]
+				if valor == '':
+					calor = -1
+				else:
+					valor=int(valor)
+				listaRespuestas.append(valor)
+				cadenaRespuestas += str(valor)
+			print("respuestas enviadas son:" ,cadenaRespuestas)
+			encriptado = rut.encripta(cadenaRespuestas)
+			print("respuestas encriptadas son:" ,encriptado)
+			print('Las respuestas desencriptadas son:',rut.desencripta(encriptado))
+			#print(nombre,claveAlumno,numeroPreguntas,claveExamen)
+			datos = {'nombre':nombre,
+			'claveAlumno':claveAlumno,
+			'numeroPreguntas':numeroPreguntas,
+			'claveExamen':claveExamen,
+			'listaRespuestas':listaRespuestas,
+			}
+			calif,incorr,correc,noContestadas= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= claveAlumno,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
+			#return generate_csvFile(request,datos)
+			queryset2 = Materia.objects.filter(id=materia)
+			materiaNombre = queryset2[0].nombre
+			lista = [
+			["Nombre del alumno: ",nombre],
+			["Folio del alumno: ",claveAlumno],
+			["Materia: ",materiaNombre],
+			["Calificacion",calif],
+			["Incorrectas (%d)"%(len(incorr)),incorr],
+			["Correctas (%d)"%(len(correc)),correc],
+			["Sin contestar (%d)"%(len(noContestadas)),noContestadas]
+			]
+			context={
+				'mensaje': "El resultado de la evaluacion es:",
+				'lista':lista,
+			}
+			# ahora que se ha evaluado el examen es necesario asentar la calificacion en la boleta
+			# 1.- Hacer la consulta para saber que curso le corresponde al alumno
+			# 2.- En el curso correspondiente se debe de verificar dos cosas:
+			#     2.1.- Verificar si la materia ya esta dada de alta en la boleta.
+			#     2.2.- Verificar que el alumno no tenga mas de tres intentos.
+			# 3.- Asentar la calificacion en la boleta
+			################################################
+			curso = queryset[0].curso # punto 1 cumplido.
+			print('EL CONTENIDO DEL CURSO ES:')
+			curso = curso
+			print(curso,curso.materias.all())
+			boleta = str(curso.boleta)
+			
+			print('EL CONTENIDO DE LA BOLETA ESSSS:')
+			print(boleta.split('\n'))
+			print(boleta.split('\r'))
+			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,cadenaRespuestas)
+			print('Boleta antigua',boleta)
+			print('SEPARADOR ENTRE BOLETAS')
+			print('Boleta Nueva',boletaNueva)
+			if boletaNueva == -1:
+				context = {
+					'titulo': "NO MAS INTENTOS",
+					'mensaje': "Solo se permiten tres evaluaciones por materia",
+				}
+
+				return render(request, 'msg_registro_inexistente.html',context)
+				 
+			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+			
+			return render(request,'impresion_lista_2d.html',context)
+	else:
+		alumnos = Estudiante.objects.filter(id = alumno)
+		if len(alumnos)==0:
+			print('NO EXISTE ESE ALUMNO')
+			return render(request, 'msg_registro_inexistente.html')
+		alumno_str = alumnos[0]
+		materias = Materia.objects.filter(id=materia)
+		materia_str = materias[0].nombre 
+		curso = Curso.objects.get(estudiante = alumnos)
+		boleta=curso.boleta
+		print("El contenido de la coleta essss:",boleta.split('\n'))
+		materiaEncontrada= 0
+		for linea in boleta.split('\n'):
+			if len(linea)!=0 : # si la linea contiene informacion
+				print('La linea contiene',linea)
+				mat = linea.split()[0]
+				print('La materia en la boleta es',mat,' la materia en la consulta es ',materia)
+				if int(mat)==int(materia):
+					respuestasDesencriptadas = rut.desencripta(linea.split()[-1])
+					materiaEncontrada = 1
+					break
+		respuestasDict = {}
+		cnt = 1
+		if materiaEncontrada==1:
+			for i in respuestasDesencriptadas:
+				cadena = 'pregunta_'+str(cnt)
+				respuestasDict[cadena] = i
+				cnt+=1
+		if materiaEncontrada==1:
+			form = preguntas_form(initial=respuestasDict)
+		else:
+			form = preguntas_form()
+		context = {
+		"mensaje": "Ingresa la informacion correspondiente",
+		"form":form,
+		"alumno":alumno_str,
+		"materia":materia_str,
+		}
+	return render(request, "formulario1.html", context)
 def index_original(request):
 	#return render(request, 'index.html', {})
 	return render(request,'menuOpcionesAcceso.html',{})
@@ -582,6 +710,8 @@ def captura_calificacion(request):
 			# actualizamos la calificacion en el curso correspondiente
 			curso = Curso.objects.get(estudiante = alumno)
 			boleta = str(curso.boleta)
+			print('El contenido de la boleta antes de guardarla es:')
+			print(boleta)
 			boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,respuestas='000',force=1)
 			if boletaNueva == -1:
 				messages.add_message(request, messages.INFO, 'La materia ya contenia la calificacion extra, ya no es posible esitar esta!')
@@ -590,7 +720,8 @@ def captura_calificacion(request):
 				Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
 			# si todo se ha verificado correctamente entonces regresamos al menu principal
 				messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
-
+			print('El contenido de la boleta despues de guardarla es:')
+			print(boletaNueva)
 			return HttpResponseRedirect('captura_calificacion')
 	else:
 		form = form_captura_cal()

@@ -130,9 +130,11 @@ def agrega_calificacion(boleta,idMateria,calificacion,respuestas,force = 0):
 	materiaEncontrada = 0 # variable bandera para saber si existe la materia en la boleta
 	respuestasEncriptadas = encripta(respuestas)
 	for linea in boleta:
+		
 		if len(linea.split())<1: # si no hay ninguna materia registrada en la boleta
 			continue
 		materia = linea.split()[0]
+		print('la linea contiene',linea)
 		if linea[-1]=='\r': # si la ultima linea es un enter (o formalmente un retorno de carro)
 			linea = linea[:-1] # no contamos el ultimo caracter, en este caso el retorno de carro
 		if int(materia)==int(idMateria): # buscamos la materia correspondiente al examen que hizo el alumno
@@ -149,15 +151,14 @@ def agrega_calificacion(boleta,idMateria,calificacion,respuestas,force = 0):
 			nIntentos = nElementos - 2 
 			if nIntentos<=3:  # si se han hecho menos de 3+1 intentos, entonces se agrega la nueva calificacion
 				#boletaNueva += linea + " " + str(calificacion) +'\n'
-				boletaNueva = creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
+				boletaNueva += creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
 			elif force==1 and nIntentos<=4: 
 				# si direccion evalua con una calificacion extraordinaria
-				boletaNueva = creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
+				boletaNueva += creaNuevaLinea(linea, calificacion,respuestasEncriptadas)
 			else:
 				# Mas intentos de los permitidos
 				boletaNueva += linea +'\n'
 				return -1 # regresa -1 para indicar que no despligue el resultado de la evaluacion
-
 
 		else:
 			# si no encontramos la materia en la n-esima linea de la boleta entonces
