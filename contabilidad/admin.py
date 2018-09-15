@@ -94,7 +94,7 @@ admin.site.register(Proveedor,ProveedoresAdmin)
 class TarjetonAdmin(admin.ModelAdmin):
 	#list_filter = ('plantelRegistro')
 	#raw_id_fields = ('Aspirante',)
-	#search_fields = ('Estudiante_id',)
+	search_fields = ('alumno__id',)
 	#filter_horizontal = ('cursos',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura

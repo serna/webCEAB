@@ -23,10 +23,10 @@ def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagad
 	""" Computes the next date of payment
 
 		inicio [date]: date since it would be computed the payments
-		monto [float]: amount of money that has to be pay
+		monto [float]: amount of money that has to be paid
 		colegiatura [float]: The amoun of money in each payment
 		esquema [string]: the number of days between each payment
-		pagado [float]: The amount of money the alumn has alredy paid 
+		pagado [float]: The amount of money the alumno has alredy paid 
 
 		It returns the next date of payment and the number of delayed payments
 	"""
@@ -38,30 +38,46 @@ def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagad
 		'Otro': timedelta(days=30, hours=10),
 	}
 	#inicio = date.today()-timedelta(days=8)
+	unSoloPago = 0
+	print('El esquema de pago es: ',esquema)
+	if esquema=='Un solo pago':
+		print('EEEEEEEl esquema de pago es: ',esquema)
+		unSoloPago=1
 	fechaCalculo = date.today()
 	pagoPeriodico = colegiatura
 	esquema = opciones[esquema]
-	#print('La fecha de inicio es:',inicio)
-	#print('La fecha de hoy es:',fechaCalculo)
-	#print('Han pasado ', fechaCalculo-inicio, ' dias')
-	nPag = int((fechaCalculo-inicio)/esquema) # pagos que ya tendrian que estar hechos
-	if nPag>montoTotal/pagoPeriodico:
-		nPag = int(round(montoTotal/pagoPeriodico))
-	print('Se tendrian que tener registrados ', nPag , ' pagos')
-	print('Equivalente a ', nPag*pagoPeriodico, ' pesos')
+	print('La fecha de inicio es:',inicio)
+	print('La fecha de hoy es:',fechaCalculo)
+	print('Han pasado ', fechaCalculo-inicio, ' dias')
+	nPag = int((fechaCalculo-inicio)/esquema)+1 # pagos que ya tendrian que estar hechos
+	print('Se tendrian que tener registrados 1 ', nPag , ' pagos')
+	if unSoloPago==1:
+		nPag = 1
+		pagoPeriodico = montoTotal
+		#print('Se tendrian que tener registrados 2 ', nPag , ' pagos')
 
-	if nPag*pagoPeriodico>pagado:
+	#if nPag>montoTotal/pagoPeriodico:
+		#nPag = int(round(montoTotal/pagoPeriodico))
+		#print('Se tendrian que tener registrados 3 ', nPag , ' pagos')
+	#print('Se tendrian que tener registradossssss ', nPag , ' pagos')
+	print('Equivalente a ', nPag*pagoPeriodico, ' pesos')
+	atrasados=-1
+	if nPag*pagoPeriodico>pagado: # nPages el numero de pagos que ya deberia de tener hechos el alumno
 		# El alumno esta atrasado en pagos, calculamos la ultima fecha en la que debio hacer un pago
 		
 		pagosHechos = int(pagado/pagoPeriodico)
+		atrasados = nPag-pagosHechos
 		print("El alumno tiene pagos atrasados: ", nPag-pagosHechos)
-		nextDate = inicio+(pagosHechos+1)*esquema
+		nextDate = inicio+(pagosHechos)*esquema
 	else:
 		# El alumno esta al corriente de sus pagos, calculamos su siguiente fecha de pago
 		pagosHechos = int(pagado/pagoPeriodico)
 		print('El alumno esta al corriente en sus pagos')
+		#print('pagado',pagado,'pagoPeriodico',pagoPeriodico)
 		nextDate = inicio+(pagosHechos+1)*esquema
-	return nextDate, nPag-pagosHechos
+		print('proxima fecha de pago',nextDate)
+		atrasados = 0
+	return nextDate,  atrasados
 
 @receiver(post_save, sender = PagosAlumno)
 def pago_realizado_signal(sender, instance, **kwargs):
@@ -71,6 +87,7 @@ def pago_realizado_signal(sender, instance, **kwargs):
 	"""
 	queryset = Tarjeton.objects.filter(alumno = instance.alumno) 
 	# buscamos el tarjeton del alumno correspondiente
+	print("Guardando pago")
 	if len(queryset)==0:
 		# No existe el tarjeton correspondiente, por lo tanto hay que crearlo
 		print("Creando un tarjeton para el alumno",instance.alumno)
@@ -80,7 +97,8 @@ def pago_realizado_signal(sender, instance, **kwargs):
 			inicio=date.today(),
 			#inicio=timezone.now,
 			esquema_de_pago = 'Semanal',
-			monto = 1000,
+			monto_total = 1000,
+			monto_a_pagos = 100,
 			monto_cubierto = False,
 			pago_periodico = 100,
 			proxima_fecha_de_pago =  proximaFecha ,
@@ -94,22 +112,29 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		#queryset = Tarjeton.objects.filter(alumno = instance.alumno)
 	else:
 		# if the tarjeton exists
+		tarjetonExistente = Tarjeton.objects.get(id = queryset[0].id)
+		tarjetonExistente.pagos.add(instance) # guardamos el pago recien hecho
+		tarjetonExistente.save() # guardamos el tarjeton
+		queryset = Tarjeton.objects.filter(alumno = instance.alumno) # hacemos nuevamente la consulta
 		print("los pagos que ha hecho son: ", queryset[0].pagos.all())
-		pagado = instance.monto
+		pagado = 0
+		#if instance.concepto == 'Colegiatura' and instance.pk is None:
+		#	pagado = instance.monto
+		
 		#for item in  queryset[0].pagos.all():
 		#	if item.concepto=='Colegiatura':
 		#		pagado+=item.monto
 		#print('El alumno ha pagado en colegiaturas: ',pagado)
 		for item in queryset[0].pagos.all():
-			pagado += item.monto
-			
-		print("El alumno ha pagado en colegiaturas: ",pagado)
+			if item.concepto == 'Colegiatura':
+				pagado += item.monto
+		print("El alumno ha pagado en colegiaturas: ",pagado,' y debe en total ',queryset[0].monto_a_pagos)
 		montoColeg = queryset[0].pago_periodico
 		if montoColeg == 0:
 			montoColeg = 1
 		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-			montoTotal = queryset[0].monto,
-			monto=queryset[0].monto-pagado,
+			montoTotal = queryset[0].monto_a_pagos,
+			monto=queryset[0].monto_a_pagos-pagado,
 			colegiatura=montoColeg,
 			esquema=queryset[0].esquema_de_pago,
 			pagado=pagado)
@@ -118,14 +143,15 @@ def pago_realizado_signal(sender, instance, **kwargs):
 			inicio = queryset[0].inicio,
 			esquema_de_pago = queryset[0].esquema_de_pago,
 			monto_cubierto = queryset[0].monto_cubierto,
-			monto = queryset[0].monto,
+			monto_total = queryset[0].monto_total,
+			monto_a_pagos = queryset[0].monto_a_pagos,
 			pago_periodico = queryset[0].pago_periodico,
 			proxima_fecha_de_pago =  proximaFecha ,
 			pagos_atrasados = pagosAtrasados,
 			)
 			#proxima_fecha_de_pago =  models.DateField(default= timezone.now)
 
-
+		print('Pagos atrasados',pagosAtrasados,proximaFecha)
 		print('Agregando/actualizando un pago en el tarjeton de un alumno')	
 		tarjetonExistente.save()
-		tarjetonExistente.pagos.add(instance)
+		

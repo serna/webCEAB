@@ -4,6 +4,7 @@ from .models import Estudiante, Materia, Servicio, Curso,  Documentacion, Catalo
 admin.site.register(Catalogo)
 class CursosAdmin(admin.ModelAdmin):
 	filter_horizontal = ('materias',)
+	search_fields = ('estudiante__id',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []
@@ -46,6 +47,7 @@ admin.site.register(Documentacion,DocumentacionAdmin)
 
 class EstudianteAdmin(admin.ModelAdmin):
 	#filter_horizontal = ('cursos',)
+	search_fields = ('id',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []
