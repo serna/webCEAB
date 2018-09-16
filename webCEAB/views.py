@@ -4,7 +4,7 @@ from django.template.loader import get_template
 from django.template import Context
 import datetime
 from django.core.mail import send_mail
-from controlescolar.models import Estudiante, Curso, Materia
+from controlescolar.models import Estudiante, Curso, Materia, Catalogo
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
 from siad.models import Empleado
@@ -784,39 +784,24 @@ def boleta_alumno(request):
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
 def imprime_material(request):
-	inicio = timezone.now()+timedelta(days=14) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+	inicio = timezone.now()+timedelta(days=0) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 	fin = inicio + timedelta(days=14) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
-	alumnosRegulares = Estudiante.objects.filter(tarjeton__pagos_atrasados=0) # hacemos una consulta de alumnos alumnos que no tengan pagos tarjeton__pagos_atrasados
-	#alumnosRegulares = alumnosRegulares.filter(activo = True) # solo contemplar los estudiantes que estan activos
-	qs = Materia.objects.filter(fecha_inicio__gte = inicio) # que materias inician entre dos y cuatro semanas a partir de hoy
-	qs=qs.filter(fecha_inicio__lte=fin)
-	cursosConMateria = Curso.objects.filter(materias = qs) #filtramos todos los cursos que tengan las materias que cumplen la condicion anterior y que sean de alumnos regulares
-	#impresionMaterial = alumnosRegulares.filter(curso = cursosConMateria) # filtramos los alumnos que ctengan los cursos que cumplen la condicion anterior
-# es decir, son alumnos regulares (0 pagos atrasados) y van a cursar una materia que inicia en dos semanas o maximo inicia en cuatro semanas
-	cursos_validos = []
-	print('Materias')
-	print(qs)
-	print('Alumnos regulares')
-	print(alumnosRegulares)
-	print('Cursos con materias en qs')
-	print(cursosConMateria)
-	for alumno in alumnosRegulares:
-		posibleCurso = cursosConMateria.filter(estudiante=alumno)
-		if len(posibleCurso)!=0:
-			cursos_validos.append(posibleCurso)
+	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lt=fin,estudiante__tarjeton__pagos_atrasados=0)
+	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
 
 	filas = []
 	print('Cursos validos')
-	print(cursos_validos)
-	for curso in cursos_validos:
-		fila = [Estudiante.objects.get(curso=curso)] # el primer elemento de la lista es el estudiante
-		materias = qs.filter(curso=curso)
-		for item in materias:
-			fila.append(item)
+	print(cv)
+	for curso in cv:
+		fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+		for mat in materias:
+			fila.append(mat.examen.clave_del_examen)
 		filas.append(fila)
 	context = {
 			'mensaje': "Los materiales que  se tiene que imprimir son",
-			'encabezados': ['Alumno', 'materia 1','materia 2','Materia 3'],
+			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
 			'filas': filas,
 			}
 	return render(request, "reporta_resultados.html", context)	
