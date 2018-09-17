@@ -1,13 +1,39 @@
-{% extends 'base2.html' %}
+{% extends 'consultas_diarias.html' %}
 
-{% block content %}
+{% block resultado %}
+	<h1>{{subtitulo}}</h1>
+	<h2 style="color:Red">{{info}}</h2>
+	<h3>{{subtitle1	}}</h3>
 
-	
-	<h2>{{mensaje}}</h2>
-    {% for item in lista %}
+	<table class = "table table-striped">
+			<thead class="thead-inverse">
+				<tr>
+					{% for item in encabezados %}
+					
+						<th> {{item}} </td>
+			  		
+					{% endfor %}
+					
+				</tr>
+			</thead>
+
+
+
+			<tbody>
+				{% for item in queryset %}
+					<tr>
+						<td> {{item}} </td>
+						<td> {{item.horario}} </td>
+						<td> {{item.fecha_de_inicio}} </td>
+						<td> {{item.fecha_de_termino}} </td>
+			  		</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+	{% for alumno in queryset %}
 		<h3>{{item.0}}</h3>
 		<p>{{item.1}}</p>
 	{% endfor %}
-    
-
+	
 {% endblock %}

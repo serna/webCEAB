@@ -27,7 +27,7 @@ class Plantel(models.Model):
 class Empleado(models.Model):
 	nombre = models.CharField(max_length=30)
 	contrasena = models.CharField(max_length=20,null = True, default = '0') 
-	plantel = models.ForeignKey(Plantel)
+	plantel = models.ForeignKey(Plantel,on_delete=models.CASCADE)
 	nombre = models.CharField(max_length=30)
 	apellido_paterno = models.CharField(max_length=20)
 	apellido_materno = models.CharField(max_length=20)
@@ -60,7 +60,7 @@ class Empresa(models.Model):
 	cp = models.CharField(max_length=5)
 	email = models.CharField(max_length=50)
 	telefono_extension = models.CharField(max_length=50)
-	contacto_empresarial = models.ForeignKey(ContactoEmpresarial)
+	contacto_empresarial = models.ForeignKey(ContactoEmpresarial,on_delete=models.CASCADE)
 	def __str__(self):
 		return self.nombre
 class FormaContacto(models.Model):
@@ -99,7 +99,7 @@ class FormaDePago(models.Model):
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Formas de pago" 
-		
+
 #class Concepto(models.Model):
 #	concepto = models.CharField(max_length = 50)
 #	def __str__(self):

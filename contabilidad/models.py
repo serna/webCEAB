@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+
 from controlescolar.models import Curso, Estudiante
 from siad.models import Empleado, FormaDePago
 from django.utils import timezone
@@ -37,7 +37,8 @@ class PagosAlumno(models.Model):
 	fecha_pago = models.DateField(default=timezone.now)
 	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
 	#concepto = models.ForeignKey(Concepto)
-	monto = models.DecimalField(max_digits = 7,decimal_places=2)
+	monto = models.DecimalField(max_digits = 7,decimal_places=2,help_text='Aqui ingresa el monto efectivo que el alumno paga a la institucion')
+	bonificacion = models.DecimalField(max_digits = 7,decimal_places=2,default=0,help_text = "Aqui ingresa la bonificacion que se le hara al alumno")
 	forma_de_pago = models.ForeignKey(FormaDePago)
 	folio = models.CharField(max_length = 10,default = '0000')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')

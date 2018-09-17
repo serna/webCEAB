@@ -768,7 +768,7 @@ def boleta_alumno(request):
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
 			context = {
-			'nombreAlumno': queryset1,
+			'mensaje': "Boleta del alumno: "+str(queryset1),
 			'encabezados': ['Materia', '1ra','2da','3ra','extra'],
 			'filas': calificaciones,
 			}
@@ -783,11 +783,12 @@ def boleta_alumno(request):
 		"form":form,
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
-def imprime_material(request):
-	inicio = timezone.now()+timedelta(days=0) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
-	fin = inicio + timedelta(days=14) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
+def imprime_material_regulares(request):
+	diaDeLaSemana = datetime.date.today().weekday()
+	inicio = timezone.now()+timedelta(days=diaDeLaSemana) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
 	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
-	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lt=fin,estudiante__tarjeton__pagos_atrasados=0)
+	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0)
 	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
 
 	filas = []
@@ -800,7 +801,31 @@ def imprime_material(request):
 			fila.append(mat.examen.clave_del_examen)
 		filas.append(fila)
 	context = {
-			'mensaje': "Los materiales que  se tiene que imprimir son",
+			'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio.date(),fin.date()),
+			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
+			'filas': filas,
+			}
+	
+	return render(request,"tabla_general.html", context)
+def imprime_material_alumno(request):
+	diaDeLaSemana = datetime.date.today().weekday()
+	inicio = timezone.now()+timedelta(days=diaDeLaSemana) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
+	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0)
+	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
+
+	filas = []
+	print('Cursos validos')
+	print(cv)
+	for curso in cv:
+		fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+		for mat in materias:
+			fila.append(mat.examen.clave_del_examen)
+		filas.append(fila)
+	context = {
+			'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio.date(),fin.date()),
 			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
 			'filas': filas,
 			}
