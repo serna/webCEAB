@@ -39,18 +39,18 @@ def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagad
 	}
 	#inicio = date.today()-timedelta(days=8)
 	unSoloPago = 0
-	print('El esquema de pago es: ',esquema)
+	#print('El esquema de pago es: ',esquema)
 	if esquema=='Un solo pago':
-		print('EEEEEEEl esquema de pago es: ',esquema)
+		#print('EEEEEEEl esquema de pago es: ',esquema)
 		unSoloPago=1
 	fechaCalculo = date.today()
 	pagoPeriodico = colegiatura
 	esquema = opciones[esquema]
-	print('La fecha de inicio es:',inicio)
-	print('La fecha de hoy es:',fechaCalculo)
-	print('Han pasado ', fechaCalculo-inicio, ' dias')
+	#('La fecha de inicio es:',inicio)
+	#print('La fecha de hoy es:',fechaCalculo)
+	#print('Han pasado ', fechaCalculo-inicio, ' dias')
 	nPag = int((fechaCalculo-inicio)/esquema)+1 # pagos que ya tendrian que estar hechos
-	print('Se tendrian que tener registrados 1 ', nPag , ' pagos')
+	#print('Se tendrian que tener registrados 1 ', nPag , ' pagos')
 	if unSoloPago==1:
 		nPag = 1
 		pagoPeriodico = montoTotal
@@ -71,6 +71,7 @@ def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagad
 		nextDate = inicio+(pagosHechos)*esquema
 	else:
 		# El alumno esta al corriente de sus pagos, calculamos su siguiente fecha de pago
+		print("El pago peridodico esssssssssssssssss",pagoPeriodico)
 		pagosHechos = int(pagado/pagoPeriodico)
 		print('El alumno esta al corriente en sus pagos')
 		#print('pagado',pagado,'pagoPeriodico',pagoPeriodico)
@@ -128,12 +129,14 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		for item in queryset[0].pagos.all():
 			if item.concepto == 'Colegiatura':
 				pagado += item.monto
+				pagado += item.bonificacion
 		print("El alumno ha pagado en colegiaturas: ",pagado,' y debe en total ',queryset[0].monto_a_pagos)
 		montoColeg = queryset[0].pago_periodico
 		if montoColeg == 0:
 			montoColeg = 1
+		print("Monto pago periodico",montoColeg);
 		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-			montoTotal = queryset[0].monto_a_pagos,
+			montoTotal = queryset[0].monto_total,
 			monto=queryset[0].monto_a_pagos-pagado,
 			colegiatura=montoColeg,
 			esquema=queryset[0].esquema_de_pago,
