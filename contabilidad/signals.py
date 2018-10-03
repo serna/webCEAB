@@ -135,23 +135,38 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		if montoColeg == 0:
 			montoColeg = 1
 		print("Monto pago periodico",montoColeg);
-		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-			montoTotal = queryset[0].monto_total,
-			monto=queryset[0].monto_a_pagos-pagado,
-			colegiatura=montoColeg,
-			esquema=queryset[0].esquema_de_pago,
-			pagado=pagado)
-		tarjetonExistente = Tarjeton(id = queryset[0].id,
-			alumno = queryset[0].alumno,
-			inicio = queryset[0].inicio,
-			esquema_de_pago = queryset[0].esquema_de_pago,
-			monto_cubierto = queryset[0].monto_cubierto,
-			monto_total = queryset[0].monto_total,
-			monto_a_pagos = queryset[0].monto_a_pagos,
-			pago_periodico = queryset[0].pago_periodico,
-			proxima_fecha_de_pago =  proximaFecha ,
-			pagos_atrasados = pagosAtrasados,
-			)
+		if pagado<queryset[0].monto_a_pagos:
+			proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
+				montoTotal = queryset[0].monto_total,
+				monto=queryset[0].monto_a_pagos-pagado,
+				colegiatura=montoColeg,
+				esquema=queryset[0].esquema_de_pago,
+				pagado=pagado)
+			tarjetonExistente = Tarjeton(id = queryset[0].id,
+				alumno = queryset[0].alumno,
+				inicio = queryset[0].inicio,
+				esquema_de_pago = queryset[0].esquema_de_pago,
+				monto_cubierto = queryset[0].monto_cubierto,
+				monto_total = queryset[0].monto_total,
+				monto_a_pagos = queryset[0].monto_a_pagos,
+				pago_periodico = queryset[0].pago_periodico,
+				proxima_fecha_de_pago =  proximaFecha ,
+				pagos_atrasados = pagosAtrasados,
+				)
+		else:
+			pagosAtrasados = 0
+			proximaFecha = timezone.now()
+			tarjetonExistente = Tarjeton(id = queryset[0].id,
+				alumno = queryset[0].alumno,
+				inicio = queryset[0].inicio,
+				esquema_de_pago = queryset[0].esquema_de_pago,
+				monto_cubierto = queryset[0].monto_cubierto,
+				monto_total = queryset[0].monto_total,
+				monto_a_pagos = queryset[0].monto_a_pagos,
+				pago_periodico = queryset[0].pago_periodico,
+				proxima_fecha_de_pago =  proximaFecha ,
+				pagos_atrasados = pagosAtrasados,
+				)
 			#proxima_fecha_de_pago =  models.DateField(default= timezone.now)
 
 		print('Pagos atrasados',pagosAtrasados,proximaFecha)

@@ -870,4 +870,26 @@ def resumen_prospectos(request):
 		}
 	return render(request, "formulario_fechas.html", context)
 
-	
+def calendario_materias(request):
+	diaDeLaSemana = datetime.date.today().weekday()
+	inicio = timezone.now()+timedelta(days=diaDeLaSemana) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
+	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0)
+	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
+
+	filas = []
+	print('Cursos validos')
+	print(cv)
+	for curso in cv:
+		fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+		for mat in materias:
+			fila.append(mat.examen.clave_del_examen)
+		filas.append(fila)
+	context = {
+			'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio.date(),fin.date()),
+			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)	
