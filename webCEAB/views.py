@@ -417,9 +417,11 @@ def accesoAlumno(request):
 				print('La fecha de hoy: ',datetime.datetime.now())
 				if fechaLimite < datetime.datetime.now().date():
 					# si la fecha de evaluacion digital ya caduco
-					etiqueta += 'Fuera de fechas, '
+					print("Ya caduco el examen")
+					etiqueta = 'Fuera de fechas, '
 					habilitaLink = 0
 				else:
+					print("Aun es valida la fecha el examen")
 					habilitaLink = 1
 				#Ahora buscamos la materia en la boleta y verificamos el numero de intentos
 				#print("La boleta del alumno es: ", boleta)
@@ -441,6 +443,14 @@ def accesoAlumno(request):
 						else:
 							print('Todavia tiene mas intentos, ha hecho ',intentos,' intentos')
 							habilitaLink = 1
+							if fechaLimite < datetime.datetime.now().date():
+								# si la fecha de evaluacion digital ya caduco
+								print("Ya caduco el examen")
+								etiqueta = 'Fuera de fechas, '
+								habilitaLink = 0
+							else:
+								print("Aun es valida la fecha el examen")
+								habilitaLink = 1
 							break
 				if habilitaLink==1:
 					link = 'eval/' + str(numero) + "/"+str(claveMateria)
