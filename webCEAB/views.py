@@ -407,7 +407,7 @@ def accesoAlumno(request):
 				print('\nLa materia que se esta analizando es: ',claveMateria)
 				#print(item,claveMateria)
 				# send the claveMateria alogn with the alumno id
-				periodoValido = timedelta(days=14)
+				periodoValido = timedelta(days=10)
 				fechaLimite = periodoValido+item.fecha_termino
 				#print('La fecha limite es: ',fechaLimite)
 				etiqueta = ''
