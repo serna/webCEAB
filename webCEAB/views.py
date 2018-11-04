@@ -921,7 +921,7 @@ def calendario_materias(request):
 	return render(request, "reporta_resultados.html", context)	
 def documentacion_incompleta(request):
 	#alumnos = Estudiante.objects.filter(documentacion__documentacion_completa=False)
-	cursos = Curso.objects.filter(estudiante__documentacion__documentacion_entregada=False)
+	cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False)
 	ordCursos = cursos.order_by('fecha_de_termino')
 	filas=[]
 	#print(alumnos)
