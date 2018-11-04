@@ -4,10 +4,10 @@ from django.template.loader import get_template
 from django.template import Context
 import datetime
 from django.core.mail import send_mail
-from controlescolar.models import Estudiante, Curso, Materia, Catalogo
+from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Documentacion
 from promotoria.models import Aspirantes
-from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton
-from siad.models import Empleado
+from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
+from siad.models import Empleado, Documento
 from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
@@ -70,6 +70,22 @@ def cobros_vencidos(request,dias):
 			 	
 				}
 	return render(request,"cobros_vencidos.html", context)
+	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
+	total = 0
+	filas = [] 
+	cnt=0
+	for pago in pagosAlumnos:
+		total += pago.monto
+		fila = [pago.fecha_pago,pago.alumno,pago.monto,pago.forma_de_pago,pago.folio]
+		cnt += 1
+		filas.append(fila)
+	context = {
+			'mensaje': "Se registraron %d movimientos el dia de hoy"%cnt,
+			'submensaje': "La suma de ingresos registrados es de $" + str(total),
+			'encabezados': ['Fecha','Pago','Monto','Forma de pago','Folio'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)
 #def index(request):
 def evaluacion_digital(request,alumno,materia):
 	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta" 
@@ -903,3 +919,52 @@ def calendario_materias(request):
 			'filas': filas,
 			}
 	return render(request, "reporta_resultados.html", context)	
+def documentacion_incompleta(request):
+	#alumnos = Estudiante.objects.filter(documentacion__documentacion_completa=False)
+	cursos = Curso.objects.filter(estudiante__documentacion__documentacion_entregada=True)
+	ordCursos = cursos.order_by('fecha_de_termino')
+	filas=[]
+	#print(alumnos)
+	cnt = 0
+	for curso in ordCursos:
+		docs = Documentacion.objects.filter(alumno=curso.estudiante)
+		presentDocs = docs[0].documentacion_entregada.all()
+		print(cnt,presentDocs)
+		
+		missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+		alumno = curso.estudiante
+		fechaTermino = curso.fecha_de_termino
+		losQueFaltan = ""
+		for item in missingDocs:
+			losQueFaltan+=str(item.id)+", "
+		
+		fila =[alumno,losQueFaltan[:-2],fechaTermino]
+		
+		#print(cnt,alumno)
+		#cnt+=1
+		filas.append(fila)
+		
+		cnt += 1
+	context = {
+			'mensaje': "%d alumnos tienen documentacion incompleta"%cnt,
+			'encabezados': ['Alumno','Falta','Fin de curso'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)
+def corte_caja(request):
+	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
+	total = 0
+	filas = [] 
+	cnt=0
+	for pago in pagosAlumnos:
+		total += pago.monto
+		fila = [pago.fecha_pago,pago.alumno,pago.monto,pago.forma_de_pago,pago.folio]
+		cnt += 1
+		filas.append(fila)
+	context = {
+			'mensaje': "Se registraron %d movimientos el dia de hoy"%cnt,
+			'submensaje': "La suma de ingresos registrados es de $" + str(total),
+			'encabezados': ['Fecha','Pago','Monto','Forma de pago','Folio'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)

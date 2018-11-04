@@ -73,7 +73,7 @@ class FormaContacto(models.Model):
 class Documento(models.Model):
 	documento = models.CharField(max_length = 50)
 	def __str__(self):
-		return self.documento
+		return str(self.id)+': '+self.documento
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Documentos" 

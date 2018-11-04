@@ -40,4 +40,6 @@ urlpatterns = [
     url(r'^imprime_material_regulares$', views.imprime_material_regulares),
     url(r'^imprime_material_regulares$', views.imprime_material_alumno),
     url(r'^calendario_materias$', views.calendario_materias),
+    url(r'^documentacion_incompleta$', views.documentacion_incompleta),
+    url(r'^corte_caja$', views.corte_caja),
 ]
