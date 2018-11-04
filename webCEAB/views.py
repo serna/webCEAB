@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
 from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -897,6 +897,7 @@ def resumen_prospectos(request):
 	return render(request, "formulario_fechas.html", context)
 
 def calendario_materias(request):
+
 	diaDeLaSemana = datetime.date.today().weekday()
 	inicio = timezone.now()+timedelta(days=diaDeLaSemana) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
@@ -918,39 +919,57 @@ def calendario_materias(request):
 			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
 			'filas': filas,
 			}
-	return render(request, "reporta_resultados.html", context)	
-def documentacion_incompleta(request):
-	#alumnos = Estudiante.objects.filter(documentacion__documentacion_completa=False)
-	cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False)
-	ordCursos = cursos.order_by('fecha_de_termino')
-	filas=[]
-	#print(alumnos)
-	cnt = 0
-	for curso in ordCursos:
-		docs = Documentacion.objects.filter(alumno=curso.estudiante)
-		presentDocs = docs[0].documentacion_entregada.all()
-		print(cnt,presentDocs)
-		
-		missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
-		alumno = curso.estudiante
-		fechaTermino = curso.fecha_de_termino
-		losQueFaltan = ""
-		for item in missingDocs:
-			losQueFaltan+=str(item.id)+", "
-		
-		fila =[alumno,losQueFaltan[:-2],fechaTermino]
-		
-		#print(cnt,alumno)
-		#cnt+=1
-		filas.append(fila)
-		
-		cnt += 1
-	context = {
-			'mensaje': "%d alumnos tienen documentacion incompleta"%cnt,
-			'encabezados': ['Alumno','Falta','Fin de curso'],
-			'filas': filas,
-			}
 	return render(request, "reporta_resultados.html", context)
+
+def documentacion_incompleta(request):
+	if request.method == 'POST':
+		form = form_plantel_empresa_horario(request.POST)
+		if form.is_valid():
+			plantel = form.cleaned_data['plantel']
+			empresa = form.cleaned_data['empresa']
+			horario = form.cleaned_data['horario']
+			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False)
+			cursos = cursos.filter(estudiante__plantel=plantel)
+			cursos = cursos.filter(estudiante__empresa=empresa)
+			cursos = cursos.filter(estudiante__curso__horario=horario)
+			ordCursos = cursos.order_by('fecha_de_termino')
+			filas=[]
+			#print(alumnos)
+			cnt = 0
+			for curso in ordCursos:
+				docs = Documentacion.objects.filter(alumno=curso.estudiante)
+				presentDocs = docs[0].documentacion_entregada.all()
+				print(cnt,presentDocs)
+				
+				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+				alumno = curso.estudiante
+				fechaTermino = curso.fecha_de_termino
+				losQueFaltan = ""
+				for item in missingDocs:
+					losQueFaltan+=str(item.id)+", "
+				
+				fila =[alumno,losQueFaltan[:-2],fechaTermino]
+				
+				#print(cnt,alumno)
+				#cnt+=1
+				filas.append(fila)
+				
+				cnt += 1
+			context = {
+					'mensaje': "%d alumnos tienen documentacion incompleta"%cnt,
+					'encabezados': ['Alumno','Falta','Fin de curso'],
+					'filas': filas,
+					}
+			return render(request, "reporta_resultados.html", context)
+	else:
+		form = form_plantel_empresa_horario()
+
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "form_gral.html", context)
+
 def corte_caja(request):
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
 	total = 0
