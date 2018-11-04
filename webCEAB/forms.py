@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django import forms
 from django.utils.safestring import mark_safe
-from siad.models import Plantel, Horario
+from siad.models import Plantel, Horario, Empresa
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
   def render(self):
     return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
@@ -31,9 +31,9 @@ class form_boleta_alumno(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	alumno = forms.IntegerField()
 class form_plantel_empresa_horario(forms.Form):
-	plantel = forms.ModelChoiceField(queryset=Plantel.objects.all())
-	empresa = forms.BooleanField(required = False)
-	horario = forms.ModelChoiceField(queryset=Horario.objects.all())
+	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
+	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
+	horario = forms.ModelChoiceField(queryset = Horario.objects.all())
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
 	#nombre = forms.CharField(widget=forms.TextInput())
