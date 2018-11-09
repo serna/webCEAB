@@ -36,7 +36,7 @@ class PagosAlumno(models.Model):
 	alumno = models.ForeignKey(Estudiante)
 	fecha_pago = models.DateField(default=timezone.now)
 	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
-	#concepto = models.ForeignKey(Concepto)
+	#concepto = models.ForeignKey(Concepto)	
 	monto = models.DecimalField(max_digits = 7,decimal_places=2,help_text='Aqui ingresa el monto efectivo que el alumno paga a la institucion')
 	bonificacion = models.DecimalField(max_digits = 7,decimal_places=2,default=0,help_text = "Aqui ingresa la bonificacion que se le hara al alumno")
 	forma_de_pago = models.ForeignKey(FormaDePago)

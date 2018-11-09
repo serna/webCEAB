@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
 from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -987,3 +987,19 @@ def corte_caja(request):
 			'filas': filas,
 			}
 	return render(request, "reporta_resultados.html", context)
+def genera_extraordinario(request):
+	if request.method == 'POST':
+		form = form_genera_extraordinario(request.POST)
+		if form.is_valid():
+			alumno = form.cleaned_data['alumno']
+			materia = form.cleaned_data['materia']
+			
+			return HttpResponseRedirect('/eval/%s/%s'%(alumno,materia))
+	else:
+		form = form_genera_extraordinario()
+
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "form_gral.html", context)

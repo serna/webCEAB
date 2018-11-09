@@ -34,6 +34,10 @@ class form_plantel_empresa_horario(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
 	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
 	horario = forms.ModelChoiceField(queryset = Horario.objects.all())
+class form_genera_extraordinario(forms.Form):
+	alumno = forms.IntegerField()
+	materia = forms.IntegerField()
+	
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
 	#nombre = forms.CharField(widget=forms.TextInput())
