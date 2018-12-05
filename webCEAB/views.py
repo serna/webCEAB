@@ -814,7 +814,7 @@ def imprime_material_regulares(request):
 	inicio = timezone.now()+timedelta(days=diaDeLaSemana) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
 	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
-	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0)
+	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True)
 	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
 
 	filas = []
