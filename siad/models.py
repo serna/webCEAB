@@ -62,7 +62,7 @@ class Empresa(models.Model):
 	telefono_extension = models.CharField(max_length=50)
 	contacto_empresarial = models.ForeignKey(ContactoEmpresarial,on_delete=models.CASCADE)
 	def __str__(self):
-		return self.nombre
+		return str(self.id) + ": " + str(self.nombre)
 class FormaContacto(models.Model):
 	forma_contacto = models.CharField(max_length = 50)
 	def __str__(self):
