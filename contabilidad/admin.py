@@ -56,6 +56,7 @@ admin.site.register(EgresoNomina,EgresoNominasAdmin)
 
 class PagosAlumnoAdmin(admin.ModelAdmin):
 	raw_id_fields = ('alumno',)
+	search_fields = ('id',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []

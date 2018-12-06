@@ -45,7 +45,7 @@ class PagosAlumno(models.Model):
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	def __str__(self): 
 		#return str(self.alumno.id) +': ' + str(self.monto)
-		return str(self.id)+":" +str(self.monto) +":" +str(self.fecha_pago) + "\n"
+		return str(self.id)+":" +str(self.concepto)+" "+str(self.monto) +":" +str(self.fecha_pago) + "\n"
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Pagos de alumnos"

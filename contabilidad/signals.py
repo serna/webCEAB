@@ -126,8 +126,10 @@ def pago_realizado_signal(sender, instance, **kwargs):
 		#	if item.concepto=='Colegiatura':
 		#		pagado+=item.monto
 		#print('El alumno ha pagado en colegiaturas: ',pagado)
+		print("Los pagos de colegiatura son: ")
 		for item in queryset[0].pagos.all():
 			if item.concepto == 'Colegiatura':
+				print(item)
 				pagado += item.monto
 				pagado += item.bonificacion
 		print("El alumno ha pagado en colegiaturas: ",pagado,' y debe en total ',queryset[0].monto_a_pagos)
