@@ -954,7 +954,7 @@ def documentacion_incompleta(request):
 			plantel = form.cleaned_data['plantel']
 			empresa = form.cleaned_data['empresa']
 			horario = form.cleaned_data['horario']
-			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False)
+			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False,estudiante__activo=True)
 			cursos = cursos.filter(estudiante__plantel=plantel)
 			cursos = cursos.filter(estudiante__empresa=empresa)
 			cursos = cursos.filter(estudiante__curso__horario=horario)
