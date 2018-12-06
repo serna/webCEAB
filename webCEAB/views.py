@@ -823,7 +823,7 @@ def imprime_material_regulares(request):
 	print(cv)
 	for curso in cv:
 		fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
-		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
 		for mat in materias:
 			fila.append(mat.examen.clave_del_examen)
 		filas.append(fila)
