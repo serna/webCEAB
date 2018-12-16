@@ -62,8 +62,11 @@ def generate_csvFile(request,datos = None):
 def cobros_vencidos(request,dias):
 
 	queryset = Tarjeton.objects.filter(monto_cubierto = False)
+	queryset = queryset.filter(pagos_atrasados__gt = 0 )
 	
-	
+	#filas=[]
+	#cnt = 0
+
 	context = {"queryset":queryset,
 			 	"subtitulo":"Pagos vencidos",
 			 	'subtitle1': 'Generales',
