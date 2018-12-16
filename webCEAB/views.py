@@ -61,18 +61,26 @@ def generate_csvFile(request,datos = None):
 # Create your views here.
 def cobros_vencidos(request,dias):
 
-	queryset = Tarjeton.objects.filter(monto_cubierto = False)
+	#cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False)
+	queryset = Tarjeton.objects.filter(monto_cubierto = False,alumno__activo=True)
 	queryset = queryset.filter(pagos_atrasados__gt = 0 )
-	
-	#filas=[]
-	#cnt = 0
-
-	context = {"queryset":queryset,
-			 	"subtitulo":"Pagos vencidos",
-			 	'subtitle1': 'Generales',
-			 	
+	filas=[]
+	cnt = 0
+	encabezados = ["Alumno","Pagos atrasados","Monto","Horario","Empresa"]
+	montoTotal = 0
+	for tar in queryset:
+		#diasAtraso = datetime.date.today()-tar.proxima_fecha_de_pago
+		atrasos = tar.pagos_atrasados
+		monto = atrasos*tar.pago_periodico
+		fila = [tar.alumno,atrasos,monto,tar.alumno.curso.horario,tar.alumno.empresa]
+		filas.append(fila)
+		montoTotal += monto
+	context = {"filas":filas,
+			 	'mensaje': "Pobros vencidos",
+				'submensaje': "La suma total de pagos vencidos es $" + str(montoTotal),
+				"encabezados":encabezados,
 				}
-	return render(request,"cobros_vencidos.html", context)
+	return render(request,"reporta_resultados.html", context)
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
 	total = 0
 	filas = [] 
@@ -815,7 +823,7 @@ def boleta_alumno(request):
 def imprime_material_regulares(request):
 	diaDeLaSemana = datetime.date.today().weekday()
 	print("La impresion",diaDeLaSemana)
-	inicio = timezone.now()-timedelta(days=diaDeLaSemana) +timedelta(days=7) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+	inicio = timezone.now()-timedelta(days=diaDeLaSemana) +timedelta(days=0) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
 	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
 	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True,estudiante__empresa=1)
