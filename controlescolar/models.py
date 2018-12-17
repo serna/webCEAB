@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
-from siad.models import Plantel,Empleado,Empresa,Documento,Estatus,Servicio, Horario
+from siad.models import Plantel,Empleado,Empresa,Documento,Estatus,Servicio, Horario,Calendario
 from promotoria.models import Aspirantes
 #from contabilidad.models import Tarjeton
 from decimal import Decimal
@@ -34,7 +34,7 @@ class Materia(models.Model):
 	horario_inicio = models.TimeField()#choices = opcionesHorarios,default = '7:00:00')
 	horario_fin = models.TimeField()#choices = opcionesHorarios,default = '9:00:00')
 	examen = models.ForeignKey(Catalogo,null=True)
-	plantel = models.ForeignKey(Empresa, null=True)
+	calendario = models.ForeignKey(Calendario, null=True)
 	#clave_de_la_materia = models.CharField(max_length = 4,null=True,default = '0000',help_text='Ingresa aqui la clave de la materia')
 	#numero_de_preguntas = models.IntegerField(null = True,default = 0,help_text='Numero de preguntas del examen de la materia')
 	#opcionesDias = (

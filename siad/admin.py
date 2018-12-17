@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Plantel, Empleado, ContactoEmpresarial, Empresa, FormaContacto, Documento, Estatus, FormaDePago, Horario
+from .models import Plantel, Empleado, ContactoEmpresarial, Empresa, FormaContacto, Documento, Estatus, FormaDePago, Horario,Calendario
 
 
 admin.site.register(Plantel)
@@ -11,3 +11,4 @@ admin.site.register(Documento)
 admin.site.register(Estatus)
 admin.site.register(FormaDePago)
 admin.site.register(Horario)
+admin.site.register(Calendario)
