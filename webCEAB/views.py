@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
 from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -821,30 +821,43 @@ def boleta_alumno(request):
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
 def imprime_material_regulares(request):
-	diaDeLaSemana = datetime.date.today().weekday()
-	print("La impresion",diaDeLaSemana)
-	inicio = timezone.now()-timedelta(days=diaDeLaSemana) +timedelta(days=0) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
-	fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
-	#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
-	cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True,estudiante__empresa=1)
-	cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
+	if request.method == 'POST':
+		form = fecha_form(request.POST)
+		if form.is_valid():
 
-	filas = []
-	print('Cursos validos')
-	print(cv)
-	for curso in cv:
-		fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
-		materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
-		for mat in materias:
-			fila.append(mat.examen.clave_del_examen)
-		filas.append(fila)
-	context = {
-			'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio.date(),fin.date()),
-			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
-			'filas': filas,
-			}
-	
-	return render(request,"tabla_general.html", context)
+			#diaDeLaSemana = datetime.date.today().weekday()
+			fecha = form.cleaned_data['fecha']
+			diaDeLaSemana = form.cleaned_data['fecha'].weekday()
+			print("La impresion",diaDeLaSemana)
+			inicio = fecha-timedelta(days=diaDeLaSemana) #+timedelta(days=-7) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+			fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
+			#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+			cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True,estudiante__empresa=1)
+			cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
+
+			filas = []
+			print('Cursos validos')
+			print(cv)
+			for curso in cv:
+				fila =[curso.estudiante,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+				materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
+				for mat in materias:
+					fila.append(mat.examen.clave_del_examen)
+				filas.append(fila)
+			context = {
+					'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio,fin),
+					'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
+					'filas': filas,
+					}
+			
+			return render(request,"tabla_general.html", context)
+	else:
+		form = fecha_form()
+		context = {
+		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
+		"form":form,
+		}
+	return render(request, "formulario_fechas.html", context)
 def imprime_material_empresa(request):
 	diaDeLaSemana = datetime.date.today().weekday()
 	print("La impresion",diaDeLaSemana)
@@ -1037,6 +1050,36 @@ def genera_extraordinario(request):
 
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "form_gral.html", context)
+def buscar_alumno_nombre(request):
+	if request.method == 'POST':
+		form = form_busca_alumno_nombre(request.POST)
+		if form.is_valid():
+			nombre = form.cleaned_data['nombre']
+			paterno = form.cleaned_data['apellido_paterno']
+			materno = form.cleaned_data['apellido_materno']
+			qs = Estudiante.objects.filter(Aspirante__nombre = nombre)
+			filas = [] 
+			cnt=0
+			for est in qs:
+				fila = [est]
+				cnt += 1
+				filas.append(fila)
+			context = {
+					'mensaje': "Se encontraron %d estudiantes que coinciden con los criterios de busqueda"%cnt,
+					#'submensaje': "La suma de ingresos registrados es de $" + str(total),
+					'encabezados': ['Estudiante'],
+					'filas': filas,
+					}
+			return render(request, "reporta_resultados.html", context)
+			
+	else:
+		form = form_busca_alumno_nombre()
+
+		context = {
+		"mensaje": "Buscar alumno por nombre",
 		"form":form,
 		}
 	return render(request, "form_gral.html", context)

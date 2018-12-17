@@ -43,4 +43,6 @@ urlpatterns = [
     url(r'^documentacion_incompleta$', views.documentacion_incompleta),
     url(r'^corte_caja$', views.corte_caja),
     url(r'^genera_extraordinario$', views.genera_extraordinario),
+    url(r'^buscar_alumno_nombre$', views.buscar_alumno_nombre),
+    
 ]
