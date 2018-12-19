@@ -1100,3 +1100,48 @@ def buscar_alumno_nombre(request):
 		"form":form,
 		}
 	return render(request, "form_gral.html", context)
+def consulta_pagos_alumno(request):
+	if request.method == 'POST':
+		form = form_boleta_alumno(request.POST)
+		if form.is_valid():
+			alumno = form.cleaned_data['alumno']
+			
+			# verificamos que este alumnol exista
+			try:
+				queryset1 = Estudiante.objects.get(id = alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe ese alumno en la base de datos',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			# Buscamos el tarjeton asociado a este alumno
+			try:
+				qs = Tarjeton.objects.get(alumno=alumno)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe un tarjeton asociado a este alumno',}
+				return render(request, 'msg_registro_inexistente.html',context)
+			filas = []
+			montoCubierto = 0
+			for pago in qs.pagos.all():
+				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,pago.monto,pago.bonificacion]
+				filas.append(fila)
+				montoCubierto += pago.monto+pago.bonificacion
+			detalles = "El alumno ha cubierto un total de $" +str(montoCubierto) + " pesos, tiene una deuda actualmente de $" + str(qs.deuda_actual) + " pesos, "+ str(qs.pagos_atrasados) + " pagos atrasados y su proxima fecha de pago es el " + str(qs.proxima_fecha_de_pago) + "."
+			if qs.monto_cubierto == True:
+				detalles += " El tarjeton del alumno indica que ha cubierto totalmente el monto del servicio."
+			context = {
+			'subtitulo': 'Resumen de pagos del alumno: '+ str(queryset1),
+			'encabezados': ['ID pago', 'Folio','Fecha','Concepto','Monto','Bonificacion'],
+			'filas': filas,
+			'detalles' : detalles
+			}
+			#print(queryset)
+			#print(queryset[0].Estudiante_set.all())
+
+			return render(request,"tabla_general.html", context)
+	else:
+		form = form_boleta_alumno()
+		context = {
+		"subtitulo": "Consulta de pagos de alumno",
+		"mensaje": "Ingresa el id del alumno",
+		"form":form,
+		}
+	return render(request, "formulario_captura_calificacion.html", context)	

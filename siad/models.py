@@ -42,6 +42,8 @@ class Empleado(models.Model):
 
 class ContactoEmpresarial(models.Model):
 	nombre = models.CharField(max_length=100)
+	telefono = models.CharField(max_length=20)
+	exyension = models.CharField(max_length=10)
 	puesto = models.CharField(max_length=50)
 	horario = models.CharField(max_length=50)
 	email = models.CharField(max_length=50)

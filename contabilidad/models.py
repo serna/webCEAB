@@ -105,7 +105,8 @@ class Tarjeton(models.Model):
 	tarjeton_verificado_por_direccion = models.BooleanField(default = False)
 	deuda_actual =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Esta es la cantidad de dinero que debe actualmente el alumno',default = 0,blank = True)
 	def __str__(self):
-		return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
+		#return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
+		return str(self.alumno)
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Tarjetones"	

@@ -1,6 +1,8 @@
 {% extends "consultas_diarias.html" %}
 {% block buscar %}
-
+	<h1>{{titulo}}</h1>
+	<h2>{{subtitulo}}</h2>
+	<h3>{{mensaje}}</h3>
 	{% if messages %}
 		<ul class="messages">
 		    {% for message in messages %}
