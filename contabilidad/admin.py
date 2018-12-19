@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina, Tarjeton
+from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina, Tarjeton, CorteCaja
 
 
 class EgresoGeneralesAdmin(admin.ModelAdmin):
@@ -118,4 +118,6 @@ class TarjetonAdmin(admin.ModelAdmin):
 			readOnlyFields = ['pagos','tarjeton_verificado_por_direccion','monto_cubierto']
 		return readOnlyFields
 admin.site.register(Tarjeton,TarjetonAdmin)
+
+admin.site.register(CorteCaja)
 

@@ -18,8 +18,8 @@ class form_acceso_alumno(forms.Form):
 class form_busca_alumno_nombre(forms.Form):
 	""" Este formulario busca a un alumno por su nombre"""
 	nombre = forms.CharField(label='Nombre')
-	apellido_paterno = forms.CharField(label='Apellido paterno')
-	apellido_materno = forms.CharField(label='Apellido materno')
+	apellido_paterno = forms.CharField(label='Apellido paterno',required=False)
+	apellido_materno = forms.CharField(label='Apellido materno',required=False)
 	
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())

@@ -1037,7 +1037,7 @@ def documentacion_incompleta(request):
 		}
 	return render(request, "form_gral.html", context)
 
-def corte_caja(request):
+def ingresos_del_dia(request):
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
 	total = 0
 	filas = [] 
@@ -1106,7 +1106,7 @@ def consulta_pagos_alumno(request):
 		if form.is_valid():
 			alumno = form.cleaned_data['alumno']
 			
-			# verificamos que este alumnol exista
+			# verificamos que este alumno exista
 			try:
 				queryset1 = Estudiante.objects.get(id = alumno)
 			except ObjectDoesNotExist:
@@ -1145,3 +1145,20 @@ def consulta_pagos_alumno(request):
 		"form":form,
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
+def corte_caja(request):
+	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
+	total = 0
+	filas = [] 
+	cnt=0
+	for pago in pagosAlumnos:
+		total += pago.monto
+		fila = [pago.fecha_pago,pago.alumno,pago.monto,pago.forma_de_pago,pago.folio]
+		cnt += 1
+		filas.append(fila)
+	context = {
+			'mensaje': "Se registraron %d movimientos el dia de hoy"%cnt,
+			'submensaje': "La suma de ingresos registrados es de $" + str(total),
+			'encabezados': ['Fecha','Pago','Monto','Forma de pago','Folio'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)

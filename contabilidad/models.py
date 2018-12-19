@@ -110,3 +110,14 @@ class Tarjeton(models.Model):
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Tarjetones"	
+class CorteCaja(models.Model):
+	folio = models.IntegerField()
+	fecha_inicio = models.DateField(default= timezone.now)
+	fecha_fin = models.DateField(default= timezone.now)
+	monto_recibido =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cantidad de dinero que se recibio en el corte de caja')
+	observaciones = models.TextField(max_length = 200,help_text='Descripcion breve del corte de caja',blank=True)
+	def __str__(self):
+		return self.fecha_fin
+	class Meta: 
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Cortes de caja"		
