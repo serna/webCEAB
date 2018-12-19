@@ -31,9 +31,9 @@ def calcula_proxima_fecha_pago(inicio,montoTotal,monto,colegiatura,esquema,pagad
 		It returns the next date of payment and the number of delayed payments
 	"""
 	opciones= {
-		'Semanal':timedelta(days=7, hours=10),
+		'Semanal':timedelta(days=7, hours=1),
 		'Quincenal':timedelta(days=14),
-		'Mensual':timedelta(days=28, hours=10),
+		'Mensual':timedelta(days=28, hours=1),
 		'Un solo pago':timedelta(days=0, hours=10),
 		'Otro': timedelta(days=30, hours=10),
 	}
@@ -89,89 +89,83 @@ def pago_realizado_signal(sender, instance, **kwargs):
 	queryset = Tarjeton.objects.filter(alumno = instance.alumno) 
 	# buscamos el tarjeton del alumno correspondiente
 	print("Guardando pago")
-	if len(queryset)==0:
-		# No existe el tarjeton correspondiente, por lo tanto hay que crearlo
-		print("Creando un tarjeton para el alumno",instance.alumno)
-		proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=date.today(),
-			monto=1000,colegiatura=500,esquema='Semanal',pagado=0)
-		tarjetonNuevo = Tarjeton(alumno=instance.alumno,
-			inicio=date.today(),
-			#inicio=timezone.now,
-			esquema_de_pago = 'Semanal',
-			monto_total = 1000,
-			monto_a_pagos = 100,
-			monto_cubierto = False,
-			pago_periodico = 100,
-			proxima_fecha_de_pago =  proximaFecha ,
-			pagos_atrasados = pagosAtrasados,
-			
-			)
-		tarjetonNuevo.save()
-		print(instance)	
-		tarjetonNuevo.pagos.add(instance)
-		print('Guardando un tarjeton nuevo, creando desde plantilla predefinida')
-		#queryset = Tarjeton.objects.filter(alumno = instance.alumno)
-	else:
+	if len(queryset)!=0:
 		# if the tarjeton exists
 		tarjetonExistente = Tarjeton.objects.get(id = queryset[0].id)
 		tarjetonExistente.pagos.add(instance) # guardamos el pago recien hecho
 		tarjetonExistente.save() # guardamos el tarjeton
-		queryset = Tarjeton.objects.filter(alumno = instance.alumno) # hacemos nuevamente la consulta
-		print("los pagos que ha hecho son: ", queryset[0].pagos.all())
-		pagado = 0
-		#if instance.concepto == 'Colegiatura' and instance.pk is None:
-		#	pagado = instance.monto
 		
-		#for item in  queryset[0].pagos.all():
-		#	if item.concepto=='Colegiatura':
-		#		pagado+=item.monto
-		#print('El alumno ha pagado en colegiaturas: ',pagado)
-		print("Los pagos de colegiatura son: ")
-		for item in queryset[0].pagos.all():
-			if item.concepto == 'Colegiatura':
-				print(item)
-				pagado += item.monto
-				pagado += item.bonificacion
-		print("El alumno ha pagado en colegiaturas: ",pagado,' y debe en total ',queryset[0].monto_a_pagos)
-		montoColeg = queryset[0].pago_periodico
-		if montoColeg == 0:
-			montoColeg = 1
-		print("Monto pago periodico",montoColeg);
-		if pagado<queryset[0].monto_a_pagos:
-			proximaFecha, pagosAtrasados = calcula_proxima_fecha_pago(inicio=queryset[0].inicio,
-				montoTotal = queryset[0].monto_total,
-				monto=queryset[0].monto_a_pagos-pagado,
-				colegiatura=montoColeg,
-				esquema=queryset[0].esquema_de_pago,
-				pagado=pagado)
-			tarjetonExistente = Tarjeton(id = queryset[0].id,
-				alumno = queryset[0].alumno,
-				inicio = queryset[0].inicio,
-				esquema_de_pago = queryset[0].esquema_de_pago,
-				monto_cubierto = queryset[0].monto_cubierto,
-				monto_total = queryset[0].monto_total,
-				monto_a_pagos = queryset[0].monto_a_pagos,
-				pago_periodico = queryset[0].pago_periodico,
-				proxima_fecha_de_pago =  proximaFecha ,
-				pagos_atrasados = pagosAtrasados,
-				)
-		else:
-			pagosAtrasados = 0
-			proximaFecha = timezone.now()
-			tarjetonExistente = Tarjeton(id = queryset[0].id,
-				alumno = queryset[0].alumno,
-				inicio = queryset[0].inicio,
-				esquema_de_pago = queryset[0].esquema_de_pago,
-				monto_cubierto = queryset[0].monto_cubierto,
-				monto_total = queryset[0].monto_total,
-				monto_a_pagos = queryset[0].monto_a_pagos,
-				pago_periodico = queryset[0].pago_periodico,
-				proxima_fecha_de_pago =  proximaFecha ,
-				pagos_atrasados = pagosAtrasados,
-				)
-			#proxima_fecha_de_pago =  models.DateField(default= timezone.now)
+@receiver(pre_save, sender = Tarjeton)
+def actualiza_tarjeton(sender, instance, **kwargs):
+	""" Senal para actualizar la deuda actual del alumno y el numero e pagos pendientes
 
-		print('Pagos atrasados',pagosAtrasados,proximaFecha)
-		print('Agregando/actualizando un pago en el tarjeton de un alumno')	
-		tarjetonExistente.save()
+		Cuando se hace un cambio en el tarjeton se debe de verificar que el numero de pagos atra
+	"""
+	if not(instance.id):
+		# si no logramos actualizar el tarjeton que esta por guardarse
+		print("No se cumplio la condicion para entrar en la rutina que actualiza el tarjeton")
+		return 0
+	print("\nEntramos en la rutina para actulizar el tarjeton del alumno  ",instance.alumno)
+	montoCubierto = 0
+	for pago in instance.pagos.all():
+		if pago.concepto=='Colegiatura':
+			montoCubierto += pago.monto + pago.bonificacion
+	# estas opciones sirven para verificar el periodo de tiempo en el que se deben de realizar los cobros
+	opciones= {
+		'Semanal':timedelta(days=7),
+		'Quincenal':timedelta(days=14),
+		'Mensual':timedelta(days=28),
+		'Un solo pago':timedelta(days=1),
+		'Otro': timedelta(days=30, hours=10),
+	}
+	fechaCalculo = date.today()
+	# dividimos el numero de dias que han pasado desde el primer pago del alumno
+	# entre el numero de dias que dura el esquema de pagos del alumno, si el esquema 
+	# es en un solo pago, entonces solo se revisa que el alumno haya cubierto el total
+	if instance.esquema_de_pago=='Un solo pago':
+		print("El alumno pago el servicio en una sola exhibicion")
+		for pago in instance.pagos.all():
+			if pago.concepto!='Colegiatura':
+				montoCubierto += pago.monto + pago.bonificacion
+		if montoCubierto < instance.monto_total:
+			# si el alumno no ha cubierto el total del servicio
+			print("El alumno no cubrio el monto total del servicio con los pagos que tiene registrados")
+			instance.pagos_atrasados = 1
+			instance.deuda_actual = instance.monto_a_pagos
+			return 0
+		else:
+			print("El alumno ha cubierto la totalidad del servicio")
+			return 0
+	nDiasEsquema = opciones[instance.esquema_de_pago]
+	nPag = int((fechaCalculo-instance.inicio)/nDiasEsquema)+1 # pagos que ya tendrian que estar hechos
+	print("El numero de pagos que el alumno deberia tener registrados son: ",nPag,fechaCalculo,instance.inicio,nDiasEsquema)
+	pagoPeriodico = instance.pago_periodico
+	montoHaCubrir = nPag*pagoPeriodico # esto es lo que deberia de haber ya pagado el alumno
+
+	print("Que corresponde a una cantidad de: ",montoHaCubrir)
+	print("El alumno ha cubierto",montoCubierto)
+	# ahora calculamos el numero de pagos que se ha atrasado, para ellos solo vemos cuantos pagos_periodicos completos 
+	# se necesitan para cubrir su deuda
+
+	if pagoPeriodico != 0:
+		pagosHechos = int(montoCubierto/pagoPeriodico) # cuantos pagos completos ha hecho el alumno
+		nAtrasos = nPag-pagosHechos # cuantos pagos se ha atrasado, quivalentmente seria pero con la funcion ceiling (montoHaCubrir-montoCubierto)/pagoPeriodico
+		print("El alumno se atraso ",nAtrasos," y tiene ",pagosHechos," pagos hechos")
+	else:
+		# si pagoPeriodico es igual a cero nos indica una situacion anomala, para que el usuario note este error
+		# reportaremos, aunque no sea cierto, que este alumno tiene varios atrasos para que llame la atencion al usuario
+		pagosHechos = 0
+		nAtrasos = 5
+	
+	deuda = montoHaCubrir-montoCubierto
+	instance.deuda_actual = deuda
+	instance.pagos_atrasados = nAtrasos
+
+	# Ahora calculamos la siguiente fecha de pago
+	instance.proxima_fecha_de_pago = instance.inicio+(pagosHechos)*opciones[instance.esquema_de_pago]
+
+
+	
 		
+
+

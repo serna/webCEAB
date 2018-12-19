@@ -104,7 +104,7 @@ class TarjetonAdmin(admin.ModelAdmin):
 		if request.user.is_superuser:
 			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
 			# sera superusuario, en esta funcion se determina que campos no podra modificar
-			readOnlyFields = ['pagos','pagos_atrasados','proxima_fecha_de_pago']
+			readOnlyFields = ['pagos','pagos_atrasados','proxima_fecha_de_pago','deuda_actual']
 		elif obj:
 			# if the object is created then make all fields readonly
 			for f in self.model._meta.fields:

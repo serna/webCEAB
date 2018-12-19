@@ -71,12 +71,12 @@ def cobros_vencidos(request,dias):
 	for tar in queryset:
 		#diasAtraso = datetime.date.today()-tar.proxima_fecha_de_pago
 		atrasos = tar.pagos_atrasados
-		monto = atrasos*tar.pago_periodico
+		monto = tar.deuda_actual
 		fila = [tar.alumno,atrasos,monto,tar.alumno.curso.horario,tar.alumno.empresa]
 		filas.append(fila)
 		montoTotal += monto
 	context = {"filas":filas,
-			 	'mensaje': "Pobros vencidos",
+			 	'mensaje': "Cobros vencidos",
 				'submensaje': "La suma total de pagos vencidos es $" + str(montoTotal),
 				"encabezados":encabezados,
 				}

@@ -45,8 +45,8 @@ class PagosAlumno(models.Model):
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	def __str__(self): 
 		#return str(self.alumno.id) +': ' + str(self.monto)
-		return str(self.id)+":" +str(self.concepto)+" "+str(self.monto) +":" +str(self.fecha_pago) + "\n"
-	class Meta: 
+		return str(self.id)+":" +str(self.concepto)+" "+str(self.monto+self.bonificacion) +":" +str(self.fecha_pago) + "\n"
+	class Meta:
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Pagos de alumnos"
 class Ingreso(models.Model):
@@ -93,7 +93,7 @@ class Tarjeton(models.Model):
 	)
 	alumno = models.OneToOneField(Estudiante)
 	inicio =  models.DateField(default= timezone.now,help_text='Fecha del primer pago programado')
-	descripcion = models.TextField(max_length = 200,default = 'Creacion: ' + str(timezone.now())[:16],help_text='Descripcion breve relativa al tarjeton')
+	descripcion = models.TextField(max_length = 200,help_text='Descripcion breve relativa al tarjeton',blank=True)
 	esquema_de_pago = models.CharField(max_length = 20,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
 	monto_total = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto total del servicio')
 	monto_a_pagos =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto que se cubrira en pagos')
@@ -103,6 +103,7 @@ class Tarjeton(models.Model):
 	proxima_fecha_de_pago =  models.DateField(default= timezone.now) 
 	pagos_atrasados = models.IntegerField(default = 0)
 	tarjeton_verificado_por_direccion = models.BooleanField(default = False)
+	deuda_actual =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Esta es la cantidad de dinero que debe actualmente el alumno',default = 0,blank = True)
 	def __str__(self):
 		return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
 	class Meta: 
