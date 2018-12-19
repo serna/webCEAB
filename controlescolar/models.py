@@ -95,7 +95,7 @@ class Estudiante(models.Model):
 	)
 	#servicio_interes = models.CharField(max_length = 20,choices = opciones_servicio,default = 'Colbach')
 	curso = models.OneToOneField(Curso,null=True,blank=True)
-	estatus = models.ForeignKey(Estatus)
+	estatus = models.ForeignKey(Estatus,blank=True,null=True)
 	activo = models.BooleanField(default=False)
 	#tarjeton = models.OneToOneField(Tarjeton)
 	def __str__(self):

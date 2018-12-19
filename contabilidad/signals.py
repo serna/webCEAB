@@ -74,8 +74,22 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 			return 0
 	nDiasEsquema = opciones[instance.esquema_de_pago]
 	nPag = int((fechaCalculo-instance.inicio)/nDiasEsquema)+1 # pagos que ya tendrian que estar hechos
+	if instance.pago_periodico!=0:
+		if nPag>instance.monto_a_pagos/instance.pago_periodico:
+			# dado que nPag es calculado con la fecha actual, es posible que nPag sea mayor
+			# que el numero de pagos efectivos que el alumno deberia haber hecho, es decir,
+			# el sistema pudiera estar reportando que debe 10 pagos cuando en realidad con
+			# 7 pagos el alumno ya habria cubierto su deuda, esto se debe a que usamos la fecha actual
+			# para calcular el numero de pagos que deberia de tener hechos el alumno,
+			# esta condicion resuelve parcialmente este problema (lo resuelve parcialmente porque
+			# hay una ambiguedad entre monto total y monto a pagos que pudiera llevar a algun error)
+			nPag = int(instance.monto_a_pagos/instance.pago_periodico)
+	else:
+		nPag=15 # 
 	print("El numero de pagos que el alumno deberia tener registrados son: ",nPag,fechaCalculo,instance.inicio,nDiasEsquema)
+
 	pagoPeriodico = instance.pago_periodico
+	
 	montoHaCubrir = nPag*pagoPeriodico # esto es lo que deberia de haber ya pagado el alumno
 
 	print("Que corresponde a una cantidad de: ",montoHaCubrir)
