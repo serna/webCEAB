@@ -66,13 +66,13 @@ def cobros_vencidos(request,dias):
 	queryset = queryset.filter(pagos_atrasados__gt = 0 )
 	filas=[]
 	cnt = 0
-	encabezados = ["Alumno","Pagos atrasados","Monto","Horario","Empresa"]
+	encabezados = ["Alumno","Pagos atrasados","Monto","Horario","Fecha del pago"]
 	montoTotal = 0
 	for tar in queryset:
 		#diasAtraso = datetime.date.today()-tar.proxima_fecha_de_pago
 		atrasos = tar.pagos_atrasados
 		monto = tar.deuda_actual
-		fila = [tar.alumno,atrasos,monto,tar.alumno.curso.horario,tar.alumno.empresa]
+		fila = [tar.alumno,atrasos,monto,tar.alumno.curso.horario,tar.proxima_fecha_de_pago]
 		filas.append(fila)
 		montoTotal += monto
 	context = {"filas":filas,
@@ -1159,6 +1159,36 @@ def corte_caja(request):
 			'mensaje': "Se registraron %d movimientos el dia de hoy"%cnt,
 			'submensaje': "La suma de ingresos registrados es de $" + str(total),
 			'encabezados': ['Fecha','Pago','Monto','Forma de pago','Folio'],
+			'filas': filas,
+			}
+	return render(request, "reporta_resultados.html", context)
+def cobros_por_vencer(request):
+	inicio = datetime.date.today() + timedelta(days=1)
+	print("La fecha de inicio para la consulta es ",inicio)
+	siguienteMes = inicio.month+1
+	siguienteAnio =  inicio.year  
+	print("mes acutal ",inicio.month," mes siguiente ",siguienteMes)
+	if siguienteMes==13:
+		siguienteMes = 1
+		siguienteAnio += 1
+	fin = inicio.replace(day=1,month=siguienteMes,year=siguienteAnio)
+	print("La fecha final para hacer la consulta es (pero con dias adicionales): ",fin)
+	fin = fin - timedelta(days=1)
+	print("La fecha correcta final para hacer la consulta es ",fin)
+	qs = Tarjeton.objects.filter(alumno__activo=True,proxima_fecha_de_pago__gte=inicio,proxima_fecha_de_pago__lte=fin)
+	total = 0
+	filas = []
+	cnt = 0
+	for tar in qs:
+		fila = [tar.alumno,tar.proxima_fecha_de_pago,tar.pago_periodico]
+		#fila = [pago.fecha_pago,pago.alumno,pago.monto,pago.forma_de_pago,pago.folio]
+		total += tar.pago_periodico
+		filas.append(fila)
+		cnt += 1
+	context = {
+			'titulo': 'Ingresos programados',
+			'submensaje': "Se tiene programado  %d ingresos en colegiaturas en lo que resta del mes, la suma los ingresos programados es $%s pesos."%(cnt,str(total)),
+			'encabezados': ['alumno','Fecha de pago','Monto'],
 			'filas': filas,
 			}
 	return render(request, "reporta_resultados.html", context)

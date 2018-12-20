@@ -110,7 +110,10 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	deuda = montoHaCubrir-montoCubierto
 	instance.deuda_actual = deuda
 	instance.pagos_atrasados = nAtrasos
-
+	if deuda<=0:
+		instance.monto_cubierto = True
+	else:
+		instance.monto_completo = False
 	# Ahora calculamos la siguiente fecha de pago
 	instance.proxima_fecha_de_pago = instance.inicio+(pagosHechos)*opciones[instance.esquema_de_pago]
 
