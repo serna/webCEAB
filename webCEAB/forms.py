@@ -52,7 +52,6 @@ class form_plantel_empresa_horario(forms.Form):
 class form_plantel(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
 class form_empresa(forms.Form):
-	
 	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
 	
 class form_genera_extraordinario(forms.Form):

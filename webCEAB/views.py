@@ -991,11 +991,11 @@ def calendario_materias(request):
 
 def documentacion_incompleta_plantel(request):
 	if request.method == 'POST':
-		form = form_empresa(request.POST)
+		form = form_plantel(request.POST)
 		if form.is_valid():
-			empresa = form.cleaned_data['empresa']
+			plantel = form.cleaned_data['plantel']
 			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False,estudiante__activo=True)
-			cursos = cursos.filter(estudiante__empresa=empresa)
+			cursos = cursos.filter(estudiante__plantel=plantel,estudiante__empresa=1)
 			ordCursos = cursos.order_by('fecha_de_termino')
 			filas=[]
 			#print(alumnos)
@@ -1011,23 +1011,19 @@ def documentacion_incompleta_plantel(request):
 				losQueFaltan = ""
 				for item in missingDocs:
 					losQueFaltan+=str(item.id)+", "
-				
 				fila =[alumno,losQueFaltan[:-2],fechaTermino]
-				
-				#print(cnt,alumno)
-				#cnt+=1
 				filas.append(fila)
 				
 				cnt += 1
 			context = {
-					'mensaje': "Documentos que le faltan a los alumnos de la empresa: %s"%empresa,
+					'mensaje': "Documentos que le faltan a los alumnos del plantel: %s"%plantel,
 					'submensaje': "%d alumnos tienen documentacion incompleta"%cnt,
 					'encabezados': ['Alumno','Falta','Fin de curso'],
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
 	else:
-		form = form_empresa()
+		form = form_plantel()
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
 		"form":form,
