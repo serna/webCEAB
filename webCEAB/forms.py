@@ -27,6 +27,16 @@ class rango_fechas_form(forms.Form):
 class fecha_form(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+class empresaFecha_form(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
+	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+
+class fechaPlantel_form(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
+	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now())
+
 class form_captura_cal(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	alumno = forms.IntegerField()
@@ -39,6 +49,12 @@ class form_plantel_empresa_horario(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
 	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
 	horario = forms.ModelChoiceField(queryset = Horario.objects.all())
+class form_plantel(forms.Form):
+	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
+class form_empresa(forms.Form):
+	
+	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
+	
 class form_genera_extraordinario(forms.Form):
 	alumno = forms.IntegerField()
 	materia = forms.IntegerField()

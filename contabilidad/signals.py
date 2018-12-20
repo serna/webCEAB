@@ -54,7 +54,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	if instance.esquema_de_pago=='Un solo pago':
 		print("El alumno pago el servicio en una sola exhibicion")
 		for pago in instance.pagos.all():
-			if pago.concepto!='Colegiatura':
+			if pago.concepto=='Inscripcion':
 				montoCubierto += pago.monto + pago.bonificacion
 		if montoCubierto < instance.monto_total:
 			# si el alumno no ha cubierto el total del servicio

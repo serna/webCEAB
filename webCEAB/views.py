@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
 from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -805,6 +805,7 @@ def boleta_alumno(request):
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
 			context = {
+			
 			'mensaje': "Boleta del alumno: "+str(queryset1),
 			'encabezados': ['Materia', '1ra','2da','3ra','extra'],
 			'filas': calificaciones,
@@ -821,11 +822,12 @@ def boleta_alumno(request):
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
 def imprime_material_regulares(request):
+	
 	if request.method == 'POST':
-		form = fecha_form(request.POST)
+		form = fechaPlantel_form(request.POST)	
 		if form.is_valid():
 
-			#diaDeLaSemana = datetime.date.today().weekday()
+			plantel = form.cleaned_data['plantel']
 			fecha = form.cleaned_data['fecha']
 			diaDeLaSemana = form.cleaned_data['fecha'].weekday()
 			print("La impresion",diaDeLaSemana)
@@ -845,6 +847,7 @@ def imprime_material_regulares(request):
 					fila.append(mat.examen.clave_del_examen)
 				filas.append(fila)
 			context = {
+					'titulo': "Material pas los alumnos del plantel: %s"%plantel,
 					'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio,fin),
 					'encabezados': ['Alumno','horario','Folio', 'materia 1','materia 2','Materia 3'],
 					'filas': filas,
@@ -852,49 +855,47 @@ def imprime_material_regulares(request):
 			
 			return render(request,"tabla_general.html", context)
 	else:
-		form = fecha_form()
+		form = fechaPlantel_form()
 		context = {
 		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
 		"form":form,
 		}
 	return render(request, "formulario_fechas.html", context)
 def imprime_material_empresa(request):
+	
 	if request.method == 'POST':
-		form = fecha_form(request.POST)
+		form = empresaFecha_form(request.POST)	
 		if form.is_valid():
 
-			#diaDeLaSemana = datetime.date.today().weekday()
+			empresa = form.cleaned_data['empresa']
 			fecha = form.cleaned_data['fecha']
 			diaDeLaSemana = form.cleaned_data['fecha'].weekday()
 			print("La impresion",diaDeLaSemana)
-			#diaDeLaSemana = datetime.date.today().weekday()
-			print("La impresion",diaDeLaSemana)
-			#inicio = timezone.now()-timedelta(days=diaDeLaSemana) +timedelta(days=7) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 			inicio = fecha-timedelta(days=diaDeLaSemana) #+timedelta(days=-7) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
 			fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
 			#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
-			cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__activo=True).exclude(estudiante__empresa=1)
+			cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True,estudiante__empresa=empresa)
 			cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
-			cv=cv.order_by("estudiante__empresa")
-
+			cv = cv.order_by('horario')
 			filas = []
 			print('Cursos validos')
 			print(cv)
 			for curso in cv:
-				fila =[curso.estudiante,curso.estudiante.empresa,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+				fila =[curso.estudiante,curso.horario,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
 				materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
 				for mat in materias:
 					fila.append(mat.examen.clave_del_examen)
 				filas.append(fila)
 			context = {
+					'titulo': "Material para los alumnos de la empresa: %s"%empresa,
 					'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio,fin),
-					'encabezados': ['Alumno','empresa','Folio', 'materia 1','materia 2','Materia 3'],
+					'encabezados': ['Alumno','horario','Folio', 'materia 1','materia 2','Materia 3'],
 					'filas': filas,
 					}
 			
 			return render(request,"tabla_general.html", context)
 	else:
-		form = fecha_form()
+		form = empresaFecha_form()
 		context = {
 		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
 		"form":form,
@@ -988,17 +989,13 @@ def calendario_materias(request):
 			}
 	return render(request, "reporta_resultados.html", context)
 
-def documentacion_incompleta(request):
+def documentacion_incompleta_plantel(request):
 	if request.method == 'POST':
-		form = form_plantel_empresa_horario(request.POST)
+		form = form_empresa(request.POST)
 		if form.is_valid():
-			plantel = form.cleaned_data['plantel']
 			empresa = form.cleaned_data['empresa']
-			horario = form.cleaned_data['horario']
 			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False,estudiante__activo=True)
-			cursos = cursos.filter(estudiante__plantel=plantel)
 			cursos = cursos.filter(estudiante__empresa=empresa)
-			cursos = cursos.filter(estudiante__curso__horario=horario)
 			ordCursos = cursos.order_by('fecha_de_termino')
 			filas=[]
 			#print(alumnos)
@@ -1023,19 +1020,66 @@ def documentacion_incompleta(request):
 				
 				cnt += 1
 			context = {
-					'mensaje': "%d alumnos tienen documentacion incompleta"%cnt,
+					'mensaje': "Documentos que le faltan a los alumnos de la empresa: %s"%empresa,
+					'submensaje': "%d alumnos tienen documentacion incompleta"%cnt,
 					'encabezados': ['Alumno','Falta','Fin de curso'],
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
 	else:
-		form = form_plantel_empresa_horario()
-
+		form = form_empresa()
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
 		"form":form,
 		}
 	return render(request, "form_gral.html", context)
+def documentacion_incompleta_empresa(request):
+	if request.method == 'POST':
+		form = form_empresa(request.POST)
+		if form.is_valid():
+			empresa = form.cleaned_data['empresa']
+			cursos = Curso.objects.filter(estudiante__documentacion__documentacion_completa=False,estudiante__activo=True)
+			cursos = cursos.filter(estudiante__empresa=empresa)
+			ordCursos = cursos.order_by('fecha_de_termino')
+			filas=[]
+			#print(alumnos)
+			cnt = 0
+			for curso in ordCursos:
+				docs = Documentacion.objects.filter(alumno=curso.estudiante)
+				presentDocs = docs[0].documentacion_entregada.all()
+				print(cnt,presentDocs)
+				
+				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+				alumno = curso.estudiante
+				fechaTermino = curso.fecha_de_termino
+				losQueFaltan = ""
+				for item in missingDocs:
+					losQueFaltan+=str(item.id)+", "
+				
+				fila =[alumno,losQueFaltan[:-2],fechaTermino]
+				
+				#print(cnt,alumno)
+				#cnt+=1
+				filas.append(fila)
+				
+				cnt += 1
+			context = {
+					'mensaje': "Documentos que le faltan a los alumnos de la empresa: %s"%empresa,
+					'submensaje': "%d alumnos tienen documentacion incompleta"%cnt,
+					'encabezados': ['Alumno','Falta','Fin de curso'],
+					'filas': filas,
+					}
+			return render(request, "reporta_resultados.html", context)
+	else:
+		form = form_empresa()
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
+	return render(request, "form_gral.html", context)
+
+
+
 
 def ingresos_del_dia(request):
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
@@ -1121,7 +1165,7 @@ def consulta_pagos_alumno(request):
 			filas = []
 			montoCubierto = 0
 			for pago in qs.pagos.all():
-				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,pago.monto,pago.bonificacion]
+				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,pago.monto,pago.bonificacion,pago.forma_de_pago]
 				filas.append(fila)
 				montoCubierto += pago.monto+pago.bonificacion
 			detalles = "El alumno ha cubierto un total de $" +str(montoCubierto) + " pesos, tiene una deuda actualmente de $" + str(qs.deuda_actual) + " pesos, "+ str(qs.pagos_atrasados) + " pagos atrasados y su proxima fecha de pago es el " + str(qs.proxima_fecha_de_pago) + "."
@@ -1129,7 +1173,7 @@ def consulta_pagos_alumno(request):
 				detalles += " El tarjeton del alumno indica que ha cubierto totalmente el monto del servicio."
 			context = {
 			'subtitulo': 'Resumen de pagos del alumno: '+ str(queryset1),
-			'encabezados': ['ID pago', 'Folio','Fecha','Concepto','Monto','Bonificacion'],
+			'encabezados': ['ID pago', 'Folio','Fecha','Concepto','Monto','Bonificacion','Forma de pago'],
 			'filas': filas,
 			'detalles' : detalles
 			}

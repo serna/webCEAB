@@ -31,7 +31,7 @@ class PagosAlumno(models.Model):
 	opcionesConcepto = (
 		('Inscripcion','Inscripcion'),
 		('Colegiatura','Colegiatura'),
-		('Quincenal','Quincenal'),
+		('Cargo administrativo','Cargo administrativo'),
 	)
 	alumno = models.ForeignKey(Estudiante)
 	fecha_pago = models.DateField(default=timezone.now)
