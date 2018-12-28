@@ -6,7 +6,7 @@ import datetime
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Documentacion
 from promotoria.models import Aspirantes
-from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno
+from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno,CorteCaja
 from siad.models import Empleado, Documento
 from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
@@ -1186,18 +1186,47 @@ def consulta_pagos_alumno(request):
 		}
 	return render(request, "formulario_captura_calificacion.html", context)	
 def corte_caja(request):
-	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
-	total = 0
+	
+	try:
+		qs = CorteCaja.objects.latest('fecha_de_corte')
+	except ObjectDoesNotExist:
+		
+		print("No existe ningun corte de caja previo, para el correcto funcionamiento de esta funcion es necesario tener al menos un corte de caja")
+		context = {'mensaje': 'No existe un corte de caja previo, deberas ingresarlo de manera manual a la base de datos, consulta el manual de usuario para mayor informacion',}
+		return render(request, 'msg_registro_inexistente.html',context)
+		
+	inicio = qs.fecha_de_corte
+	fin = datetime.datetime.now().date()
+	print("Se realiza un corte de caja para el intervalo de tiempo ",inicio,fin)
+	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago__lte = fin, fecha_pago__gte = inicio)
+	
 	filas = [] 
-	cnt=0
+	cntIngresos=0
+	
+	montoIngresos = 0
 	for pago in pagosAlumnos:
-		total += pago.monto
+		montoIngresos += pago.monto
 		fila = [pago.fecha_pago,pago.alumno,pago.monto,pago.forma_de_pago,pago.folio]
-		cnt += 1
+		cntIngresos += 1
 		filas.append(fila)
+	montoEgresos = 0
+	cntEgresos = 0
+	egresos = EgresoGenerales.objects.filter(fecha__lte = fin, fecha__gte = inicio)
+	for egreso in egresos:
+		montoEgresos += egreso.monto	
+		fila = [egreso.fecha,egreso.pago_hecho_a,-egreso.monto,egreso.concepto,egreso.folio_de_recibo]
+		cntEgresos += 1
+		filas.append(fila)
+	egresos = EgresoNomina.objects.filter(fecha__lte = fin, fecha__gte = inicio)
+	for egreso in egresos:
+		montoEgresos += egreso.monto	
+		fila = [egreso.fecha,egreso.pago_hecho_a,-egreso.monto,egreso.concepto,egreso.folio_de_recibo]
+		cntEgresos += 1
+		filas.append(fila)
+	montoTotal = montoIngresos - montoEgresos
 	context = {
-			'mensaje': "Se registraron %d movimientos el dia de hoy"%cnt,
-			'submensaje': "La suma de ingresos registrados es de $" + str(total),
+			'mensaje': "Corte de caja del %s al %s"%(inicio,fin),
+			'submensaje': "La suma de los movimientos registrados es de $%s, egresos $%s, ingresos $%s"%(str(montoTotal),str(montoEgresos),str(montoIngresos)),
 			'encabezados': ['Fecha','Pago','Monto','Forma de pago','Folio'],
 			'filas': filas,
 			}
