@@ -1,7 +1,6 @@
 from django.db import models
-
 from controlescolar.models import Curso, Estudiante
-from siad.models import Empleado, FormaDePago
+from siad.models import Empleado, FormaDePago, Plantel
 from django.utils import timezone
 #import datetime
 # Create your models here.
@@ -45,7 +44,7 @@ class PagosAlumno(models.Model):
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	def __str__(self): 
 		#return str(self.alumno.id) +': ' + str(self.monto)
-		return str(self.id)+":" +str(self.concepto)+" "+str(self.monto+self.bonificacion) +":" +str(self.fecha_pago) + "\n"
+		return str(self.id)+":" +str(self.concepto)+"" +str(self.monto+self.bonificacion) +":" +str(self.fecha_pago) + "\n"
 	class Meta:
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Pagos de alumnos"
@@ -53,6 +52,7 @@ class Ingreso(models.Model):
 	numero_registro = models.IntegerField()
 class EgresoGenerales(models.Model):
 	folio_de_recibo = models.IntegerField(help_text='Ingresa el folio del recibo de cotejo')
+	plantel = models.ForeignKey(Plantel)
 	concepto = models.CharField(max_length = 40)
 	descripcion = models.CharField(max_length = 100)
 	monto = models.DecimalField(max_digits = 7, decimal_places = 2)
@@ -111,12 +111,13 @@ class Tarjeton(models.Model):
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Tarjetones"	
 class CorteCaja(models.Model):
-	folio = models.IntegerField()
+	folio = models.CharField(max_length = 10,default = '0000')
 	fecha_de_corte = models.DateField(default= timezone.now)
-	monto_recibido =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cantidad de dinero que se recibio en el corte de caja')
+	ingresos =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text = "Suma total de los ingresos")
+	egresos =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Suma total de los egresos')
 	observaciones = models.TextField(max_length = 200,help_text='Descripcion breve del corte de caja',blank=True)
 	def __str__(self):
-		return str(self.id)+": "+str(self.fecha_de_corte)+ " " + str(self.monto_recibido)
+		return str(self.id)+": "+str(self.fecha_de_corte)
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Cortes de caja"		

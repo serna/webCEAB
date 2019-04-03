@@ -68,6 +68,7 @@ class EstudianteAdmin(admin.ModelAdmin):
 admin.site.register(Estudiante,EstudianteAdmin)
 
 class MateriasAdmin(admin.ModelAdmin):
+	search_fields = ('id',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []

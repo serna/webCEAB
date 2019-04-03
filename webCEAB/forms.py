@@ -1,7 +1,10 @@
 from django.utils import timezone
+from django.forms import ModelForm
 from django import forms
 from django.utils.safestring import mark_safe
 from siad.models import Plantel, Horario, Empresa
+from contabilidad.models import CorteCaja
+
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
   def render(self):
     return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
@@ -37,6 +40,7 @@ class fechaPlantel_form(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
 	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now())
 
+
 class form_captura_cal(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	alumno = forms.IntegerField()
@@ -58,6 +62,10 @@ class form_genera_extraordinario(forms.Form):
 	alumno = forms.IntegerField()
 	materia = forms.IntegerField()
 	
+class form_corte_caja(ModelForm):
+	class Meta:
+		model = CorteCaja
+		fields = ['folio','fecha_de_corte','ingresos','egresos','observaciones']
 class preguntas_form(forms.Form):
 	optionChoices = ((0,'a'), (1,'b'), (2,'c'),(3,'d'))
 	#nombre = forms.CharField(widget=forms.TextInput())
