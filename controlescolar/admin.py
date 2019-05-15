@@ -28,7 +28,7 @@ admin.site.register(Curso,CursosAdmin)
 
 class DocumentacionAdmin(admin.ModelAdmin):
 	filter_horizontal = ('documentacion_entregada',)
-	search_fields = ('estudiante__id',)
+	search_fields = ('alumno__id',)
 	def get_readonly_fields(self, request, obj=None):
 		# regresa la lista de campos que son de solo lectura
 		readOnlyFields = []

@@ -456,7 +456,7 @@ def accesoAlumno(request):
 				for linea in boleta:
 					if len(linea)==0:
 						continue
-					print("la linea de la boleta contiene: ", linea)
+					#print("la linea de la boleta contiene: ", linea)
 					mat = linea.split()[0]
 					
 					if int(mat) == int(claveMateria):

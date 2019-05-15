@@ -37,6 +37,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	montoCubierto = 0
 	for pago in instance.pagos.all():
 		if pago.concepto=='Colegiatura':
+			print(pago)
 			montoCubierto += pago.monto + pago.bonificacion
 	# estas opciones sirven para verificar el periodo de tiempo en el que se deben de realizar los cobros
 	opciones= {
