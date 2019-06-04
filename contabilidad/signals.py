@@ -36,7 +36,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	print("\nEntramos en la rutina para actulizar el tarjeton del alumno  ",instance.alumno)
 	montoCubierto = 0
 	for pago in instance.pagos.all():
-		if pago.concepto=='Colegiatura':
+		if pago.concepto=='Colegiatura' and pago.fecha_pago >= instance.inicio:
 			print(pago)
 			montoCubierto += pago.monto + pago.bonificacion
 	# estas opciones sirven para verificar el periodo de tiempo en el que se deben de realizar los cobros
@@ -74,7 +74,11 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 			instance.monto_cubierto=True
 			return 0
 	nDiasEsquema = opciones[instance.esquema_de_pago]
-	nPag = int((fechaCalculo-instance.inicio)/nDiasEsquema)+1 # pagos que ya tendrian que estar hechos
+	if fechaCalculo<instance.inicio:
+		nPag = -1
+	else:
+		nPag = int((fechaCalculo-instance.inicio)/nDiasEsquema)+1 # pagos que ya tendrian que estar hechos
+	print("Calculo de pagos",int((fechaCalculo-instance.inicio)/nDiasEsquema))
 	if instance.pago_periodico!=0:
 		if nPag>instance.monto_a_pagos/instance.pago_periodico:
 			# dado que nPag es calculado con la fecha actual, es posible que nPag sea mayor
