@@ -454,7 +454,7 @@ def accesoAlumno(request):
 				#print("La boleta del alumno es: ", boleta)
 				intentos = 0
 				for linea in boleta:
-					if len(linea)==0:
+					if len(linea)<=1:
 						continue
 					#print("la linea de la boleta contiene: ", linea)
 					mat = linea.split()[0]
@@ -508,7 +508,7 @@ def accesoAlumno(request):
 			#print("La boleta contiene:\n",boleta)
 			calificaciones = []
 			for item in boleta.split('\n'):
-				if len(item)!=0:
+				if len(item)>1:
 					materia = item.split()[0]
 					try: # buscamos la materia correspondiente en la base de datos
 						queryset = Materia.objects.get(id = materia)
@@ -843,7 +843,7 @@ def imprime_material_regulares(request):
 			print('Cursos validos')
 			print(cv)
 			for curso in cv:
-				fila =[curso.estudiante,curso.horario,curso.estudiante.numero_de_control] # el primer elemento de la lista es el estudiante
+				fila =[curso.estudiante,curso.horario,curso.estudiante.numero_de_control]  # el primer elemento de la lista es el estudiante
 				materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
 				for mat in materias:
 					fila.append(mat.examen.clave_del_examen)
