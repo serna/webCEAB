@@ -57,7 +57,9 @@ class form_plantel(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
 class form_empresa(forms.Form):
 	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
-	
+class form_no_alumno(forms.Form):
+	# se usa este formulario para consultas donde solo se necesita una fecha
+	alumno = forms.IntegerField()
 class form_genera_extraordinario(forms.Form):
 	alumno = forms.IntegerField()
 	materia = forms.IntegerField()

@@ -8,7 +8,7 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno,CorteCaja
 from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja,form_no_alumno
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -1273,3 +1273,51 @@ def cobros_por_vencer(request):
 			'filas': filas,
 			}
 	return render(request, "reporta_resultados.html", context)
+def detalle_pago_alumno(request):
+	""" Imprime los pagos que ha hecho el alumno
+
+	"""
+	if request.method == 'POST':
+		form = form_no_alumno(request.POST)
+		if form.is_valid():
+			id_alumno = form.cleaned_data['alumno']
+			qs = Tarjeton.objects.get(alumno = id_alumno)
+			filas = [] 
+			resumen = []
+			cnt=0
+			total_pagado = 0
+			for pago in qs.pagos.all():
+				fila = [pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
+				total_pagado += pago.monto
+				cnt += 1
+				filas.append(fila)
+			mensaje_principal = "%s"%(qs.alumno)
+			if qs.pagos_atrasados==0:
+				submensaje = "El alumno esta al corriente en sus pagos"
+				cadena_fecha = "Proxima fecha de pago"
+			else:
+				
+				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
+				cadena_fecha = "Fecha que no se cubrio "
+			resumen = [ (cadena_fecha,qs.proxima_fecha_de_pago),
+						("Monto total",qs.monto_total),
+						("Monto a pagos",qs.monto_a_pagos),
+						("Pago periodico",qs.pago_periodico),
+						("Fecha programada del primer pago",qs.inicio)]
+			context = {
+					'mensaje': mensaje_principal,
+					'submensaje': submensaje,
+					'filas':resumen, 
+					'encabezados2': ["Folio",'Fecha',"Concepto","Monto"],
+					'filas2': filas,
+					}
+			return render(request, "reporta_resultados_pago_alumno.html", context)
+			
+	else:
+		form = form_no_alumno()
+
+		context = {
+		"mensaje": "Buscar alumno por nombre",
+		"form":form,
+		}
+	return render(request, "form_gral.html", context)

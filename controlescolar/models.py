@@ -57,7 +57,6 @@ class Curso(models.Model):
 	materias = models.ManyToManyField(Materia,blank=True)
 	boleta = models.TextField(blank=True)
 	def __str__(self):
-		
 		try:
 			self.estudiante
 			nombre = str(self.estudiante)

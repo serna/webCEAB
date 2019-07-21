@@ -36,8 +36,8 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	print("\nEntramos en la rutina para actulizar el tarjeton del alumno  ",instance.alumno)
 	montoCubierto = 0
 	for pago in instance.pagos.all():
-		if pago.concepto=='Colegiatura' and pago.fecha_pago >= instance.inicio:
-			print(pago)
+		if pago.concepto=='Colegiatura' and pago.fecha_pago >= instance.inicio-timedelta(days=7):
+			print("pago hecho: ",pago)
 			montoCubierto += pago.monto + pago.bonificacion
 	# estas opciones sirven para verificar el periodo de tiempo en el que se deben de realizar los cobros
 	opciones= {
@@ -95,9 +95,9 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 
 	pagoPeriodico = instance.pago_periodico
 	
-	montoHaCubrir = nPag*pagoPeriodico # esto es lo que deberia de haber ya pagado el alumno
+	montoACubrir = nPag*pagoPeriodico # esto es lo que deberia de haber ya pagado el alumno
 
-	print("Que corresponde a una cantidad de: ",montoHaCubrir)
+	print("Que corresponde a una cantidad de: ",montoACubrir)
 	print("El alumno ha cubierto",montoCubierto)
 	# ahora calculamos el numero de pagos que se ha atrasado, para ellos solo vemos cuantos pagos_periodicos completos 
 	# se necesitan para cubrir su deuda
@@ -112,7 +112,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 		pagosHechos = 0
 		nAtrasos = 5
 	
-	deuda = montoHaCubrir-montoCubierto
+	deuda = montoACubrir-montoCubierto
 	instance.deuda_actual = deuda
 	instance.pagos_atrasados = nAtrasos
 	if deuda<=0:

@@ -1,0 +1,54 @@
+{% extends 'consultas_diarias.html' %}
+
+	{% block busqueda %}
+
+	{% endblock %}
+
+{% block resultado %}
+
+	<h1>{{titulo}}</h1>
+	<h2>{{subtitulo}}</h2>
+	<h3>{{mensaje}}</h3>
+	<h4>{{submensaje}}</h4>
+
+	<table class = "table table-striped">
+		<tbody>
+		<tr>
+			{% for description, content in filas %}
+			<tr>
+				<th scope="row">{{description}}</th>
+				<td> {{content}} </td>		  		
+			</tr>
+			{% endfor %}
+		
+		</tbody>
+	</table>
+
+
+	<table class = "table table-striped">
+		<thead class="thead-inverse">
+			<tr>
+
+				{% for item in encabezados2 %}
+				
+					<th> {{item}} </td>
+		  		
+				{% endfor %}
+				
+			</tr>
+		</thead>
+
+
+
+		<tbody>
+			{% for fila in filas2 %}
+				<tr>
+				{% for cad in fila %}
+					<td> {{cad}} </td>
+				{% endfor %}
+		  		</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+		
+{% endblock %}

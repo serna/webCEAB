@@ -48,5 +48,7 @@ urlpatterns = [
     url(r'^consulta_pagos_alumno$', views.consulta_pagos_alumno),
     url(r'^corte_caja$', views.corte_caja),
     url(r'^cobros_por_vencer$', views.cobros_por_vencer),
+    url(r'^detalle_pago_alumno$', views.detalle_pago_alumno),
+
 
 ]
