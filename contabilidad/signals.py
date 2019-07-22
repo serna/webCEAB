@@ -63,7 +63,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 			instance.pagos_atrasados = 1
 			instance.deuda_actual = deudaUnSoloPago
 			instance.proxima_fecha_de_pago = date.today()
-			instance.monto_cubierto=False
+			#instance.monto_cubierto=False
 			print("El alumno no cubrio el monto total del servicio con los pagos que tiene registrados, debe: ",deudaUnSoloPago)
 			return 0
 		else:
@@ -71,7 +71,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 			instance.pagos_atrasados = 0
 			instance.deuda_actual = deudaUnSoloPago
 			instance.proxima_fecha_de_pago = date.today()
-			instance.monto_cubierto=True
+			#instance.monto_cubierto=True
 			return 0
 	nDiasEsquema = opciones[instance.esquema_de_pago]
 	if fechaCalculo<instance.inicio:
@@ -115,10 +115,10 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	deuda = montoACubrir-montoCubierto
 	instance.deuda_actual = deuda
 	instance.pagos_atrasados = nAtrasos
-	if deuda<=0:
-		instance.monto_cubierto = True
-	else:
-		instance.monto_completo = False
+	#if deuda<=0:
+	#	instance.monto_cubierto = True
+	#else:
+	#	instance.monto_completo = False
 	# Ahora calculamos la siguiente fecha de pago
 	instance.proxima_fecha_de_pago = instance.inicio+(pagosHechos)*opciones[instance.esquema_de_pago]
 
