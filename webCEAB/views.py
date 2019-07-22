@@ -1282,12 +1282,13 @@ def detalle_pago_alumno(request):
 		if form.is_valid():
 			id_alumno = form.cleaned_data['alumno']
 			qs = Tarjeton.objects.get(alumno = id_alumno)
+			inicio = qs.inicio
 			filas = [] 
 			resumen = []
 			cnt=0
 			total_pagado = 0
 			for pago in qs.pagos.all():
-				fila = [pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
+				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
 				total_pagado += pago.monto
 				cnt += 1
 				filas.append(fila)
@@ -1299,16 +1300,23 @@ def detalle_pago_alumno(request):
 				
 				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
 				cadena_fecha = "Fecha que no se cubrio "
+			fecha_inicio = qs.inicio
+			monto_cubierto = 0
+			for pago in qs.pagos.all():
+				if pago.fecha_pago>=inicio-timedelta(days=15):
+					monto_cubierto += pago.monto
+
 			resumen = [ (cadena_fecha,qs.proxima_fecha_de_pago),
 						("Monto total",qs.monto_total),
 						("Monto a pagos",qs.monto_a_pagos),
 						("Pago periodico",qs.pago_periodico),
-						("Fecha programada del primer pago",qs.inicio)]
+						("Fecha programada del primer pago",qs.inicio),
+						("Monto cubierto actualmente",monto_cubierto)]
 			context = {
 					'mensaje': mensaje_principal,
 					'submensaje': submensaje,
 					'filas':resumen, 
-					'encabezados2': ["Folio",'Fecha',"Concepto","Monto"],
+					'encabezados2': ["Id pago","Folio",'Fecha',"Concepto","Monto"],
 					'filas2': filas,
 					}
 			return render(request, "reporta_resultados_pago_alumno.html", context)
