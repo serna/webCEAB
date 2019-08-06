@@ -36,7 +36,7 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	print("\nEntramos en la rutina para actulizar el tarjeton del alumno  ",instance.alumno)
 	montoCubierto = 0
 	for pago in instance.pagos.all():
-		if pago.concepto=='Colegiatura' and pago.fecha_pago >= instance.inicio-timedelta(days=7):
+		if pago.concepto=='Colegiatura' and pago.fecha_pago >= instance.fecha_abonos_anticipados:
 			print("pago hecho: ",pago)
 			montoCubierto += pago.monto + pago.bonificacion
 	# estas opciones sirven para verificar el periodo de tiempo en el que se deben de realizar los cobros
@@ -120,7 +120,10 @@ def actualiza_tarjeton(sender, instance, **kwargs):
 	#else:
 	#	instance.monto_completo = False
 	# Ahora calculamos la siguiente fecha de pago
-	instance.proxima_fecha_de_pago = instance.inicio+(pagosHechos)*opciones[instance.esquema_de_pago]
+	#instance.proxima_fecha_de_pago = instance.inicio+(pagosHechos)*opciones[instance.esquema_de_pago] # anteriormente esta linea era la que se ejecutaba
+	# pero para poder calcular de manera continua cuantos pagos tiene atrasados es mejo usar esta fecha como la ultima fecha 
+	# en la que el alumno no cubrio el pago, para eso se usa esta linea
+	instance.proxima_fecha_de_pago = instance.inicio+(nPag)*opciones[instance.esquema_de_pago]
 
 
 	

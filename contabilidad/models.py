@@ -92,7 +92,7 @@ class Tarjeton(models.Model):
 			('Otro', 'Otro'),
 	)
 	alumno = models.OneToOneField(Estudiante)
-	inicio =  models.DateField(default= timezone.now,help_text='Fecha del primer pago programado')
+	inicio =  models.DateField(default= timezone.now,help_text='Fecha del primer pago programado, esta fecha sirve para agendar los pagos siguientes')
 	descripcion = models.TextField(max_length = 200,help_text='Descripcion breve relativa al tarjeton',blank=True)
 	esquema_de_pago = models.CharField(max_length = 20,choices = opciones,default = 'Semanal',help_text='Esquema de pago')
 	monto_total = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Aqui ingresa el monto total del servicio')
@@ -104,6 +104,7 @@ class Tarjeton(models.Model):
 	pagos_atrasados = models.IntegerField(default = 0)
 	tarjeton_verificado_por_direccion = models.BooleanField(default = False)
 	deuda_actual =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Esta es la cantidad de dinero que debe actualmente el alumno',default = 0,blank = True)
+	fecha_abonos_anticipados = models.DateField(default= timezone.now,help_text='Solo se tomaran en cuenta los pagos que se hayan hecho desde esta fecha')
 	def __str__(self):
 		#return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
 		return str(self.alumno)

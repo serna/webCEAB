@@ -1292,7 +1292,10 @@ def detalle_pago_alumno(request):
 				total_pagado += pago.monto
 				cnt += 1
 				filas.append(fila)
-			mensaje_principal = "%s"%(qs.alumno)
+			estatus = "(INACTIVO)"
+			if qs.alumno.activo==True:
+				estatus = "(ACTIVO)"
+			mensaje_principal = "%s %s"%(qs.alumno,estatus)
 			if qs.pagos_atrasados==0:
 				submensaje = "El alumno esta al corriente en sus pagos"
 				cadena_fecha = "Proxima fecha de pago"
