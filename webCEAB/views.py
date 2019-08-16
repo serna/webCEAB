@@ -1007,12 +1007,13 @@ def documentacion_incompleta_plantel(request):
 				presentDocs = docs[0].documentacion_entregada.all()
 				print(cnt,presentDocs)
 				
-				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+				#missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+				missingDocs = presentDocs
 				alumno = curso.estudiante
 				fechaTermino = curso.fecha_de_termino
 				losQueFaltan = ""
 				for item in missingDocs:
-					losQueFaltan+=str(item.id)+", "
+					losQueFaltan+=str(item)+", "
 				fila =[alumno,losQueFaltan[:-2],fechaTermino]
 				filas.append(fila)
 				
@@ -1020,7 +1021,7 @@ def documentacion_incompleta_plantel(request):
 			context = {
 					'mensaje': "Documentos que le faltan a los alumnos del plantel: %s"%plantel,
 					'submensaje': "%d alumnos tienen documentacion incompleta"%cnt,
-					'encabezados': ['Alumno','Falta','Fin de curso'],
+					'encabezados': ['Alumno','Entregada','Fin de curso'],
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
@@ -1123,13 +1124,13 @@ def buscar_alumno_nombre(request):
 			filas = [] 
 			cnt=0
 			for est in qs:
-				fila = [est]
+				fila = [est,est.contrasena]
 				cnt += 1
 				filas.append(fila)
 			context = {
 					'mensaje': "Se encontraron %d estudiantes que coinciden con los criterios de busqueda"%cnt,
 					#'submensaje': "La suma de ingresos registrados es de $" + str(total),
-					'encabezados': ['Estudiante'],
+					'encabezados': ['Estudiante','Contraseña'],
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
@@ -1302,7 +1303,7 @@ def detalle_pago_alumno(request):
 			else:
 				
 				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
-				cadena_fecha = "Fecha que no se cubrio "
+				cadena_fecha = "Ultima fecha que debe cubrir "
 			fecha_inicio = qs.inicio
 			monto_cubierto = 0
 			for pago in qs.pagos.all():
