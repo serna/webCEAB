@@ -1007,8 +1007,8 @@ def documentacion_incompleta_plantel(request):
 				presentDocs = docs[0].documentacion_entregada.all()
 				print(cnt,presentDocs)
 				
-				#missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
-				missingDocs = presentDocs
+				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+				#missingDocs = presentDocs
 				alumno = curso.estudiante
 				fechaTermino = curso.fecha_de_termino
 				losQueFaltan = ""
@@ -1021,7 +1021,7 @@ def documentacion_incompleta_plantel(request):
 			context = {
 					'mensaje': "Documentos que le faltan a los alumnos del plantel: %s"%plantel,
 					'submensaje': "%d alumnos tienen documentacion incompleta"%cnt,
-					'encabezados': ['Alumno','Entregada','Fin de curso'],
+					'encabezados': ['Alumno','Faltan','Fin de curso'],
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
@@ -1297,20 +1297,30 @@ def detalle_pago_alumno(request):
 			if qs.alumno.activo==True:
 				estatus = "(ACTIVO)"
 			mensaje_principal = "%s %s"%(qs.alumno,estatus)
+
 			if qs.pagos_atrasados==0:
 				submensaje = "El alumno esta al corriente en sus pagos"
 				cadena_fecha = "Proxima fecha de pago"
+				fecha_proxima = qs.proxima_fecha_de_pago
 			else:
-				
 				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
 				cadena_fecha = "Ultima fecha que debe cubrir "
-			fecha_inicio = qs.inicio
+				opciones= {
+					'Semanal':timedelta(days=7),
+					'Quincenal':timedelta(days=14),
+					'Mensual':timedelta(days=28),
+					'Un solo pago':timedelta(days=1),
+					'Otro': timedelta(days=30, hours=10),
+				}
+				fecha_proxima = qs.proxima_fecha_de_pago-qs.pagos_atrasados*opciones[qs.esquema_de_pago]
+				#fecha_proxima = qs.proxima_fecha_de_pago
+			fecha_inicio = qs.fecha_abonos_anticipados
 			monto_cubierto = 0
 			for pago in qs.pagos.all():
-				if pago.fecha_pago>=inicio-timedelta(days=15):
+				if pago.fecha_pago>=inicio:
 					monto_cubierto += pago.monto
 
-			resumen = [ (cadena_fecha,qs.proxima_fecha_de_pago),
+			resumen = [ (cadena_fecha,fecha_proxima),
 						("Monto total",qs.monto_total),
 						("Monto a pagos",qs.monto_a_pagos),
 						("Pago periodico",qs.pago_periodico),
