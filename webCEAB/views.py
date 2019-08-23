@@ -1283,7 +1283,7 @@ def detalle_pago_alumno(request):
 		if form.is_valid():
 			id_alumno = form.cleaned_data['alumno']
 			qs = Tarjeton.objects.get(alumno = id_alumno)
-			inicio = qs.inicio
+			inicio = qs.fecha_abonos_anticipados
 			filas = [] 
 			resumen = []
 			cnt=0
@@ -1314,9 +1314,10 @@ def detalle_pago_alumno(request):
 				}
 				fecha_proxima = qs.proxima_fecha_de_pago-qs.pagos_atrasados*opciones[qs.esquema_de_pago]
 				#fecha_proxima = qs.proxima_fecha_de_pago
-			fecha_inicio = qs.fecha_abonos_anticipados
+			#fecha_inicio = qs.fecha_abonos_anticipados
 			monto_cubierto = 0
 			for pago in qs.pagos.all():
+				print("PAGOS HECHOS",qs.pagos.all(),inicio)
 				if pago.fecha_pago>=inicio:
 					monto_cubierto += pago.monto
 
