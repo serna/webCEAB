@@ -83,7 +83,7 @@ def cobros_vencidos(request,dias):
 	return render(request,"reporta_resultados.html", context)
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
 	total = 0
-	filas = [] 
+	filas = []
 	cnt=0
 	for pago in pagosAlumnos:
 		total += pago.monto
@@ -99,7 +99,7 @@ def cobros_vencidos(request,dias):
 	return render(request, "reporta_resultados.html", context)
 #def index(request):
 def evaluacion_digital(request,alumno,materia):
-	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta" 
+	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta"
 	"""
 	if request.method == 'POST':
 		form = preguntas_form(request.POST)
@@ -167,7 +167,7 @@ def evaluacion_digital(request,alumno,materia):
 			curso = curso
 			print(curso,curso.materias.all())
 			boleta = str(curso.boleta)
-			
+
 			print('EL CONTENIDO DE LA BOLETA ESSSS:')
 			print(boleta.split('\n'))
 			print(boleta.split('\r'))
@@ -182,9 +182,9 @@ def evaluacion_digital(request,alumno,materia):
 				}
 
 				return render(request, 'msg_registro_inexistente.html',context)
-				 
+
 			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
-			
+
 			return render(request,'impresion_lista_2d.html',context)
 	else:
 		alumnos = Estudiante.objects.filter(id = alumno)
@@ -193,7 +193,7 @@ def evaluacion_digital(request,alumno,materia):
 			return render(request, 'msg_registro_inexistente.html')
 		alumno_str = alumnos[0]
 		materias = Materia.objects.filter(id=materia)
-		materia_str = materias[0].nombre 
+		materia_str = materias[0].nombre
 		curso = Curso.objects.get(estudiante = alumnos)
 		boleta=curso.boleta
 		print("El contenido de la coleta essss:",boleta.split('\n'))
@@ -228,7 +228,7 @@ def evaluacion_digital(request,alumno,materia):
 def evaluacion_digital2(request,alumno,materia):
 	""" This function get the answers from the test-form and return the corresponding grade
 
-		
+
 	"""
 	if request.method == 'POST':
 		form = preguntas_form(request.POST)
@@ -275,7 +275,7 @@ def evaluacion_digital2(request,alumno,materia):
 			["Folio del alumno: ",claveAlumno],
 			["Materia: ",materiaNombre],
 			["Calificacion",calif],
-			["Incorrectas (%d)"%(len(incorr)),incorr],
+			["Incorrectas contestadas por el alumno(%d)"%(len(incorr)),incorr],
 			["Correctas (%d)"%(len(correc)),correc],
 			["Sin contestar (%d)"%(len(noContestadas)),noContestadas]
 			]
@@ -295,7 +295,7 @@ def evaluacion_digital2(request,alumno,materia):
 			curso = curso
 			print(curso,curso.materias.all())
 			boleta = str(curso.boleta)
-			
+
 			print('EL CONTENIDO DE LA BOLETA ESSSS:')
 			print(boleta.split('\n'))
 			print(boleta.split('\r'))
@@ -310,9 +310,9 @@ def evaluacion_digital2(request,alumno,materia):
 				}
 
 				return render(request, 'msg_registro_inexistente.html',context)
-				 
+
 			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
-			
+
 			return render(request,'impresion_lista_2d.html',context)
 	else:
 		alumnos = Estudiante.objects.filter(id = alumno)
@@ -321,7 +321,7 @@ def evaluacion_digital2(request,alumno,materia):
 			return render(request, 'msg_registro_inexistente.html')
 		alumno_str = alumnos[0]
 		materias = Materia.objects.filter(id=materia)
-		materia_str = materias[0].nombre 
+		materia_str = materias[0].nombre
 		curso = Curso.objects.get(estudiante = alumnos)
 		boleta=curso.boleta
 		print("El contenido de la coleta essss:",boleta.split('\n'))
@@ -376,7 +376,7 @@ def accesoAlumno(request):
 			clave = form.cleaned_data['clave_de_alumno']
 			print('FORMULARIO ACCESO ALUMNOS')
 			print("alumno",numero,'clave',clave)
-			
+
 			queryset = Estudiante.objects.filter(id = numero)
 			if len(queryset)==0:
 				context = {
@@ -394,7 +394,7 @@ def accesoAlumno(request):
 					'mensaje': "La contrasena no es correcta",
 					}
 
-					return render(request, 'msg_registro_inexistente.html',context)	
+					return render(request, 'msg_registro_inexistente.html',context)
 				#cursos = queryset[0].cursos.all()
 				#print("Los cursos del alumno son: ",cursos)
 				#if len(cursos)==0:
@@ -439,7 +439,7 @@ def accesoAlumno(request):
 				#print('La fecha limite es: ',fechaLimite)
 				etiqueta = ''
 				link = ''
-				
+
 				print('La fecha limite para aplicar examen: ',fechaLimite)
 				print('La fecha de hoy: ',datetime.datetime.now())
 				if fechaLimite < datetime.datetime.now().date():
@@ -458,7 +458,7 @@ def accesoAlumno(request):
 						continue
 					#print("la linea de la boleta contiene: ", linea)
 					mat = linea.split()[0]
-					
+
 					if int(mat) == int(claveMateria):
 						intentos = len(linea.split())-2
 						print('coincidieron la materia ',int(mat), ' con ',int(claveMateria), intentos)
@@ -503,7 +503,7 @@ def accesoAlumno(request):
 			except ObjectDoesNotExist:
 				context = {'mensaje': 'El alumno ' + str(queryset) +' no tiene ningun curso registrado',}
 				return render(request, 'msg_registro_inexistente.html',context)
-			
+
 			boleta = str(curso.boleta)
 			#print("La boleta contiene:\n",boleta)
 			calificaciones = []
@@ -522,7 +522,7 @@ def accesoAlumno(request):
 							lista[i+1]=item.split()[i+1]
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
-			
+
 
 			########################################################################
 
@@ -539,7 +539,7 @@ def accesoAlumno(request):
 
 
 			return render(request,"menu_alumno.html", context)
-			
+
 	else:
 		form = form_acceso_alumno()
 		context = {
@@ -556,7 +556,7 @@ def inscritos_promotor(request):
 		'titulo': 'Registro inexistente',
 		'mensaje': 'La contrasena o el numero de promotor son incorrectos',}
 		return render(request, 'msg_registro_inexistente.html')
-	
+
 	inscritos = Estudiante.objects.filter(Aspirante__promotor = queryset[0])
 	print('Los incsritos son: ',inscritos)
 	context = {
@@ -564,7 +564,7 @@ def inscritos_promotor(request):
 	'inscritos': inscritos,
 	}
 	return render(request,"inscritos_promotor.html", context)
-	
+
 def prospectos_promotor(request):
 	idPromotor = int(request.session['idPromotor'])
 	queryset = Empleado.objects.filter(id = idPromotor)
@@ -574,7 +574,7 @@ def prospectos_promotor(request):
 		'titulo': 'Registro inexistente',
 		'mensaje': 'La contrasena o el numero de promotor son incorrectos',}
 		return render(request, 'msg_registro_inexistente.html')
-	
+
 	prospectos = Aspirantes.objects.filter(promotor = queryset[0])
 	#print("Los prospectos del promotor son: ",prospectos)
 	if len(prospectos)==0:
@@ -597,7 +597,7 @@ def menu_promotor(request):
 		if form.is_valid():
 			numero = form.cleaned_data['numero_de_alumno']
 			clave = form.cleaned_data['clave_de_alumno']
-			
+
 			queryset = Empleado.objects.filter(id = numero)
 			if len(queryset)==0:
 				print('NO EXISTE ESE PROMOTOR')
@@ -608,11 +608,11 @@ def menu_promotor(request):
 				print(contrasena)
 				if contrasena!=clave:
 					print('La clave de acceso del promotor es incorrecta')
-					return render(request, 'msg_registro_inexistente.html')	
+					return render(request, 'msg_registro_inexistente.html')
 			request.session['idPromotor'] = numero
 			print("El numero del promotor es: ", request.session['idPromotor'])
 			return render(request,"menu_promotor.html")
-			
+
 	else:
 		form = form_acceso_alumno()
 		context = {
@@ -688,14 +688,14 @@ def reporte_prospectos(request):
 		if form.is_valid():
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
-			
+
 			print(fecha1,type(fecha1))
 			print('Las pruebas resultaron satisfactorias')
 			queryset = Aspirantes.objects.filter(creacion_de_registro__lt = fecha2)
 			queryset = queryset.filter(creacion_de_registro__gt = fecha1)
 			context = {"queryset":queryset,}
 			return render(request,"reporte_prospectos.html", context)
-			
+
 	else:
 		form = rango_fechas_form()
 
@@ -785,7 +785,7 @@ def boleta_alumno(request):
 			except ObjectDoesNotExist:
 				context = {'mensaje': 'El alumno ' + str(queryset1) +' no tiene ningun curso registrado',}
 				return render(request, 'msg_registro_inexistente.html',context)
-			
+
 			boleta = str(curso.boleta)
 			#print("La boleta contiene:\n",boleta)
 			calificaciones = []
@@ -805,7 +805,7 @@ def boleta_alumno(request):
 					calificaciones.append(lista)
 			#messages.add_message(request, messages.INFO, 'Se ha actualizado la boleta de manera correcta!')
 			context = {
-			
+
 			'mensaje': "Boleta del alumno: "+str(queryset1),
 			'encabezados': ['Materia', '1ra','2da','3ra','extra'],
 			'filas': calificaciones,
@@ -820,11 +820,11 @@ def boleta_alumno(request):
 		"mensaje": "De que alumno quieres consultar la boleta",
 		"form":form,
 		}
-	return render(request, "formulario_captura_calificacion.html", context)	
+	return render(request, "formulario_captura_calificacion.html", context)
 def imprime_material_regulares(request):
-	
+
 	if request.method == 'POST':
-		form = fechaPlantel_form(request.POST)	
+		form = fechaPlantel_form(request.POST)
 		if form.is_valid():
 
 			plantel = form.cleaned_data['plantel']
@@ -854,7 +854,7 @@ def imprime_material_regulares(request):
 					'encabezados': ['Alumno','horario','Folio', 'materia 1','materia 2','Materia 3'],
 					'filas': filas,
 					}
-			
+
 			return render(request,"tabla_general.html", context)
 	else:
 		form = fechaPlantel_form()
@@ -864,9 +864,9 @@ def imprime_material_regulares(request):
 		}
 	return render(request, "formulario_fechas.html", context)
 def imprime_material_empresa(request):
-	
+
 	if request.method == 'POST':
-		form = empresaFecha_form(request.POST)	
+		form = empresaFecha_form(request.POST)
 		if form.is_valid():
 
 			empresa = form.cleaned_data['empresa']
@@ -894,7 +894,7 @@ def imprime_material_empresa(request):
 					'encabezados': ['Alumno','horario','Folio', 'materia 1','materia 2','Materia 3'],
 					'filas': filas,
 					}
-			
+
 			return render(request,"tabla_general.html", context)
 	else:
 		form = empresaFecha_form()
@@ -925,14 +925,14 @@ def imprime_material_alumno(request):
 			'encabezados': ['Alumno','Folio', 'materia 1','materia 2','Materia 3'],
 			'filas': filas,
 			}
-	return render(request, "reporta_resultados.html", context)	
+	return render(request, "reporta_resultados.html", context)
 def resumen_prospectos(request):
 	if request.method == 'POST':
 		form = rango_fechas_form(request.POST)
 		if form.is_valid():
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
-			
+
 			#return render(request,"reporte_tablas.html", context)
 			#return HttpResponseRedirect(reverse('reporte_inscritos_prospectos_por_fechas',
 			#	kwargs={'year':2000,'month':20,'day':20,'year2':3000,'month2':30,'day2':30}))
@@ -945,7 +945,7 @@ def resumen_prospectos(request):
 				rangoFechas += '0' + str(fecha1.day) + '/a/'
 			else:
 				rangoFechas += str(fecha1.day) + '/a/'
-			
+
 			rangoFechas += str(fecha2.year) + '/'
 			if fecha2.month<10:
 				rangoFechas += '0' + str(fecha2.month) + '/'
@@ -1006,7 +1006,7 @@ def documentacion_incompleta_plantel(request):
 				docs = Documentacion.objects.filter(alumno=curso.estudiante)
 				presentDocs = docs[0].documentacion_entregada.all()
 				print(cnt,presentDocs)
-				
+
 				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
 				#missingDocs = presentDocs
 				alumno = curso.estudiante
@@ -1016,7 +1016,7 @@ def documentacion_incompleta_plantel(request):
 					losQueFaltan+=str(item)+", "
 				fila =[alumno,losQueFaltan[:-2],fechaTermino]
 				filas.append(fila)
-				
+
 				cnt += 1
 			context = {
 					'mensaje': "Documentos que le faltan a los alumnos del plantel: %s"%plantel,
@@ -1032,6 +1032,53 @@ def documentacion_incompleta_plantel(request):
 		"form":form,
 		}
 	return render(request, "form_gral.html", context)
+def documentacion_incompleta_alumno(request):
+	if request.method == 'POST':
+		form = form_boleta_alumno(request.POST)
+		if form.is_valid():
+			alumno = form.cleaned_data['alumno']
+			# verificamos que este alumnol exista
+			try:
+				curso = Curso.objects.get(estudiante=alumno,estudiante__activo=True)
+			except ObjectDoesNotExist:
+				context = {'mensaje': 'No existe ese alumno en la base de datos',}
+				return render(request, 'msg_registro_inexistente.html',context)
+
+			#cursos = cursos.filter(estudiante__plantel=plantel,estudiante__empresa=1)
+			#ordCursos = cursos.order_by('fecha_de_termino')
+			filas=[]
+			#print(alumnos)
+			#cnt = 0
+			#for curso in cursos:
+			docs = Documentacion.objects.filter(alumno=curso.estudiante)
+			presentDocs = docs[0].documentacion_entregada.all()
+			#print(cnt,presentDocs)
+
+			missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
+			#missingDocs = presentDocs
+			alumno = curso.estudiante
+			fechaTermino = curso.fecha_de_termino
+			losQueFaltan = ""
+			for item in missingDocs:
+				losQueFaltan+=str(item)+", "
+			fila =[alumno,losQueFaltan[:-2],fechaTermino]
+			filas.append(fila)
+
+
+			context = {
+					'mensaje': "Alumno: %s"%alumno,
+					'submensaje': "Le faltan %d documentos"%len(missingDocs),
+					'encabezados': ['Alumno','Faltan','Fin de curso'],
+					'filas': filas,
+					}
+			return render(request, "reporta_resultados.html", context)
+	else:
+		form = form_boleta_alumno()
+		context = {
+		"mensaje": "Introduce el id del alumno",
+		"form":form,
+		}
+	return render(request, "formulario_captura_calificacion.html", context)
 def documentacion_incompleta_empresa(request):
 	if request.method == 'POST':
 		form = form_empresa(request.POST)
@@ -1047,20 +1094,20 @@ def documentacion_incompleta_empresa(request):
 				docs = Documentacion.objects.filter(alumno=curso.estudiante)
 				presentDocs = docs[0].documentacion_entregada.all()
 				print(cnt,presentDocs)
-				
+
 				missingDocs = Documento.objects.exclude(pk__in=presentDocs.values_list('pk', flat=True))
 				alumno = curso.estudiante
 				fechaTermino = curso.fecha_de_termino
 				losQueFaltan = ""
 				for item in missingDocs:
 					losQueFaltan+=str(item.id)+", "
-				
+
 				fila =[alumno,losQueFaltan[:-2],fechaTermino]
-				
+
 				#print(cnt,alumno)
 				#cnt+=1
 				filas.append(fila)
-				
+
 				cnt += 1
 			context = {
 					'mensaje': "Documentos que le faltan a los alumnos de la empresa: %s"%empresa,
@@ -1083,7 +1130,7 @@ def documentacion_incompleta_empresa(request):
 def ingresos_del_dia(request):
 	pagosAlumnos = PagosAlumno.objects.filter(fecha_pago=datetime.date.today())
 	total = 0
-	filas = [] 
+	filas = []
 	cnt=0
 	for pago in pagosAlumnos:
 		total += pago.monto
@@ -1103,7 +1150,7 @@ def genera_extraordinario(request):
 		if form.is_valid():
 			alumno = form.cleaned_data['alumno']
 			materia = form.cleaned_data['materia']
-			
+
 			return HttpResponseRedirect('/eval/%s/%s'%(alumno,materia))
 	else:
 		form = form_genera_extraordinario()
@@ -1121,7 +1168,7 @@ def buscar_alumno_nombre(request):
 			paterno = form.cleaned_data['apellido_paterno']
 			materno = form.cleaned_data['apellido_materno']
 			qs = Estudiante.objects.filter(Aspirante__nombre = nombre)
-			filas = [] 
+			filas = []
 			cnt=0
 			for est in qs:
 				fila = [est,est.contrasena]
@@ -1134,7 +1181,7 @@ def buscar_alumno_nombre(request):
 					'filas': filas,
 					}
 			return render(request, "reporta_resultados.html", context)
-			
+
 	else:
 		form = form_busca_alumno_nombre()
 
@@ -1148,7 +1195,7 @@ def consulta_pagos_alumno(request):
 		form = form_boleta_alumno(request.POST)
 		if form.is_valid():
 			alumno = form.cleaned_data['alumno']
-			
+
 			# verificamos que este alumno exista
 			try:
 				queryset1 = Estudiante.objects.get(id = alumno)
@@ -1187,29 +1234,29 @@ def consulta_pagos_alumno(request):
 		"mensaje": "Ingresa el id del alumno",
 		"form":form,
 		}
-	return render(request, "formulario_captura_calificacion.html", context)	
+	return render(request, "formulario_captura_calificacion.html", context)
 def corte_caja(request):
 	if request.method == 'POST':
 		form = form_corte_caja(request.POST)
 		form.save()
 	else:
-		
+
 		try:
 			qs = CorteCaja.objects.latest('fecha_de_corte')
 		except ObjectDoesNotExist:
-			
+
 			print("No existe ningun corte de caja previo, para el correcto funcionamiento de esta funcion es necesario tener al menos un corte de caja")
 			context = {'mensaje': 'No existe un corte de caja previo, deberas ingresarlo de manera manual a la base de datos, consulta el manual de usuario para mayor informacion',}
 			return render(request, 'msg_registro_inexistente.html',context)
-			
+
 		inicio = qs.fecha_de_corte
 		fin = datetime.datetime.now().date()
 		print("Se realiza un corte de caja para el intervalo de tiempo ",inicio,fin)
 		pagosAlumnos = PagosAlumno.objects.filter(fecha_pago__lte = fin, fecha_pago__gte = inicio)
-		
-		filas = [] 
+
+		filas = []
 		cntIngresos=0
-		
+
 		montoIngresos = 0
 		for pago in pagosAlumnos:
 			montoIngresos += pago.monto
@@ -1220,13 +1267,13 @@ def corte_caja(request):
 		cntEgresos = 0
 		egresos = EgresoGenerales.objects.filter(fecha__lte = fin, fecha__gte = inicio)
 		for egreso in egresos:
-			montoEgresos += egreso.monto	
+			montoEgresos += egreso.monto
 			fila = [egreso.fecha,egreso.pago_hecho_a,-egreso.monto,egreso.concepto,egreso.folio_de_recibo]
 			cntEgresos += 1
 			filas.append(fila)
 		egresos = EgresoNomina.objects.filter(fecha__lte = fin, fecha__gte = inicio)
 		for egreso in egresos:
-			montoEgresos += egreso.monto	
+			montoEgresos += egreso.monto
 			fila = [egreso.fecha,egreso.pago_hecho_a,-egreso.monto,egreso.concepto,egreso.folio_de_recibo]
 			cntEgresos += 1
 			filas.append(fila)
@@ -1248,7 +1295,7 @@ def cobros_por_vencer(request):
 	inicio = datetime.date.today() + timedelta(days=1)
 	print("La fecha de inicio para la consulta es ",inicio)
 	siguienteMes = inicio.month+1
-	siguienteAnio =  inicio.year  
+	siguienteAnio =  inicio.year
 	print("mes acutal ",inicio.month," mes siguiente ",siguienteMes)
 	if siguienteMes==13:
 		siguienteMes = 1
@@ -1284,7 +1331,7 @@ def detalle_pago_alumno(request):
 			id_alumno = form.cleaned_data['alumno']
 			qs = Tarjeton.objects.get(alumno = id_alumno)
 			inicio = qs.fecha_abonos_anticipados
-			filas = [] 
+			filas = []
 			resumen = []
 			cnt=0
 			total_pagado = 0
@@ -1330,12 +1377,12 @@ def detalle_pago_alumno(request):
 			context = {
 					'mensaje': mensaje_principal,
 					'submensaje': submensaje,
-					'filas':resumen, 
+					'filas':resumen,
 					'encabezados2': ["Id pago","Folio",'Fecha',"Concepto","Monto"],
 					'filas2': filas,
 					}
 			return render(request, "reporta_resultados_pago_alumno.html", context)
-			
+
 	else:
 		form = form_no_alumno()
 

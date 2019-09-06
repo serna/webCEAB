@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^imprime_material_empresa$', views.imprime_material_empresa),
     url(r'^calendario_materias$', views.calendario_materias),
     url(r'^documentacion_incompleta_plantel$', views.documentacion_incompleta_plantel),
+    url(r'^documentacion_incompleta_alumno$', views.documentacion_incompleta_alumno),
     url(r'^documentacion_incompleta_empresa$', views.documentacion_incompleta_empresa),
     url(r'^ingresos_del_dia$', views.ingresos_del_dia),
     url(r'^genera_extraordinario$', views.genera_extraordinario),

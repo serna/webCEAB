@@ -23,7 +23,7 @@ class form_busca_alumno_nombre(forms.Form):
 	nombre = forms.CharField(label='Nombre')
 	apellido_paterno = forms.CharField(label='Apellido paterno',required=False)
 	apellido_materno = forms.CharField(label='Apellido materno',required=False)
-	
+
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget())
@@ -47,7 +47,7 @@ class form_captura_cal(forms.Form):
 	materia = forms.IntegerField()
 	calificacion = forms.DecimalField(max_value = 10.0, min_value = 0.0, max_digits = 3)
 class form_boleta_alumno(forms.Form):
-	# se usa este formulario para consultas donde solo se necesita una fecha
+	# se usa este formulario para consultas donde solo se necesita el numero del alumno
 	alumno = forms.IntegerField()
 class form_plantel_empresa_horario(forms.Form):
 	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
@@ -63,7 +63,7 @@ class form_no_alumno(forms.Form):
 class form_genera_extraordinario(forms.Form):
 	alumno = forms.IntegerField()
 	materia = forms.IntegerField()
-	
+
 class form_corte_caja(ModelForm):
 	class Meta:
 		model = CorteCaja

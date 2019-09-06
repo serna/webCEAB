@@ -2,7 +2,7 @@
 
 {% load render_table from django_tables2 %}
 {% load static %}
-<html lang="es"> 
+<html lang="es">
 	<head>
 
 
@@ -10,18 +10,18 @@
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
+
 	 </head>
 	<body>
 		<header class="row" style="padding-top: 10px; padding-bottom: 20px">
-				<a href="/"><img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo"></a>			
+				<a href="/"><img class="col-md-1" src="http://www.mibachilleratoabierto.com.mx/images/logo.png" alt="Logo"></a>
 	        </div>
-	    
+
 	        <nav class="col-md-12">
 		        <ul class="nav nav-pills" style="padding-top: 20px; padding-left: 20px" >
 					<li class="active"><a href="/">Inicio</a></li>
-					
-					
+
+
 					<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="/control_diario">Tareas continuas <span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a href="/ingresos_del_dia">Ingresos del dia</a></li>
@@ -34,11 +34,12 @@
 						<ul class="dropdown-menu">
 					        <li><a href="/documentacion_incompleta_plantel">Documentacion plantel</a></li>
 					        <li><a href="/documentacion_incompleta_empresa">Documentacion empresa</a></li>
-	        				
+					        <li><a href="/documentacion_incompleta_alumno">Documentacion alumno</a></li>
+
 						</ul>
 					</li>
-					
-					
+
+
 					<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="/consultas">Herramientas <span class="caret"></span></a>
 						<ul class="dropdown-menu">
 					        <li><a href="/captura_calificacion">Captura calificacion</a></li>
@@ -56,16 +57,16 @@
 				</ul>
 			</nav>
 		</header>
-    	
+
         <section class="col-md-12">
-        	
-            
+
+
             {% block content %}
             {% endblock %}
 
    		</section>
-	  
-	 
+
+
 		<footer>
         {% block footer %}
         	<p style="margin-left: 40px" >  <br></p>
@@ -79,5 +80,5 @@
 
 
 
-	</body> 
+	</body>
 </html>
