@@ -849,9 +849,53 @@ def imprime_material_regulares(request):
 					fila.append(mat.examen.clave_del_examen)
 				filas.append(fila)
 			context = {
-					'titulo': "Material pas los alumnos del plantel: %s"%plantel,
+					'titulo': "Material para los alumnos del plantel: %s"%plantel,
 					'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio,fin),
 					'encabezados': ['Alumno','horario','Folio', 'materia 1','materia 2','Materia 3'],
+					'filas': filas,
+					}
+
+			return render(request,"tabla_general.html", context)
+	else:
+		form = fechaPlantel_form()
+		context = {
+		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
+		"form":form,
+		}
+	return render(request, "formulario_fechas.html", context)
+def imprime_material_irregulares(request):
+
+	if request.method == 'POST':
+		form = fechaPlantel_form(request.POST)
+		if form.is_valid():
+
+			plantel = form.cleaned_data['plantel']
+			print("Alumnos del plantel ",plantel)
+			fecha = form.cleaned_data['fecha']
+			diaDeLaSemana = form.cleaned_data['fecha'].weekday()
+			print("La impresion",diaDeLaSemana)
+			inicio = fecha-timedelta(days=diaDeLaSemana) #+timedelta(days=-7) # el material se imprime con 2 semanas de anticipacion, por lo tanto la consulta se hace a partir de 14 dias despues de hoy
+			fin = inicio + timedelta(days=6) # Como la impresion de material se hace cada 14 dias entonces no hay que revisar contabilizar materias que inician despues de 4 semanas
+			#qs=Materia.objects.filter(fecha_inicio__gte=inicio,fecha_inicio__lt=fin)
+			cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados__gt=0,estudiante__activo=True,estudiante__plantel=plantel)
+			#cv = Curso.objects.filter(materias__fecha_inicio__gte=inicio,materias__fecha_inicio__lte=fin,estudiante__tarjeton__pagos_atrasados=0,estudiante__activo=True,estudiante__empresa=1)
+			cv=cv.distinct() # esta consulta contiene todos los cursos de alumnos regulares que inician materias a partir de hoy y hasta la fecha guardada en fin
+			cv = cv.order_by('horario')
+			filas = []
+			print('Cursos validos')
+			print(cv)
+
+			for curso in cv:
+				fila =[curso.estudiante,curso.horario,curso.estudiante.numero_de_control]  # el primer elemento de la lista es el estudiante
+				qs = Tarjeton.objects.get(alumno = curso.estudiante)
+				pagos_atrasados = qs.pagos_atrasados
+				fila.append(pagos_atrasados)
+				materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
+				filas.append(fila)
+			context = {
+					'titulo': "Material pa los alumnos del plantel: %s"%plantel,
+					'mensaje': "Materiales a imprimir correspondientes a la semana del %s al %s"%(inicio,fin),
+					'encabezados': ['Alumno','horario','Folio','Atrasos'],
 					'filas': filas,
 					}
 

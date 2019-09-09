@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^captura_calificacion$', views.captura_calificacion),
     url(r'^boleta_alumno$', views.boleta_alumno),
     url(r'^imprime_material_regulares$', views.imprime_material_regulares),
+    url(r'^imprime_material_irregulares$', views.imprime_material_irregulares),
     url(r'^imprime_material_empresa$', views.imprime_material_empresa),
     url(r'^calendario_materias$', views.calendario_materias),
     url(r'^documentacion_incompleta_plantel$', views.documentacion_incompleta_plantel),
