@@ -51,6 +51,7 @@ urlpatterns = [
     url(r'^corte_caja$', views.corte_caja),
     url(r'^cobros_por_vencer$', views.cobros_por_vencer),
     url(r'^detalle_pago_alumno$', views.detalle_pago_alumno),
-
-
+    url(r'^ingresos_por_periodo$', views.ingresos_por_periodo),
+    url(r'^egresos_por_periodo$', views.egresos_por_periodo),
+    url(r'^balance_por_periodo$', views.balance_por_periodo),
 ]

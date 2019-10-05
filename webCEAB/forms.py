@@ -25,8 +25,8 @@ class form_busca_alumno_nombre(forms.Form):
 	apellido_materno = forms.CharField(label='Apellido materno',required=False)
 
 class rango_fechas_form(forms.Form):
-	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget())
-	fecha_final = forms.DateField(widget=forms.SelectDateWidget())
+	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 class fecha_form(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
