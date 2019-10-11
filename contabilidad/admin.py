@@ -1,6 +1,33 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina, Tarjeton, CorteCaja
+from .models import Proveedor, PagosAlumno, EgresoGenerales, EgresoNomina, Tarjeton, CorteCaja,IngresoGeneral
+
+
+
+class IngresoGeneralAdmin(admin.ModelAdmin):
+	search_fields = ('id',)
+	#def get_form(self, request, obj=None, **kwargs):
+	#	if request.user.is_superuser:
+	#		kwargs['form'] = EgresoSuperUserForm
+	#	else:
+	#		kwargs['form'] = EgresoNormalUserForm
+	#	return super(EgresoGeneralesAdmin, self).get_form(request, obj, **kwargs)
+	def get_readonly_fields(self, request, obj=None):
+		# regresa la lista de campos que son de solo lectura
+		readOnlyFields = []
+		if request.user.is_superuser:
+			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+			# sera superusuario, en esta funcion se determina que campos no podra modificar
+			readOnlyFields = [] # set all fields as editable
+		elif obj:
+			for f in self.model._meta.fields:
+				# et all fields as readoonly for all not superuser
+				if f.name != 'id' :
+					readOnlyFields.append(f.name)
+		else:
+			readOnlyFields = []
+		return readOnlyFields
+admin.site.register(IngresoGeneral,IngresoGeneralAdmin)
 
 
 class EgresoGeneralesAdmin(admin.ModelAdmin):

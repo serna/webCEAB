@@ -122,3 +122,24 @@ class CorteCaja(models.Model):
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Cortes de caja"		
+
+
+class IngresoGeneral(models.Model):
+	opciones= (
+		('Efectivo','Efectivo'),
+		('Deposito','Deposito'),
+		('Transferencia','Transferencia'),
+		('Cheque','Cheque'),
+		('Otro', 'Otro'),
+	)
+	fecha = models.DateField(default=timezone.now)
+	concepto = models.CharField(max_length = 100)
+	monto = models.DecimalField(max_digits = 7,decimal_places=2)
+	forma_de_pago = models.ForeignKey(FormaDePago)
+	folio = models.CharField(max_length = 10,default = '0000')
+	def __str__(self): 
+		#return str(self.alumno.id) +': ' + str(self.monto)
+		return str(self.id)+":" +str(self.concepto)+"" +str(self.monto) +":" +str(self.fecha_pago) + "\n"
+	class Meta:
+		#ordering = ["nombre"] 
+		verbose_name_plural = "Ingresos generales"
