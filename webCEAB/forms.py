@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.forms import ModelForm
 from django import forms
 from django.utils.safestring import mark_safe
-from siad.models import Plantel, Horario, Empresa
+from siad.models import Plantel, Horario, Empresa, Calendario
 from contabilidad.models import CorteCaja
 
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
@@ -27,6 +27,16 @@ class form_busca_alumno_nombre(forms.Form):
 class rango_fechas_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+class rango_fechas_plantel_form(forms.Form):
+	plantel = forms.ModelChoiceField(queryset = Plantel.objects.all())
+	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+class rango_fechas_calendario_form(forms.Form):
+	hora_inicio = forms.TimeField()
+	calendario = forms.ModelChoiceField(queryset = Calendario.objects.all())
+	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
+
 class fecha_form(forms.Form):
 	# se usa este formulario para consultas donde solo se necesita una fecha
 	fecha = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
@@ -58,7 +68,7 @@ class form_plantel(forms.Form):
 class form_empresa(forms.Form):
 	empresa = forms.ModelChoiceField(queryset = Empresa.objects.all())
 class form_no_alumno(forms.Form):
-	# se usa este formulario para consultas donde solo se necesita una fecha
+	
 	alumno = forms.IntegerField()
 class form_genera_extraordinario(forms.Form):
 	alumno = forms.IntegerField()

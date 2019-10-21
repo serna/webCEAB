@@ -54,4 +54,6 @@ urlpatterns = [
     url(r'^ingresos_por_periodo$', views.ingresos_por_periodo),
     url(r'^egresos_por_periodo$', views.egresos_por_periodo),
     url(r'^balance_por_periodo$', views.balance_por_periodo),
+    url(r'^datos_alumno$', views.datos_alumno),
+    url(r'^imprime_calendario_materias$', views.imprime_calendario_materias),
 ]

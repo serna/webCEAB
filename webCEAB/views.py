@@ -7,8 +7,8 @@ from django.core.mail import send_mail
 from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Documentacion
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno,CorteCaja
-from siad.models import Empleado, Documento
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja,form_no_alumno
+from siad.models import Empleado, Documento, Calendario
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja,form_no_alumno,rango_fechas_plantel_form,rango_fechas_calendario_form
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
@@ -623,26 +623,28 @@ def menu_promotor(request):
 	return render(request, 'form_acceso_alumno.html', context)
 
 def pagos_proximos(request):
-	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.localtime(timezone.now())) 
 	suma = 0
+	filas =[]
+	cnt = 1
 	for item in queryset:
 		suma = suma + item.monto_futuro_a_cubrir
-	queryset2 = EgresoNomina.objects.filter(proxima_fecha_de_pago__gt = timezone.now())
+		filas.append([cnt,item.id,"Gasto general",item.concepto,item.monto,item.proxima_fecha_de_pago])
+		cnt += 1
+	queryset2 = EgresoNomina.objects.filter(proxima_fecha_de_pago__gt = timezone.localtime(timezone.now()))
 	suma2 = 0
 	for item in queryset2:
 		suma2 = suma2 + item.monto_futuro_a_cubrir
-	table = PagosProximosTable(queryset)
-	table2 = PagosProximosNominaTable(queryset2)
+		filas.append([cnt,item.id,"Nomina",item.concepto,item.monto,item.proxima_fecha_de_pago])
+		cnt += 1
 
-	RequestConfig(request).configure(table)
-	RequestConfig(request).configure(table2)
-	context = {"queryset":table,
-				'queryset2':table2,
-			 	"subtitulo":"Resumen de pagos proximos",
-			 	"info": 'La deuda futura es de: ' + str(suma+suma2),
-			 	'subtitle1': 'Generales',
-			 	'subtitle2': 'Nomina',
-				}
+	context = {
+			'mensaje': "Proximos pagos a realizar",
+			"submensaje": "Suma total: ${0}".format(suma+suma2),
+			'encabezados': ["#","ID","Rubro","Concepto","Monto","Fecha"],
+			'filas':filas,					
+			}
+	return render(request, "tabla_general.html", context)
 	return render(request,"reporte_tablas.html", context)
 	#return render(request,"mensaje_prueba.html", context)
 def cobros_diarios(request):
@@ -1373,12 +1375,26 @@ def detalle_pago_alumno(request):
 		form = form_no_alumno(request.POST)
 		if form.is_valid():
 			id_alumno = form.cleaned_data['alumno']
-			qs = Tarjeton.objects.get(alumno = id_alumno)
+			try:
+				qs = Tarjeton.objects.get(alumno = id_alumno)
+			except:
+				context = {
+					'titulo': "Error!",
+					'mensaje': "No se tiene registro del tarjeton del alumno %d en la base de datos"%id_alumno,
+				}
+				return render(request, 'msg_registro_inexistente.html',context)
 			inicio = qs.fecha_abonos_anticipados
 			filas = []
 			resumen = []
 			cnt=0
 			total_pagado = 0
+			opciones= {
+				'Semanal':timedelta(days=7),
+				'Quincenal':timedelta(days=14),
+				'Mensual':timedelta(days=28),
+				'Un solo pago':timedelta(days=1),
+				'Otro': timedelta(days=30, hours=10),
+			}
 			for pago in qs.pagos.all():
 				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
 				total_pagado += pago.monto
@@ -1393,7 +1409,7 @@ def detalle_pago_alumno(request):
 				print("PAGOS HECHOS",qs.pagos.all(),inicio)
 				if pago.fecha_pago>=inicio:
 					monto_cubierto += pago.monto
-			if qs.pagos_atrasados==0:
+			if qs.pagos_atrasados<1:
 				submensaje = "El alumno esta al corriente en sus pagos"
 				cadena_fecha = "Proxima fecha de pago"
 				fecha_proxima = qs.proxima_fecha_de_pago
@@ -1402,17 +1418,18 @@ def detalle_pago_alumno(request):
 			else:
 				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
 				cadena_fecha = "Ultima fecha que debe cubrir "
-				opciones= {
-					'Semanal':timedelta(days=7),
-					'Quincenal':timedelta(days=14),
-					'Mensual':timedelta(days=28),
-					'Un solo pago':timedelta(days=1),
-					'Otro': timedelta(days=30, hours=10),
-				}
+				
 				fecha_proxima = qs.proxima_fecha_de_pago-qs.pagos_atrasados*opciones[qs.esquema_de_pago]
 				#fecha_proxima = qs.proxima_fecha_de_pago
 			#fecha_inicio = qs.fecha_abonos_anticipados
-			
+			if qs.pago_periodico!=0:
+				n_pagos = int(qs.monto_a_pagos/qs.pago_periodico)
+			else:
+				n_pagos=0
+			filas3 = []
+			primer_pago = qs.inicio
+			for i in range(n_pagos):
+				filas3.append([i+1,primer_pago+i*opciones[qs.esquema_de_pago],qs.pago_periodico])
 
 			resumen = [ (cadena_fecha,fecha_proxima),
 						("Monto total",qs.monto_total),
@@ -1427,6 +1444,8 @@ def detalle_pago_alumno(request):
 					'filas':resumen,
 					'encabezados2': ["Id pago","Folio",'Fecha',"Concepto","Monto"],
 					'filas2': filas,
+					'encabezados3': ["Pago",'Fecha',"Monto"],
+					'filas3': filas3,
 					}
 			return render(request, "reporta_resultados_pago_alumno.html", context)
 
@@ -1441,11 +1460,12 @@ def detalle_pago_alumno(request):
 
 def ingresos_por_periodo(request):
 	if request.method == 'POST':
-		form = rango_fechas_form(request.POST)
+		form = rango_fechas_plantel_form(request.POST)
 		if form.is_valid():
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
-			qs = PagosAlumno.objects.filter(fecha_pago__gte = fecha1,fecha_pago__lte=fecha2)
+			plantel = form.cleaned_data["plantel"]
+			qs = PagosAlumno.objects.filter(alumno__plantel=plantel,fecha_pago__gte = fecha1,fecha_pago__lte=fecha2)
 
 			filas = []
 			total = 0
@@ -1464,7 +1484,7 @@ def ingresos_por_periodo(request):
 					}
 			return render(request, "tabla_general.html", context)
 	else:
-		form = rango_fechas_form()
+		form = rango_fechas_plantel_form()
 
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
@@ -1474,11 +1494,12 @@ def ingresos_por_periodo(request):
 
 def egresos_por_periodo(request):
 	if request.method == 'POST':
-		form = rango_fechas_form(request.POST)
+		form = rango_fechas_plantel_form(request.POST)
 		if form.is_valid():
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
-			qs = EgresoGenerales.objects.filter(fecha__gte = fecha1,fecha__lte=fecha2)
+			plantel = form.cleaned_data["plantel"]
+			qs = EgresoGenerales.objects.filter(fecha__gte = fecha1,fecha__lte=fecha2,plantel=plantel)
 			filas = []
 			total = 0
 			for pago in qs:
@@ -1486,15 +1507,23 @@ def egresos_por_periodo(request):
 				total += monto
 				fila = [pago.id,pago.fecha,monto,pago.pago_hecho_a,pago.folio_de_recibo]
 				filas.append(fila)
+
+			qs2 = EgresoNomina.objects.filter(fecha__gte = fecha1,fecha__lte=fecha2)#,plantel=plantel)
+			print("### LA consulta tiene %d registros"%len(qs2))
+			for pago in qs2:
+				monto = pago.monto
+				total += monto
+				fila = [pago.id,pago.fecha,monto,pago.pago_hecho_a,pago.folio_de_recibo]
+				filas.append(fila)
 			context = {
-					'mensaje': "Resumen de los ingresos para el periodo del %s al %s"%(fecha1,fecha2),
+					'mensaje': "Resumen de los gastos para el periodo del %s al %s"%(fecha1,fecha2),
 					"submensaje": "La suma de los egresos asciende a un total de $%s"%total,
 					'encabezados': ["Id pago","Fecha",'Monto',"Forma de pago","Folio"],
 					'filas':filas,					
 					}
 			return render(request, "tabla_general.html", context)
 	else:
-		form = rango_fechas_form()
+		form = rango_fechas_plantel_form()
 
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
@@ -1504,12 +1533,13 @@ def egresos_por_periodo(request):
 
 def balance_por_periodo(request):
 	if request.method == 'POST':
-		form = rango_fechas_form(request.POST)
+		form = rango_fechas_plantel_form(request.POST)
 		if form.is_valid():
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
-			qs = PagosAlumno.objects.filter(fecha_pago__gte = fecha1,fecha_pago__lte=fecha2)
-			qs2 = EgresoGenerales.objects.filter(fecha__gte = fecha1,fecha__lte=fecha2)
+			plantel = form.cleaned_data["plantel"]
+			qs = PagosAlumno.objects.filter(alumno__plantel=plantel,fecha_pago__gte = fecha1,fecha_pago__lte=fecha2)
+			qs2 = EgresoGenerales.objects.filter(fecha__gte = fecha1,fecha__lte=fecha2,plantel=plantel)
 			ingresos = 0
 			egresos = 0
 			for pago in qs:
@@ -1526,10 +1556,75 @@ def balance_por_periodo(request):
 					}
 			return render(request, "tabla_general.html", context)
 	else:
-		form = rango_fechas_form()
+		form = rango_fechas_plantel_form()
 
 		context = {
 		"mensaje": "Ingresa el rango de fechas",
 		"form":form,
 		}
 	return render(request, "formulario_fechas.html", context)
+def datos_alumno(request):
+	
+	if request.method == 'POST':
+		form = form_no_alumno(request.POST)
+		if form.is_valid():
+			id_alumno = form.cleaned_data['alumno']
+			try:
+				qs = Estudiante.objects.get(id=id_alumno)
+			except:
+				context = {
+					'titulo': "Error!",
+					'mensaje': "No se tiene registro del alumno %d en la base de datos"%id_alumno,
+				}
+				return render(request, 'msg_registro_inexistente.html',context)
+			
+			filas = [[qs,qs.email,qs.Aspirante.telefono]]
+			context = {
+					'mensaje': "Datos del alumno",
+					#"submensaje": 
+					'encabezados': ["Nombre","Correo","Telefono"],
+					'filas':filas,					
+					}
+			return render(request, "tabla_general.html", context)
+	else:
+		form = form_no_alumno()
+
+		context = {
+		"mensaje": "Ingresa el ID del alumno",
+		"form":form,
+		}
+	return render(request, "formulario_captura_calificacion.html", context)
+
+def imprime_calendario_materias(request):
+
+	if request.method == 'POST':
+		form = rango_fechas_calendario_form(request.POST)
+
+		if form.is_valid():
+			fecha1 = form.cleaned_data['fecha_inicial']
+			fecha2 = form.cleaned_data['fecha_final']
+			calendario = form.cleaned_data["calendario"]
+			hora = form.cleaned_data["hora_inicio"]
+			qs = Materia.objects.filter(fecha_inicio__gte = fecha1,fecha_termino__lte=fecha2,calendario=calendario,horario_inicio=hora)
+			filas = []
+			cnt = 1
+			for materia in qs:
+				filas.append([cnt,materia.id,materia.nombre,materia.fecha_inicio,materia.fecha_termino])
+				cnt +=1
+			context = {
+					'mensaje': "Materias para el periodo del %s al %s"%(fecha1,fecha2),
+					#"submensaje": "El balance es de $%s"%(ingresos-egresos),
+					'encabezados': ["#","Materia ID","Nombre","Inicio","Fin"],
+					'filas':filas,					
+					}
+			return render(request, "tabla_general.html", context)
+	
+	form = rango_fechas_calendario_form()
+
+	context = {
+	"mensaje": "Ingresa la informacion correspondiente",
+	"form":form,
+	}
+
+	return render(request, "formulario_fechas.html", context)
+	

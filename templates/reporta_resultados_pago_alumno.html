@@ -24,6 +24,7 @@
 		</tbody>
 	</table>
 
+	<h2>Pagos realizados</h2>
 
 	<table class = "table table-striped">
 		<thead class="thead-inverse">
@@ -50,5 +51,33 @@
 			{% endfor %}
 		</tbody>
 	</table>
-		
+	
+	<h2>Fechas de pago programadas</h2>
+
+	<table class = "table table-striped">
+		<thead class="thead-inverse">
+			<tr>
+
+				{% for item in encabezados3 %}
+				
+					<th> {{item}} </td>
+		  		
+				{% endfor %}
+				
+			</tr>
+		</thead>
+
+
+
+		<tbody>
+			{% for fila in filas3 %}
+				<tr>
+				{% for cad in fila %}
+					<td> {{cad}} </td>
+				{% endfor %}
+		  		</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
 {% endblock %}
