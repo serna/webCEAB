@@ -216,24 +216,7 @@ def mkdir(dir_name):
             #pass
             return 0
         # let exception propagate if we just can't
-listaPreguntas = []
-fileName = sys.argv[1]
 
-clave = ""
-testName = ""
-try:
-	ff = open(fileName,"r")
-except IOError:
-	print( "El archivo '" + fileName + "' no se puede abrir")
-else:
-	line = ff.readline()
-	clave = line.split("|")[0]
-	print( "La clave del examen es: ",clave)
-	testName = line.split("|")[1]
-	for line in ff:
-		listaPreguntas.append(line)
-	ff.close()
-scrambleOnlyAnswer = 0
 def crea_archivo(nombre,contenido):
 	cadena = r"""
 \documentclass[a4paper,10pt,fleqn]{article}
