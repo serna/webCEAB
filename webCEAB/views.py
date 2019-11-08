@@ -8,14 +8,15 @@ from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Document
 from promotoria.models import Aspirantes
 from contabilidad.models import EgresoGenerales, EgresoNomina, Tarjeton, PagosAlumno,CorteCaja
 from siad.models import Empleado, Documento, Calendario
-from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja,form_no_alumno,rango_fechas_plantel_form,rango_fechas_calendario_form
+from .forms import rango_fechas_form,fecha_form, preguntas_form, form_acceso_alumno, form_captura_cal, form_boleta_alumno,form_plantel_empresa_horario,form_genera_extraordinario,form_busca_alumno_nombre,empresaFecha_form,fechaPlantel_form, form_empresa, form_plantel, form_corte_caja,form_no_alumno,rango_fechas_plantel_form,rango_fechas_calendario_form,form_alumno_materia
 from .tables import AspiranteTable, EstudianteTable, PagosProximosTable, PagosProximosNominaTable,PagospendientesTable
 import csv
 from django_tables2 import RequestConfig
 from django.urls import reverse
 from django.http import HttpResponse
 from django.utils import timezone
-from .modules import rutinas as rut
+from .modules import rutinas as rut 
+from .modules import generadorTEX as tex
 from datetime import timedelta
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -1513,12 +1514,12 @@ def egresos_por_periodo(request):
 			for pago in qs2:
 				monto = pago.monto
 				total += monto
-				fila = [pago.id,pago.fecha,monto,pago.pago_hecho_a,pago.folio_de_recibo]
+				fila = [pago.id,pago.fecha,monto,pago.concepto,pago.folio_de_recibo]
 				filas.append(fila)
 			context = {
 					'mensaje': "Resumen de los gastos para el periodo del %s al %s"%(fecha1,fecha2),
 					"submensaje": "La suma de los egresos asciende a un total de $%s"%total,
-					'encabezados': ["Id pago","Fecha",'Monto',"Forma de pago","Folio"],
+					'encabezados': ["Id pago","Fecha",'Monto',"Concepto","Folio"],
 					'filas':filas,					
 					}
 			return render(request, "tabla_general.html", context)
@@ -1578,11 +1579,11 @@ def datos_alumno(request):
 				}
 				return render(request, 'msg_registro_inexistente.html',context)
 			
-			filas = [[qs,qs.email,qs.Aspirante.telefono]]
+			filas = [[qs,qs.email,qs.Aspirante.celular,qs.Aspirante.telefono]]
 			context = {
 					'mensaje': "Datos del alumno",
 					#"submensaje": 
-					'encabezados': ["Nombre","Correo","Telefono"],
+					'encabezados': ["Nombre","Correo","Celular","Telefono"],
 					'filas':filas,					
 					}
 			return render(request, "tabla_general.html", context)
@@ -1627,4 +1628,24 @@ def imprime_calendario_materias(request):
 	}
 
 	return render(request, "formulario_fechas.html", context)
+def generaPDF(request):
+	if request.method == 'POST':
+		form = form_alumno_materia(request.POST)
+
+		if form.is_valid():
+			alumno = form.cleaned_data['numero_del_alumno']
+			materia = form.cleaned_data['numero_de_la_materia']
+			
+
+			tex.crea_archivo("cesar.tex","Marco Serna")
+			context={"mensaje":"mensaje"}
+			return render(request, "tabla_general.html", context)
 	
+	form = form_alumno_materia()
+
+	context = {
+	"mensaje": "Impresion de material para el alumno",
+	"form":form,
+	}
+
+	return render(request, "formulario_fechas.html", context)

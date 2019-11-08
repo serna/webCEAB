@@ -56,4 +56,6 @@ urlpatterns = [
     url(r'^balance_por_periodo$', views.balance_por_periodo),
     url(r'^datos_alumno$', views.datos_alumno),
     url(r'^imprime_calendario_materias$', views.imprime_calendario_materias),
+    url(r'^generaPDF$', views.generaPDF),
+    
 ]

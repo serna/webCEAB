@@ -18,6 +18,9 @@ class HorizRadioRenderer(forms.RadioSelect.renderer):
 class form_acceso_alumno(forms.Form):
 	numero_de_alumno = forms.CharField(label = 'Ingresa tu numero de identificacion')
 	clave_de_alumno = forms.CharField(label = 'Ingresa tu contrasena')
+class form_alumno_materia(forms.Form):
+	numero_del_alumno = forms.IntegerField()
+	numero_de_la_materia = forms.IntegerField()
 class form_busca_alumno_nombre(forms.Form):
 	""" Este formulario busca a un alumno por su nombre"""
 	nombre = forms.CharField(label='Nombre')

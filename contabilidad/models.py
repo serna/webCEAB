@@ -68,7 +68,7 @@ class EgresoGenerales(models.Model):
 		return "%s;\t%s;\t%s"%(self.movimiento_verificado_por_direccion,self.concepto,self.fecha)
 	class Meta: 
 		#ordering = ["nombre"] 
-		verbose_name_plural = "Egresos generales"
+		verbose_name_plural = "Gastos generales"
 class EgresoNomina(models.Model):
 	folio_de_recibo = models.IntegerField()
 	concepto = models.CharField(max_length = 40)
