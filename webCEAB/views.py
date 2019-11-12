@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, render_to_response, redirect # is used to looks for the object that is related the call
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template.loader import get_template
 from django.template import Context
 import datetime
@@ -20,7 +20,7 @@ from .modules import generadorTEX as tex
 from datetime import timedelta
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
-
+import os
 from io import BytesIO
 #from reportlab.pdfgen import canvas
 from django.http import HttpResponse
@@ -1628,6 +1628,14 @@ def imprime_calendario_materias(request):
 	}
 
 	return render(request, "formulario_fechas.html", context)
+def descarga(request,archivo):
+	print("### Abriendo el archivo",archivo)
+	ff = open(archivo,"rb")
+	response = HttpResponse(ff.read(), content_type='application/pdf')
+	response['Content-Disposition'] = 'attachment; filename="%s"'%(archivo.split("_")[-1])
+	ff.close()
+	print("### Se ha creado y entregado el archivo")
+	return response
 def generaPDF(request):
 	if request.method == 'POST':
 		form = form_alumno_materia(request.POST)
@@ -1635,11 +1643,67 @@ def generaPDF(request):
 		if form.is_valid():
 			alumno = form.cleaned_data['numero_del_alumno']
 			materia = form.cleaned_data['numero_de_la_materia']
-			
+			try:
+				qs_alumno = Estudiante.objects.get(id=alumno)
+			except:
+				context = {
+					'titulo': "Registro inexistente",
+					'mensaje': "Ese alumno no existe en la base de datos",
+				}
+				return render(request, 'msg_registro_inexistente.html',context)
+			qs_materia = Materia.objects.get(id=materia)
+			try:
+				qs_materia = Materia.objects.get(id=materia)
+			except:
+				context = {
+					'titulo': "Registro inexistente",
+					'mensaje': "Esa materia no existe en la base de datos",
+				}
+				return render(request, 'msg_registro_inexistente.html',context)
+			nombre_materia = str(qs_materia.nombre).replace(" ","")
+			materia = "%d_%d_%s"%(qs_materia.id,qs_alumno.id,nombre_materia)
 
-			tex.crea_archivo("cesar.tex","Marco Serna")
-			context={"mensaje":"mensaje"}
-			return render(request, "tabla_general.html", context)
+			archivo_pdf = "pdfs/" + str(materia) + ".pdf"
+			if os.path.exists(archivo_pdf):
+				print("### El archivo ya existe, solo se descarga")
+				return descarga(request,archivo_pdf)
+			else:
+				print("### El archivo no existe, se genera un archivo nuevo")
+				nombre = str(materia)  + ".tex"
+				a = qs_materia.banco.archivo
+				a.open("r")
+				lineas = a.readlines()
+				a.close()
+				a.open("r")
+				lineas = a.readlines()
+				a.close()
+				for i in range(len(lineas)):
+					#linea = lineas[i].replace("\\\\","\\")
+					print("Directo del archivo",lineas[i],type(lineas[i]))
+					linea = str(lineas[i])
+					if linea[0]=="b":
+						lineas[i] = linea[1:]
+					else:
+						lineas[i] = linea
+					#lineas[i] = lineas[i].replace("|","")
+					#print("Directo del archivo",lineas[i])
+				contenido = {
+				"alumno":"%d %s %s %s"%(qs_alumno.id,qs_alumno.Aspirante.nombre,qs_alumno.Aspirante.apellido_paterno,qs_alumno.Aspirante.apellido_materno),
+				"materia": "%s"%(nombre_materia),
+				"n_preguntas": qs_materia.banco.numero_de_reactivos,
+				"folio": qs_alumno.numero_de_control,
+				"en_orden": qs_materia.banco.preguntas_en_el_mismo_orden,
+				"lineas": lineas
+				}
+				tex.crea_archivo(nombre,contenido)
+				if os.path.exists(archivo_pdf):
+					print("### El archivo se descarga inmediatamente despues de haber sido creado")
+					return descarga(request,archivo_pdf)
+				else:
+					context={"mensaje":"No se pudo generar el material"}
+					return render(request, "tabla_general.html", context)
+				context={"mensaje":"No se pudo generar el material"}
+				return render(request, "tabla_general.html", context)
 	
 	form = form_alumno_materia()
 

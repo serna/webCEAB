@@ -4,3 +4,5 @@ myvenv
 db.sqlite3
 .DS_Store
 pdfs/
+contabilidad/migrations/
+controlescolar/migrations/

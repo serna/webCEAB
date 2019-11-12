@@ -79,7 +79,7 @@ def toLatexQuestion(question,order,linea):
 	ans += "	\t\\end{tasks}"
 	ans += "\n\t\\end{enumerate}"
 	return ans
-def latexPreamble(testName,clave,version,nPreguntas):
+def latexPreamble(testName,clave,version,nPreguntas,claveAlumno2):
 	"""Define the common preamble for test template
 	"""
 	ans = """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,7 +250,9 @@ def crea_archivo(nombre,contenido):
 
 \maketitle
 \thispagestyle{fancy}
-
+Alumno: %s
+Nombre de la materia: %s
+Numero de preguntas: %d
 Resuelve correctamente los siguientes ejercicios.
   \begin{enumerate}[resume]
     \item ¿Cu\'al es el \'area m\'axima posible de un rect\'angulo, cuya base 
@@ -286,27 +288,37 @@ Resuelve correctamente los siguientes ejercicios.
 	Dispone de 3600 m de material para cercar y desea hacer un corral rectangular 
 	utilizando el muro como uno de sus lados, ¿qu\'e dimensiones debe tener el
 	corral para tener la mayor \'area posible?.
-	
+	\begin{verbatim}
+	%s
+	\end{verbatim}
   \end{enumerate}
 
-% 1: 6.8853E-01
-% 2: 3.6000E+01
-% 3: 3.0170E+01
-% 4: 0.0000E+00
-% 5: 4.4721E+01
-% 6: 1.4882E+01
-% 7: 3.0792E+00
-% 8: 4.4721E-01
-% 9: 5.8800E+02
-% 10: 1.6200E+06
 
 \end{document}
 
-	"""
+	"""%(contenido["alumno"],contenido["materia"],contenido["n_preguntas"],contenido["lineas"])
+	#print(cadena)
+	en_orden = contenido["en_orden"]
+	folio = contenido["folio"]
+	preguntas = contenido["lineas"]
+	materia = contenido["materia"]
+	preguntas_validas = []
+	for pregunta in preguntas:
+		# revisamos que tenga al menos 5 elementos separados por un simbolo |
+		print("### Lo que contiene la linea", pregunta,type(pregunta))
+		if len(pregunta.split("|"))>=5:
+
+			preguntas_validas.append(pregunta)
+
+
+	cadena = genera_TEX_PDF(folio_alumno=folio,en_orden = en_orden,listaPreguntas=preguntas_validas,testName = materia)
+	print(cadena)
 	ff = open(nombre,"w")
 	ff.write(cadena)
 	ff.close()
-	os.system("pdflatex %s"%(nombre))
+	print("Nombra del archivo: ",nombre)
+	
+	os.system("pdflatex -interaction=nonstopmode %s "%(nombre))
 	print("Borrando el archivo .aux")
 	try: 
 		os.system("rm %s"%(nombre[:-3]+"aux"))
@@ -333,7 +345,7 @@ Resuelve correctamente los siguientes ejercicios.
 	except:
 		print("No se pudo mover el archivo %s"%(nombre[:-3]+"pdf"))
 
-def genera_TEX_PDF(folio_alumno,en_orden = 0):
+def genera_TEX_PDF(folio_alumno,listaPreguntas,testName ,en_orden = 0):
 	# folio_alumno: es el numero de folio del documento que usa CEAB para inscribir alumnos
 	# en_orden: Si es 1 solo se desordena el orden da las respuestas pero no la numeracion de los ejercicios
 	# if the user is printing a particular version of the test
@@ -356,9 +368,9 @@ def genera_TEX_PDF(folio_alumno,en_orden = 0):
 	#fileName = "tex/"
 	
 	fileName = sys.argv[1][:-4] + "_" + str(versionStr) + ".tex"
-	ff1 = open(fileName,"w")
-	ff1.write( latexPreamble(testName,clave,versionStr,len(listaPreguntas))) # start writing latex file
-	version = int(sys.argv[i])
+	#ff1 = open(fileName,"w")
+	cadena = latexPreamble(testName,clave,versionStr,len(listaPreguntas),folio_alumno) # start writing latex file
+	version = int(folio_alumno)
 	print("La semilla para el examen es: ",version)
 	random.seed(version) #start the random generator with seed establish by the version of the test
 	respuestas = [] # this array stablish in which position is the correct answer, this is done randomly
@@ -377,11 +389,11 @@ def genera_TEX_PDF(folio_alumno,en_orden = 0):
 	cnt = 0
 	for line in listaPreguntas:
 		if len(line)>1:
-			ff1.write(toLatexQuestion(line,respuestas[cnt],cnt+2))
+			cadena += toLatexQuestion(line,respuestas[cnt],cnt+2)
 		cnt += 1
 	#ff1.write("\n\t\\end{enumerate}") # end of questions
-	ff1.write("\n\\end{document}")
-	ff1.close()
+	cadena += "\n\\end{document}"
+	return cadena
         
 
 
