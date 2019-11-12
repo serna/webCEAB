@@ -367,7 +367,7 @@ def genera_TEX_PDF(folio_alumno,listaPreguntas,testName ,en_orden = 0):
 	#	mkdir("tex") # create the directory
 	#fileName = "tex/"
 	
-	fileName = sys.argv[1][:-4] + "_" + str(versionStr) + ".tex"
+	#fileName = sys.argv[1][:-4] + "_" + str(versionStr) + ".tex"
 	#ff1 = open(fileName,"w")
 	cadena = latexPreamble(testName,clave,versionStr,len(listaPreguntas),folio_alumno) # start writing latex file
 	version = int(folio_alumno)
@@ -397,26 +397,26 @@ def genera_TEX_PDF(folio_alumno,listaPreguntas,testName ,en_orden = 0):
         
 
 
-	comando = "pdflatex " + fileName
-	os.system(comando)
+	#comando = "pdflatex " + fileName
+	#os.system(comando)
 
-	rutaCompleta = fileName
-	fileName = fileName.split("/")[-1]
+	#rutaCompleta = fileName
+	#fileName = fileName.split("/")[-1]
 
-	comando = "rm " + fileName
-	os.system(comando)
-	comando = "rm " + fileName[:-4] +".log"
-	os.system(comando)
-	comando = "rm " + fileName[:-4] +".aux"
-	os.system(comando)
-	comando = "cp " + fileName[:-4] + ".pdf " + carpeta1+"/examen.pdf"
-	os.system(comando)
-	comando = "evince " + carpeta1 + "/examen.pdf&"
-	os.system(comando)
-	comando = "rm " + fileName[:-4] +".pdf"
-	os.system(comando)
-	print( fileName)
-	print( fileName[:-4])
+	#comando = "rm " + fileName
+	#os.system(comando)
+	#comando = "rm " + fileName[:-4] +".log"
+	#os.system(comando)
+	#comando = "rm " + fileName[:-4] +".aux"
+	#os.system(comando)
+	#comando = "cp " + fileName[:-4] + ".pdf " + carpeta1+"/examen.pdf"
+	#os.system(comando)
+	#comando = "evince " + carpeta1 + "/examen.pdf&"
+	#os.system(comando)
+	#comando = "rm " + fileName[:-4] +".pdf"
+	#os.system(comando)
+	#print( fileName)
+	#print( fileName[:-4])
 	
 	"""ff = open("script.sh","w")
 	#once the document is written, call klatex to buil the pdf file
