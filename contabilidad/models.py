@@ -15,9 +15,9 @@ class Proveedor(models.Model):
 	telefono_extension = models.CharField(max_length=50)
 	def __str__(self):
 		return self.nombre
-	class Meta: 
-		#ordering = ["nombre"] 
-		verbose_name_plural = "Proveedores" 
+	class Meta:
+		#ordering = ["nombre"]
+		verbose_name_plural = "Proveedores"
 
 class PagosAlumno(models.Model):
 	opciones= (
@@ -35,18 +35,18 @@ class PagosAlumno(models.Model):
 	alumno = models.ForeignKey(Estudiante)
 	fecha_pago = models.DateField(default=timezone.now)
 	concepto = models.CharField(max_length = 20,choices = opcionesConcepto,default = 'Colegiatura')
-	#concepto = models.ForeignKey(Concepto)	
+	#concepto = models.ForeignKey(Concepto)
 	monto = models.DecimalField(max_digits = 7,decimal_places=2,help_text='Aqui ingresa el monto efectivo que el alumno paga a la institucion')
 	bonificacion = models.DecimalField(max_digits = 7,decimal_places=2,default=0,help_text = "Aqui ingresa la bonificacion que se le hara al alumno")
 	forma_de_pago = models.ForeignKey(FormaDePago)
 	folio = models.CharField(max_length = 10,default = '0000')
 	cancelado = models.BooleanField(default = False,help_text='Si un pago es cancelado activa esta casilla')
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
-	def __str__(self): 
+	def __str__(self):
 		#return str(self.alumno.id) +': ' + str(self.monto)
 		return str(self.id)+":" +str(self.concepto)+"" +str(self.monto+self.bonificacion) +":" +str(self.fecha_pago) + "\n"
 	class Meta:
-		#ordering = ["nombre"] 
+		#ordering = ["nombre"]
 		verbose_name_plural = "Pagos de alumnos"
 class Ingreso(models.Model):
 	numero_registro = models.IntegerField()
@@ -65,9 +65,9 @@ class EgresoGenerales(models.Model):
 	movimiento_verificado_por_direccion = models.BooleanField(default = False)
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
-		return "%s;\t%s;\t%s"%(self.movimiento_verificado_por_direccion,self.concepto,self.fecha)
-	class Meta: 
-		#ordering = ["nombre"] 
+		return "%s: %s - %s"%(self.id,self.concepto,self.fecha)
+	class Meta:
+		#ordering = ["nombre"]
 		verbose_name_plural = "Gastos generales"
 class EgresoNomina(models.Model):
 	folio_de_recibo = models.IntegerField()
@@ -80,8 +80,8 @@ class EgresoNomina(models.Model):
 	#monto_cubierto = models.DecimalField(max_digits = 7, decimal_places = 2)
 	def __str__(self):
 		return self.concepto
-	class Meta: 
-		#ordering = ["nombre"] 
+	class Meta:
+		#ordering = ["nombre"]
 		verbose_name_plural = "Egresos nominas"
 class Tarjeton(models.Model):
 	opciones= (
@@ -100,17 +100,17 @@ class Tarjeton(models.Model):
 	pago_periodico = models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Cuanto pagara en cada semana, quincena o mes')
 	monto_cubierto = models.BooleanField(default = False,help_text='Activa esta casilla si el alumno ha cubierto la totalidad del monto')
 	pagos = models.ManyToManyField(PagosAlumno,help_text='Estos son los pagos que ha realizado el alumno',blank  = True)
-	proxima_fecha_de_pago =  models.DateField(default= timezone.now) 
+	proxima_fecha_de_pago =  models.DateField(default= timezone.now)
 	pagos_atrasados = models.IntegerField(default = 0)
 	tarjeton_verificado_por_direccion = models.BooleanField(default = False)
 	deuda_actual =  models.DecimalField(max_digits = 7, decimal_places = 2,help_text='Esta es la cantidad de dinero que debe actualmente el alumno',default = 0,blank = True)
 	fecha_abonos_anticipados = models.DateField(default= timezone.now,help_text='Solo se tomaran en cuenta los pagos que se hayan hecho desde esta fecha')
 	def __str__(self):
-		#return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno 
+		#return self.alumno.Aspirante.nombre + " " + self.alumno.Aspirante.apellido_paterno + " " + self.alumno.Aspirante.apellido_materno
 		return str(self.alumno)
-	class Meta: 
-		#ordering = ["nombre"] 
-		verbose_name_plural = "Tarjetones"	
+	class Meta:
+		#ordering = ["nombre"]
+		verbose_name_plural = "Tarjetones"
 class CorteCaja(models.Model):
 	folio = models.CharField(max_length = 10,default = '0000')
 	fecha_de_corte = models.DateField(default= timezone.now)
@@ -119,9 +119,9 @@ class CorteCaja(models.Model):
 	observaciones = models.TextField(max_length = 200,help_text='Descripcion breve del corte de caja',blank=True)
 	def __str__(self):
 		return str(self.id)+": "+str(self.fecha_de_corte)
-	class Meta: 
-		#ordering = ["nombre"] 
-		verbose_name_plural = "Cortes de caja"		
+	class Meta:
+		#ordering = ["nombre"]
+		verbose_name_plural = "Cortes de caja"
 
 
 class IngresoGeneral(models.Model):
@@ -137,9 +137,9 @@ class IngresoGeneral(models.Model):
 	monto = models.DecimalField(max_digits = 7,decimal_places=2)
 	forma_de_pago = models.ForeignKey(FormaDePago)
 	folio = models.CharField(max_length = 10,default = '0000')
-	def __str__(self): 
+	def __str__(self):
 		#return str(self.alumno.id) +': ' + str(self.monto)
 		return str(self.id)+":" +str(self.concepto)+"" +str(self.monto) +":" +str(self.fecha_pago) + "\n"
 	class Meta:
-		#ordering = ["nombre"] 
+		#ordering = ["nombre"]
 		verbose_name_plural = "Ingresos generales"

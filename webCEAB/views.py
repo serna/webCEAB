@@ -15,7 +15,7 @@ from django_tables2 import RequestConfig
 from django.urls import reverse
 from django.http import HttpResponse
 from django.utils import timezone
-from .modules import rutinas as rut 
+from .modules import rutinas as rut
 from .modules import generadorTEX as tex
 from datetime import timedelta
 from django.core.exceptions import ObjectDoesNotExist
@@ -624,7 +624,7 @@ def menu_promotor(request):
 	return render(request, 'form_acceso_alumno.html', context)
 
 def pagos_proximos(request):
-	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.localtime(timezone.now())) 
+	queryset = EgresoGenerales.objects.filter(proxima_fecha_de_pago__gt = timezone.localtime(timezone.now()))
 	suma = 0
 	filas =[]
 	cnt = 1
@@ -643,7 +643,7 @@ def pagos_proximos(request):
 			'mensaje': "Proximos pagos a realizar",
 			"submensaje": "Suma total: ${0}".format(suma+suma2),
 			'encabezados': ["#","ID","Rubro","Concepto","Monto","Fecha"],
-			'filas':filas,					
+			'filas':filas,
 			}
 	return render(request, "tabla_general.html", context)
 	return render(request,"reporte_tablas.html", context)
@@ -849,7 +849,7 @@ def imprime_material_regulares(request):
 				fila =[curso.estudiante,curso.horario,curso.estudiante.numero_de_control]  # el primer elemento de la lista es el estudiante
 				materias = Materia.objects.filter(curso=curso,fecha_inicio__gte=inicio,fecha_inicio__lte=fin)
 				for mat in materias:
-					fila.append(mat.examen.clave_del_examen)
+					fila.append(mat.id)
 				filas.append(fila)
 			context = {
 					'titulo': "Material para los alumnos del plantel: %s"%plantel,
@@ -859,12 +859,12 @@ def imprime_material_regulares(request):
 					}
 
 			return render(request,"tabla_general.html", context)
-	else:
-		form = fechaPlantel_form()
-		context = {
-		"mensaje": "Ingresa la fecha, esta servira como filtro para saber que alumnos tendran servicio hasta tal fecha",
-		"form":form,
-		}
+
+	form = fechaPlantel_form()
+	context = {
+	"mensaje": "Ingresa la fecha, se imprimiran los materiales de la semana correspondiente.",
+	"form":form,
+	}
 	return render(request, "formulario_fechas.html", context)
 def imprime_material_irregulares(request):
 
@@ -1419,7 +1419,7 @@ def detalle_pago_alumno(request):
 			else:
 				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
 				cadena_fecha = "Ultima fecha que debe cubrir "
-				
+
 				fecha_proxima = qs.proxima_fecha_de_pago-qs.pagos_atrasados*opciones[qs.esquema_de_pago]
 				#fecha_proxima = qs.proxima_fecha_de_pago
 			#fecha_inicio = qs.fecha_abonos_anticipados
@@ -1473,15 +1473,15 @@ def ingresos_por_periodo(request):
 			for pago in qs:
 				monto = pago.monto
 				total += monto
-				fila = [pago.id,pago.fecha_pago,monto,pago.forma_de_pago,pago.folio]
+				fila = [pago.id,pago.fecha_pago,monto,pago.concepto,pago.folio]
 				filas.append(fila)
 
 
 			context = {
 					'mensaje': "Resumen de los ingresos para el periodo del %s al %s"%(fecha1,fecha2),
 					"submensaje": "La suma de los ingresos asciende a un total de $%s"%total,
-					'encabezados': ["Id pago","Fecha",'Monto',"Forma de pago","Folio"],
-					'filas':filas,					
+					'encabezados': ["Id pago","Fecha",'Monto',"Concepto","Folio"],
+					'filas':filas,
 					}
 			return render(request, "tabla_general.html", context)
 	else:
@@ -1520,7 +1520,7 @@ def egresos_por_periodo(request):
 					'mensaje': "Resumen de los gastos para el periodo del %s al %s"%(fecha1,fecha2),
 					"submensaje": "La suma de los egresos asciende a un total de $%s"%total,
 					'encabezados': ["Id pago","Fecha",'Monto',"Concepto","Folio"],
-					'filas':filas,					
+					'filas':filas,
 					}
 			return render(request, "tabla_general.html", context)
 	else:
@@ -1547,13 +1547,13 @@ def balance_por_periodo(request):
 				ingresos += pago.monto
 			for pago in qs2:
 				egresos += pago.monto
-		
+
 			filas = [[ingresos,egresos,ingresos-egresos]]
 			context = {
 					'mensaje': "Resumen del balance para el periodo del %s al %s"%(fecha1,fecha2),
 					"submensaje": "El balance es de $%s"%(ingresos-egresos),
 					'encabezados': ["Ingresos","Egresos","Total"],
-					'filas':filas,					
+					'filas':filas,
 					}
 			return render(request, "tabla_general.html", context)
 	else:
@@ -1565,7 +1565,7 @@ def balance_por_periodo(request):
 		}
 	return render(request, "formulario_fechas.html", context)
 def datos_alumno(request):
-	
+
 	if request.method == 'POST':
 		form = form_no_alumno(request.POST)
 		if form.is_valid():
@@ -1578,13 +1578,13 @@ def datos_alumno(request):
 					'mensaje': "No se tiene registro del alumno %d en la base de datos"%id_alumno,
 				}
 				return render(request, 'msg_registro_inexistente.html',context)
-			
+
 			filas = [[qs,qs.email,qs.Aspirante.celular,qs.Aspirante.telefono]]
 			context = {
 					'mensaje': "Datos del alumno",
-					#"submensaje": 
+					#"submensaje":
 					'encabezados': ["Nombre","Correo","Celular","Telefono"],
-					'filas':filas,					
+					'filas':filas,
 					}
 			return render(request, "tabla_general.html", context)
 	else:
@@ -1616,10 +1616,10 @@ def imprime_calendario_materias(request):
 					'mensaje': "Materias para el periodo del %s al %s"%(fecha1,fecha2),
 					#"submensaje": "El balance es de $%s"%(ingresos-egresos),
 					'encabezados': ["#","Materia ID","Nombre","Inicio","Fin"],
-					'filas':filas,					
+					'filas':filas,
 					}
 			return render(request, "tabla_general.html", context)
-	
+
 	form = rango_fechas_calendario_form()
 
 	context = {
@@ -1704,7 +1704,7 @@ def generaPDF(request):
 					return render(request, "tabla_general.html", context)
 				context={"mensaje":"No se pudo generar el material"}
 				return render(request, "tabla_general.html", context)
-	
+
 	form = form_alumno_materia()
 
 	context = {
