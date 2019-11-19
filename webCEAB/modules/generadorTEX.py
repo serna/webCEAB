@@ -193,7 +193,7 @@ Centro de estudios abiertos y a distancia CEAB\\\\
 \\usepackage{tasks}	
 \\begin{document}
 \\maketitle
- \\noindent\\raisebox{29mm}[0pt][0pt]{\\rlap{\\makebox[\\textwidth][r]{\\includegraphics[height=30mm]{logo}}}}
+ \\noindent\\raisebox{29mm}[0pt][0pt]{\\rlap{\\makebox[\\textwidth][r]{\\includegraphics[height=30mm]{images/logo}}}}
  {\\bf Instrucciones: } Lee con atenci\\'on las preguntas y responde el examen en tu hoja de respuestas, recuerda registrar bien tu clave de alumno y clave de examen, as\\'i como el n\\'umero de preguntas.
  %\\section{Responde las preguntas en tu hoja de respuestas}
  
@@ -318,7 +318,8 @@ Resuelve correctamente los siguientes ejercicios.
 	ff.close()
 	print("Nombra del archivo: ",nombre)
 	
-	os.system("pdflatex -interaction=nonstopmode %s "%(nombre))
+	os.system("pdflatex %s "%(nombre))
+	#os.system("pdflatex -interaction=nonstopmode %s "%(nombre))
 	print("Borrando el archivo .aux")
 	try: 
 		os.system("rm %s"%(nombre[:-3]+"aux"))

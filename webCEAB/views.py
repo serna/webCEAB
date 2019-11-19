@@ -1671,9 +1671,19 @@ def generaPDF(request):
 				print("### El archivo no existe, se genera un archivo nuevo")
 				nombre = str(materia)  + ".tex"
 				a = qs_materia.banco.archivo
-				a.open("r")
-				lineas = a.readlines()
-				a.close()
+				try:
+					print("### Abriendo el archivo del banco")
+					a.open("r")
+					lineas = a.readlines()
+					a.close()
+
+				except:
+					print("### No se pudo abrir el banco")
+					context = {
+					'titulo': "SIN BANCO DE REACTIVOS",
+					'mensaje': "Esta materia no tiene un banco de reactivos dado de alta",
+					}
+					return render(request, 'msg_registro_inexistente.html',context)
 				a.open("r")
 				lineas = a.readlines()
 				a.close()

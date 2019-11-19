@@ -1,4 +1,5 @@
 *.pyc
+*.txt
 __pycache__
 myvenv
 db.sqlite3
@@ -8,3 +9,5 @@ contabilidad/migrations/
 controlescolar/migrations/
 siad/migrations/
 static/
+images/
+bancos/

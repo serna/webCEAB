@@ -31,7 +31,7 @@ admin.site.register(IngresoGeneral,IngresoGeneralAdmin)
 
 
 class EgresoGeneralesAdmin(admin.ModelAdmin):
-	search_fields = ('id',)
+	search_fields = ('=id',)
 	#def get_form(self, request, obj=None, **kwargs):
 	#	if request.user.is_superuser:
 	#		kwargs['form'] = EgresoSuperUserForm
@@ -118,7 +118,7 @@ class ProveedoresAdmin(admin.ModelAdmin):
 			readOnlyFields = []
 		return readOnlyFields
 admin.site.register(Proveedor,ProveedoresAdmin)
-
+	
 class TarjetonAdmin(admin.ModelAdmin):
 	#list_filter = ('plantelRegistro')
 	#raw_id_fields = ('Aspirante',)

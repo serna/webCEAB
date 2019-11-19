@@ -35,7 +35,15 @@ class rango_fechas_plantel_form(forms.Form):
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 class rango_fechas_calendario_form(forms.Form):
+	opcionesHorario = (
+		('Entre semana','Entre semana'),
+		('Sabado','Sabado'),
+		('Domingo','Domingo'),
+		('Virtual','Virtual'),
+			
+	)
 	hora_inicio = forms.TimeField()
+	horario = forms.ChoiceField(opcionesHorario)
 	calendario = forms.ModelChoiceField(queryset = Calendario.objects.all())
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
