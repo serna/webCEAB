@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Estudiante, Materia, Servicio, Curso,  Documentacion, Catalogo
 
+from promotoria.models import Aspirantes
 
 
 
@@ -15,13 +16,13 @@ class CatalogoAdmin(admin.ModelAdmin):
 			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
 			# sera superusuario, en esta funcion se determina que campos no podra modificar
 	#		readOnlyFields = [] # set all fields as editable
-			
+
 	#	elif obj:
 	#		for f in self.model._meta.fields:
 				# et all fields as readoonly for all but superuser
 	#			if f.name != 'id' and f.name != 'materias':
 	#				readOnlyFields.append(f.name)
-			
+
 	#	else:
 	#		readOnlyFields = []
 			#readOnlyFields.append('materias')
@@ -41,13 +42,13 @@ class CursosAdmin(admin.ModelAdmin):
 			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
 			# sera superusuario, en esta funcion se determina que campos no podra modificar
 			readOnlyFields = [] # set all fields as editable
-			
+
 		elif obj:
 			for f in self.model._meta.fields:
 				# et all fields as readoonly for all but superuser
 				if f.name != 'id' and f.name != 'materias':
 					readOnlyFields.append(f.name)
-			
+
 		else:
 			readOnlyFields = []
 			#readOnlyFields.append('materias')
@@ -76,25 +77,28 @@ class DocumentacionAdmin(admin.ModelAdmin):
 admin.site.register(Documentacion,DocumentacionAdmin)
 
 class EstudianteAdmin(admin.ModelAdmin):
-	#filter_horizontal = ('cursos',)
-	search_fields = ('=id',)
-	def get_readonly_fields(self, request, obj=None):
-		# regresa la lista de campos que son de solo lectura
-		readOnlyFields = []
-		if request.user.is_superuser:
-			# habra un usuario, llamado direccion, que puede modificar casi todos los campos
-			# sera superusuario, en esta funcion se determina que campos no podra modificar
-			readOnlyFields = [] # set all fields as editable
-		elif obj:
-			for f in self.model._meta.fields:
-				# et all fields as readoonly for all not superuser
-				if f.name != 'id' :
-					readOnlyFields.append(f.name)
-		else:
-			readOnlyFields = []
-		#readOnlyFields.append('cursos')
-		return readOnlyFields
+    #filter_horizontal = ('cursos',)
+    search_fields = ('=id',)
+    raw_id_fields = ("Aspirante","curso")
+    related_lookup_fields = { 'aspirante': ['aspirante']}
+    def get_readonly_fields(self, request, obj=None):
+    	# regresa la lista de campos que son de solo lectura
+    	readOnlyFields = []
+    	if request.user.is_superuser:
+    		# habra un usuario, llamado direccion, que puede modificar casi todos los campos
+    		# sera superusuario, en esta funcion se determina que campos no podra modificar
+    		readOnlyFields = [] # set all fields as editable
+    	elif obj:
+    		for f in self.model._meta.fields:
+    			# et all fields as readoonly for all not superuser
+    			if f.name != 'id' :
+				    readOnlyFields.append(f.name)
+    	else:
+    	    readOnlyFields = []
+    	#readOnlyFields.append('cursos')
+    	return readOnlyFields
 admin.site.register(Estudiante,EstudianteAdmin)
+
 
 class MateriasAdmin(admin.ModelAdmin):
 	search_fields = ('=id',)
