@@ -1651,7 +1651,6 @@ def generaPDF(request):
 					'mensaje': "Ese alumno no existe en la base de datos",
 				}
 				return render(request, 'msg_registro_inexistente.html',context)
-			qs_materia = Materia.objects.get(id=materia)
 			try:
 				qs_materia = Materia.objects.get(id=materia)
 			except:
@@ -1689,7 +1688,7 @@ def generaPDF(request):
 				a.close()
 				for i in range(len(lineas)):
 					#linea = lineas[i].replace("\\\\","\\")
-					print("Directo del archivo",lineas[i],type(lineas[i]))
+					#print("Directo del archivo",lineas[i],type(lineas[i]))
 					linea = str(lineas[i])
 					if linea[0]=="b":
 						lineas[i] = linea[1:]
@@ -1700,10 +1699,12 @@ def generaPDF(request):
 				contenido = {
 				"alumno":"%d %s %s %s"%(qs_alumno.id,qs_alumno.Aspirante.nombre,qs_alumno.Aspirante.apellido_paterno,qs_alumno.Aspirante.apellido_materno),
 				"materia": "%s"%(nombre_materia),
+				"claveMateria": qs_materia.id,
 				"n_preguntas": qs_materia.banco.numero_de_reactivos,
 				"folio": qs_alumno.numero_de_control,
 				"en_orden": qs_materia.banco.preguntas_en_el_mismo_orden,
-				"lineas": lineas
+				"lineas": lineas,
+				"nombreBanco":qs_materia.banco.nombre_del_examen
 				}
 				tex.crea_archivo(nombre,contenido)
 				if os.path.exists(archivo_pdf):
