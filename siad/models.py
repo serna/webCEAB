@@ -4,7 +4,7 @@ from django.utils import timezone
 class Horario(models.Model):
 	horario = models.CharField(max_length = 30)
 	def __str__(self):
-		return self.horario
+		return "%s: %s"%(self.id,self.horario)
 	class Meta: 
 		#ordering = ["nombre"] 
 		verbose_name_plural = "Horarios"

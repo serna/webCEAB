@@ -42,8 +42,8 @@ class rango_fechas_calendario_form(forms.Form):
 		('Virtual','Virtual'),
 			
 	)
-	hora_inicio = forms.TimeField()
-	horario = forms.ChoiceField(opcionesHorario)
+	#hora_inicio = forms.TimeField()
+	horario = forms.ModelChoiceField(queryset = Horario.objects.all())
 	calendario = forms.ModelChoiceField(queryset = Calendario.objects.all())
 	fecha_inicial = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)
 	fecha_final = forms.DateField(widget=forms.SelectDateWidget(),initial=timezone.now)

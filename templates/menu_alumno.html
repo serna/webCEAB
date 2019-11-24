@@ -42,7 +42,11 @@
 							  	{% else %}
 							  		<td><a href="{{materia.2}}" > examen</a></td>
 							  	{% endif %}
-							  	
+							  	{% if materia.4 == '' %}
+							  		<td> {{ NA }} </td>
+							  	{% else %}
+							  		<td><a href="{{materia.4}}" > Hoja resumen</a></td>
+							  	{% endif %}
 							 </tr>
 						{% endfor %}
 					</tbody>

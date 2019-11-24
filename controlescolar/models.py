@@ -38,6 +38,7 @@ class Materia(models.Model):
 	horario_fin = models.TimeField()#choices = opcionesHorarios,default = '9:00:00')
 	banco = models.ForeignKey(Catalogo,null=True)
 	calendario = models.ForeignKey(Calendario, null=True)
+	horario = models.ForeignKey(Horario,default=1)
 	#clave_de_la_materia = models.CharField(max_length = 4,null=True,default = '0000',help_text='Ingresa aqui la clave de la materia')
 	#numero_de_preguntas = models.IntegerField(null = True,default = 0,help_text='Numero de preguntas del examen de la materia')
 	#opcionesDias = (

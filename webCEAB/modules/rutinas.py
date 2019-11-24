@@ -37,15 +37,16 @@ def evaluate(nPreguntas,claveExamen,claveAlumno,listaRespuestasAlumno,materia,pa
 	#print ("Las respuestas correctas son: ",listaRespuestasCorrectas)
 	##print listaRespuestas[0],listaRespuestas[1],listaRespuestas[2],listaRespuestas[3],listaRespuestas[4]
 	#print( "n\t","corret\t","Alumno\t","Calificacion")
-	for item in listaRespuestasAlumno:
+	for item_str in listaRespuestasAlumno:
+
 		if cnt>nPreguntas:
 			break
-		if item == '':
+		if item_str == '':
 			#print( "No contestada")
 			noContestadas.append(cnt)
 			cnt+=1
 			continue
-		
+		item = int(item_str)
 		#print(cnt,"\t",respuestas[listaRespuestasCorrectas[cnt-1]],"\t",respuestas[item],"\t",)
 		if item==listaRespuestasCorrectas[cnt-1]:
 			#print("Correcta")

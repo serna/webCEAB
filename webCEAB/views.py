@@ -99,6 +99,86 @@ def cobros_vencidos(request,dias):
 			}
 	return render(request, "reporta_resultados.html", context)
 #def index(request):
+def respuestas(request,materia):
+	idAlumno = request.session["id_alumno"]
+	alumno_qs = Estudiante.objects.get(id=idAlumno)
+	folio = str(alumno_qs.numero_de_control)
+	nombre = str(alumno_qs)
+	try:
+		materia_qs = Materia.objects.get(id=materia)
+	except:
+
+		context = {
+			'titulo': "MATERIA INEXISTENTE",
+			'mensaje': "Esa materia no esta registrada en la base de datos",
+		}
+
+		return render(request, 'msg_registro_inexistente.html',context)
+	claveExamen = "1111"
+	if materia_qs.banco.preguntas_en_el_mismo_orden==True:
+		claveExamen = "0111"
+	numeroPreguntas = materia_qs.banco.numero_de_reactivos
+	materiaEncontrada= 0
+	curso = Curso.objects.get(estudiante = idAlumno)
+	boleta=curso.boleta
+	for linea in boleta.split('\n'):
+		if len(linea)!=0 : # si la linea contiene informacion
+			print('La linea contiene',linea)
+			mat = linea.split()[0]
+			print('La materia en la boleta es',mat,' la materia en la consulta es ',materia)
+			if int(mat)==int(materia):
+				respuestasDesencriptadas = rut.desencripta(linea.split()[-1])
+				materiaEncontrada = 1
+				break
+	listaRespuestas = respuestasDesencriptadas
+	calif,incorr,correc,noContestadas= rut.evaluacionDigital(nombreAlumno=nombre,claveAlumno= folio,claveExamen = claveExamen,versionExamen=2017,nPreguntas=numeroPreguntas,materia="Aqui va una materia",listaPreguntas=listaRespuestas)
+	#return generate_csvFile(request,datos)
+	queryset2 = Materia.objects.filter(id=materia)
+	materiaNombre = "%d: %s"%(queryset2[0].id,queryset2[0].nombre)
+	lista = [
+	["Nombre del alumno: ",nombre],
+	#["Folio del alumno: ",folio],
+	["Materia: ",materiaNombre],
+	["Calificacion:",calif],
+	["Incorrectas contestadas por el alumno (%d):"%(len(incorr)),incorr],
+	["Correctas contestadas por el alumno (%d):"%(len(correc)),correc],
+	#["Sin contestar (%d)"%(len(noContestadas)),noContestadas]
+	]
+	context={
+		'mensaje': "El resultado de la evaluacion es:",
+		'lista':lista,
+	}
+	# ahora que se ha evaluado el examen es necesario asentar la calificacion en la boleta
+	# 1.- Hacer la consulta para saber que curso le corresponde al alumno
+	# 2.- En el curso correspondiente se debe de verificar dos cosas:
+	#     2.1.- Verificar si la materia ya esta dada de alta en la boleta.
+	#     2.2.- Verificar que el alumno no tenga mas de tres intentos.
+	# 3.- Asentar la calificacion en la boleta
+	################################################
+	#curso = Curso.objects.get(estudiante = idAlumno)
+	#print('EL CONTENIDO DEL CURSO ES:')
+	#curso = curso
+	#print(curso,curso.materias.all())
+	#boleta = str(curso.boleta)
+
+	#print('EL CONTENIDO DE LA BOLETA ESSSS:')
+	#print(boleta.split('\n'))
+	#print(boleta.split('\r'))
+	#boletaNueva = rut.agrega_calificacion(boleta.split('\n'),materia,calif,cadenaRespuestas)
+	#print('Boleta antigua',boleta)
+	#print('SEPARADOR ENTRE BOLETAS')
+	#print('Boleta Nueva',boletaNueva)
+	#if boletaNueva == -1:
+	#	context = {
+	#		'titulo': "NO MAS INTENTOS",
+	#		'mensaje': "Solo se permiten tres evaluaciones por materia",
+	#	}
+
+	#	return render(request, 'msg_registro_inexistente.html',context)
+
+	#Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
+	#return HttpResponseRedirect("/alumnos")
+	return render(request,'impresion_lista_2d.html',context)
 def evaluacion_digital(request,alumno,materia):
 	""" This function allows to record the grade of the alumn in the corresponding alumno's "boleta"
 	"""
@@ -185,7 +265,7 @@ def evaluacion_digital(request,alumno,materia):
 				return render(request, 'msg_registro_inexistente.html',context)
 
 			Curso.objects.filter(pk=curso.pk).update(boleta=boletaNueva)
-
+			return HttpResponseRedirect("/alumnos")
 			return render(request,'impresion_lista_2d.html',context)
 	else:
 		alumnos = Estudiante.objects.filter(id = alumno)
@@ -215,6 +295,11 @@ def evaluacion_digital(request,alumno,materia):
 				cadena = 'pregunta_'+str(cnt)
 				respuestasDict[cadena] = i
 				cnt+=1
+		respuestasDict["numero_de_preguntas"] = materias[0].banco.numero_de_reactivos
+		if materias[0].banco.preguntas_en_el_mismo_orden ==True:
+			respuestasDict["clave_del_examen"] = "0111"
+		else:
+			respuestasDict["clave_del_examen"] = "1111"
 		if materiaEncontrada==1:
 			form = preguntas_form(initial=respuestasDict)
 		else:
@@ -392,7 +477,7 @@ def accesoAlumno(request):
 				if contrasena!=clave:
 					context = {
 					'titulo': "Informacion invalida",
-					'mensaje': "La contrasena no es correcta",
+					'mensaje': "La contrasena o el id no es correcto",
 					}
 
 					return render(request, 'msg_registro_inexistente.html',context)
@@ -482,7 +567,12 @@ def accesoAlumno(request):
 							break
 				if habilitaLink==1:
 					link = 'eval/' + str(numero) + "/"+str(claveMateria)
-				materias.append([item,intentos,link,etiqueta])
+				
+				if intentos>=1:
+					linkEvaluacion = "respuestas/" + str(item.id)
+				else:
+					linkEvaluacion =""
+				materias.append([item,intentos,link,etiqueta,linkEvaluacion])
 			#queryset = queryset.filter(creacion_de_registro__gt = fecha1)
 			#context = {"queryset":queryset,}
 			index = str(queryset[0].Aspirante).find(' ')
@@ -532,13 +622,13 @@ def accesoAlumno(request):
 			'clave':clave,
 			'nombre': nombreAlumno,
 			'materias': materias,
-			'encabezados': ['Materia', 'Intentos', 'Link'],
+			'encabezados': ['Materia', 'Intentos', 'Link',"Evaluacion"],
 			'encabezados2': ['Materia', '1ra','2da','3ra','extra'],
 			'filas': calificaciones,
 			}
 
 
-
+			request.session['id_alumno'] = numero
 			return render(request,"menu_alumno.html", context)
 
 	else:
@@ -1605,8 +1695,9 @@ def imprime_calendario_materias(request):
 			fecha1 = form.cleaned_data['fecha_inicial']
 			fecha2 = form.cleaned_data['fecha_final']
 			calendario = form.cleaned_data["calendario"]
-			hora = form.cleaned_data["hora_inicio"]
-			qs = Materia.objects.filter(fecha_inicio__gte = fecha1,fecha_termino__lte=fecha2,calendario=calendario,horario_inicio=hora)
+			#hora = form.cleaned_data["hora_inicio"]
+			horario = form.cleaned_data["horario"]
+			qs = Materia.objects.filter(fecha_inicio__gte = fecha1,fecha_termino__lte=fecha2,calendario=calendario,horario=horario)
 			filas = []
 			cnt = 1
 			for materia in qs:

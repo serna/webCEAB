@@ -57,6 +57,7 @@ urlpatterns = [
     url(r'^datos_alumno$', views.datos_alumno),
     url(r'^imprime_calendario_materias$', views.imprime_calendario_materias),
     url(r'^generaPDF$', views.generaPDF),
-
+    #url(r'^respuestas$', views.respuestas),
+    url(r'^respuestas/(?P<materia>\d+)$', views.respuestas),
 
 ]
