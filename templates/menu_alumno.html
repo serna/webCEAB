@@ -35,7 +35,15 @@
 				
 				        {% for materia in materias %}
 				        	<tr>
-							  	<td> {{materia.0}}</td>
+							  	
+
+							  	{% if materia.5 == '' %}
+							  		<td> {{ materia.0 }} </td>
+							  	{% else %}
+							  	
+							  		<td><a href="{{materia.5}}" > {{materia.0}}</a></td>
+							  	{% endif %}
+
 							  	<td> {{materia.1}} </td>
 							  	{% if materia.2 == '' %}
 							  		<td> {{ materia.3 }} </td>

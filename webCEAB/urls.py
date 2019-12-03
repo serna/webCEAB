@@ -59,5 +59,7 @@ urlpatterns = [
     url(r'^generaPDF$', views.generaPDF),
     #url(r'^respuestas$', views.respuestas),
     url(r'^respuestas/(?P<materia>\d+)$', views.respuestas),
+    url(r'^archivoPDF/(?P<alumno>\d+)/(?P<materia>\d+)$', views.genera_archivo_PDF),
+    
 
 ]
