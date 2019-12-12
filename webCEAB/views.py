@@ -1566,7 +1566,7 @@ def detalle_pago_alumno(request):
 			filas = []
 			resumen = []
 			cnt=0
-			total_pagado = 0
+			
 			opciones= {
 				'Semanal':timedelta(days=7),
 				'Quincenal':timedelta(days=14),
@@ -1574,20 +1574,23 @@ def detalle_pago_alumno(request):
 				'Un solo pago':timedelta(days=1),
 				'Otro': timedelta(days=30, hours=10),
 			}
+			monto_cubierto = 0
 			for pago in qs.pagos.all():
 				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
-				total_pagado += pago.monto +pago.bonificacion
+				
 				cnt += 1
 				filas.append(fila)
+				if pago.fecha_pago>=inicio:
+					monto_cubierto += pago.monto+pago.bonificacion
 			estatus = "(INACTIVO)"
 			if qs.alumno.activo==True:
 				estatus = "(ACTIVO)"
 			mensaje_principal = "%s %s"%(qs.alumno,estatus)
-			monto_cubierto = 0
-			for pago in qs.pagos.all():
-				print("PAGOS HECHOS",qs.pagos.all(),inicio)
-				if pago.fecha_pago>=inicio:
-					monto_cubierto += pago.monto
+			
+		
+				#print("PAGOS HECHOS",qs.pagos.all(),inicio)
+				
+			print("Pagos atrasados",qs.pagos_atrasados)
 			if qs.pagos_atrasados<1:
 				submensaje = "El alumno esta al corriente en sus pagos"
 				cadena_fecha = "Proxima fecha de pago"
