@@ -14,6 +14,7 @@ class Catalogo(models.Model):
 	preguntas_en_el_mismo_orden = models.BooleanField(default=False)
 	numero_de_reactivos = models.IntegerField(null=True,default=10)
 	archivo = models.FileField(null=True,blank=True,upload_to='bancos/')
+	disponible_para_alumno = models.BooleanField(default=True,help_text="Disponible para que el alumno lo pueda descargar desde su menu.")
 	def __str__(self):
 		#return "%s;\t inicia %s\t termina %s\t, de %s\t a %s" % (self.nombre , self.fecha_inicio, self.fecha_termino, self.horario_inicio, self.horario_fin)
 		return  "%s"%self.id +": "+str(self.nombre_del_examen)

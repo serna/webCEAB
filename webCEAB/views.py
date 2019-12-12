@@ -639,7 +639,7 @@ def accesoAlumno(request):
 						else:
 							print('Todavia tiene mas intentos, ha hecho ',intentos,' intentos')
 							habilitaLink = 1
-							if fechaLimite < datetime.datetime.now().date():
+							if fechaLimite < datetime.datetime.now().date() :
 								# si la fecha de evaluacion digital ya caduco
 								print("Ya caduco el examen")
 								etiqueta = 'Fuera de fechas, '
@@ -655,7 +655,7 @@ def accesoAlumno(request):
 					linkEvaluacion = "respuestas/" + str(item.id)
 				else:
 					linkEvaluacion =""
-				if item.fecha_inicio <= hoy and item.fecha_termino >= hoy:
+				if item.fecha_inicio <= hoy and item.fecha_termino >= hoy and item.banco.disponible_para_alumno==True:
 					linkMaterial = "archivoPDF/%d/%d"%(int(numero),item.id)
 				else:
 					linkMaterial = ""
@@ -1576,7 +1576,7 @@ def detalle_pago_alumno(request):
 			}
 			for pago in qs.pagos.all():
 				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
-				total_pagado += pago.monto
+				total_pagado += pago.monto +pago.bonificacion
 				cnt += 1
 				filas.append(fila)
 			estatus = "(INACTIVO)"
@@ -1824,4 +1824,75 @@ def generaPDF(request):
 	"form":form,
 	}
 
+	return render(request, "formulario_fechas.html", context)
+
+def calcula_pagos(inicio,fin,primerPago,n_pagos,periodo):
+	""" Regresa el numero de veces que un elemento de lista de pagos programados
+		cae dentro del periodo de fechas de inicio a fin 
+	"""
+	
+	n = 0
+	for i in range(n_pagos):
+		fechaIndice = primerPago+i*periodo
+		if fechaIndice >= inicio and fechaIndice <=fin:
+			n += 1
+	return n
+def proximas_colegiaturas(request):
+	opciones= {
+		'Semanal':timedelta(days=7),
+		'Quincenal':timedelta(days=14),
+		'Mensual':timedelta(days=28),
+		'Un solo pago':timedelta(days=1),
+		'Otro': timedelta(days=30, hours=10),
+	}
+	if request.method == 'POST':
+		form = rango_fechas_plantel_form(request.POST)
+		if form.is_valid():
+			fecha1 = form.cleaned_data['fecha_inicial']
+			fin = form.cleaned_data['fecha_final']
+
+			if fecha1 <=  timezone.localtime(timezone.now()).date():
+				inicio = timezone.localtime(timezone.now()).date()
+			if fin<=fecha1:
+				fin = timezone.localtime(timezone.now()).date()
+			plantel = form.cleaned_data["plantel"]
+			# consulta que regresa a todos los alumnos activos que no han cubierto
+			# el monto total del servicio
+			qs = Tarjeton.objects.filter(alumno__activo = True, monto_cubierto=False)
+			filas = []
+			total = 0
+			for tarjeton in qs:
+				deudaAlumno = 0
+				if tarjeton.deuda_actual>0:
+					deudaAlumno += tarjeton.deuda_actual
+				if tarjeton.pago_periodico!=0:
+					n_pagos = int(tarjeton.monto_a_pagos/tarjeton.pago_periodico)
+				else:
+					n_pagos=0
+				if n_pagos==0:
+					continue
+				periodo = opciones[tarjeton.esquema_de_pago]
+				primerPago = tarjeton.inicio
+				nPag = calcula_pagos(inicio,fin,primerPago,n_pagos,periodo)
+				deudaAlumno += nPag*tarjeton.pago_periodico
+				fila = [tarjeton.alumno,deudaAlumno]
+				if deudaAlumno>0:
+					filas.append(fila)
+				total += deudaAlumno
+
+			
+			context = {
+					'mensaje': "Pronostico de los ingresos para el periodo del %s al %s"%(inicio,fin),
+					"submensaje": "La suma del pronostico de ingresos es $%s"%total,
+					'encabezados': ["Alumno",'Monto'],
+					'filas':filas,
+					}
+			return render(request, "tabla_general.html", context)
+	else:
+		form = rango_fechas_plantel_form()
+
+		context = {
+		"mensaje": "Ingresa el rango de fechas",
+		"form":form,
+		}
 	return render(request, "formulario_fechas.html", context)

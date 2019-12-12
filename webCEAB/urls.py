@@ -60,6 +60,6 @@ urlpatterns = [
     #url(r'^respuestas$', views.respuestas),
     url(r'^respuestas/(?P<materia>\d+)$', views.respuestas),
     url(r'^archivoPDF/(?P<alumno>\d+)/(?P<materia>\d+)$', views.genera_archivo_PDF),
-    
+    url(r'^proximas_colegiaturas$', views.proximas_colegiaturas),
 
 ]
