@@ -1927,6 +1927,8 @@ def proximas_colegiaturas(request):
 				periodo = opciones[tarjeton.esquema_de_pago]
 				primerPago = tarjeton.inicio
 				nPag = calcula_pagos(inicio,fin,primerPago,n_pagos,periodo)
+				if nPag==0:
+					continue
 				deudaAlumno += nPag*tarjeton.pago_periodico
 				fila = [tarjeton.alumno,deudaAlumno]
 				if deudaAlumno>0:
