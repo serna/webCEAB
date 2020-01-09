@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template.loader import get_template
 from django.template import Context
 import datetime
+from math import ceil
 from django.core.mail import send_mail
 from controlescolar.models import Estudiante, Curso, Materia, Catalogo, Documentacion
 from promotoria.models import Aspirantes
@@ -49,6 +50,14 @@ def genera_archivo_PDF(request,alumno,materia):
 		context = {
 			'titulo': "Registro inexistente",
 			'mensaje': "Esa materia no existe en la base de datos",
+		}
+		return render(request, 'msg_registro_inexistente.html',context)
+	hoy = timezone.localtime(timezone.now()).date()
+	if hoy<qs_materia.fecha_inicio or hoy >qs_materia.fecha_termino:
+		print("### Fuera de fechas")
+		context = {
+		'titulo': "Fuera de fechas",
+		'mensaje': "Este material ya no esta vigente",
 		}
 		return render(request, 'msg_registro_inexistente.html',context)
 	nombre_materia = str(qs_materia.nombre).replace(" ","")
@@ -1575,13 +1584,18 @@ def detalle_pago_alumno(request):
 				'Otro': timedelta(days=30, hours=10),
 			}
 			monto_cubierto = 0
+			pago_colegiaturas =0
 			for pago in qs.pagos.all():
 				fila = [pago.id,pago.folio,pago.fecha_pago,pago.concepto,"$%1.2f"%pago.monto]
 				
 				cnt += 1
 				filas.append(fila)
 				if pago.fecha_pago>=inicio:
-					monto_cubierto += pago.monto+pago.bonificacion
+					abono = pago.monto+pago.bonificacion
+					monto_cubierto += abono
+					if pago.concepto != "Inscripcion" and pago.concepto!="Cargo administrativo":
+						pago_colegiaturas += abono
+			print("### El alumno ha pagado en total: ",monto_cubierto,pago_colegiaturas)
 			estatus = "(INACTIVO)"
 			if qs.alumno.activo==True:
 				estatus = "(ACTIVO)"
@@ -1589,21 +1603,6 @@ def detalle_pago_alumno(request):
 			
 		
 				#print("PAGOS HECHOS",qs.pagos.all(),inicio)
-				
-			print("Pagos atrasados",qs.pagos_atrasados)
-			if qs.pagos_atrasados<1:
-				submensaje = "El alumno esta al corriente en sus pagos"
-				cadena_fecha = "Proxima fecha de pago"
-				fecha_proxima = qs.proxima_fecha_de_pago
-				if qs.monto_total <= monto_cubierto:
-					fecha_proxima = "MONTO TOTAL CUBIERTO"
-			else:
-				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(qs.pagos_atrasados)
-				cadena_fecha = "Ultima fecha que debe cubrir "
-
-				fecha_proxima = qs.proxima_fecha_de_pago-qs.pagos_atrasados*opciones[qs.esquema_de_pago]
-				#fecha_proxima = qs.proxima_fecha_de_pago
-			#fecha_inicio = qs.fecha_abonos_anticipados
 			if qs.pago_periodico!=0:
 				n_pagos = int(qs.monto_a_pagos/qs.pago_periodico)
 			else:
@@ -1612,6 +1611,57 @@ def detalle_pago_alumno(request):
 			primer_pago = qs.inicio
 			for i in range(n_pagos):
 				filas3.append([i+1,primer_pago+i*opciones[qs.esquema_de_pago],qs.pago_periodico])
+			
+			# la funcion se~nal que calcula los montos atrasados de los alumnos ha presentado algunas 
+			# fallas, por esa razon en este segmento de codigo se vuelve a verificar cuanto debe el alumno
+			hoy = timezone.localtime(timezone.now()).date()
+			deudaReal = 0
+			for i in range(len(filas3)):
+				#print(hoy,filas3[i][1])
+				if hoy<filas3[i][1]:
+					break
+				deudaReal += filas3[i][2]
+				
+			if qs.pago_periodico!=0:
+				pagos_atrasados = ceil((deudaReal-pago_colegiaturas)/qs.pago_periodico)
+			else:
+				pagos_atrasados = 1
+			print("### realDeuda ", deudaReal)
+			print("### El alumno presenta ",pagos_atrasados,"pagos atrasados",qs.monto_total,monto_cubierto)
+			if pagos_atrasados<1:
+				submensaje = "El alumno esta al corriente en sus pagos"
+				cadena_fecha = "Proxima fecha de pago"
+				fecha_proxima = qs.proxima_fecha_de_pago
+				if qs.monto_total <= monto_cubierto:
+					fecha_proxima = "MONTO TOTAL CUBIERTO"
+				else:
+					# va al corriente pero no ha pagado todo, sin embargo es posible que este adelantando pagos, 
+					# en esos casos el cliente solicito que se calcule de manera correcta cual sera la proxima
+					# fecha de pagos en funcion de lo que ya ha pagado.
+					print("### El alumno no debe pero no tiene el monto total cubierto, calculando su proxima fecha de pago")
+					
+					primer_pago = qs.inicio
+					if qs.pago_periodico!=0:
+						colegiaturasPagadas = int(pago_colegiaturas/qs.pago_periodico)
+					else:
+						colegiaturasPagadas = 1 
+					if colegiaturasPagadas == 0:
+						fecha_proxima = filas3[0][1]
+					else:
+						if len(filas3)==0:
+							fecha_proxima = "MONTO TOTAL CUBIERTO"
+						else:
+							fecha_proxima = filas3[colegiaturasPagadas][1]
+					print("### El alumno ha cubierto ", colegiaturasPagadas,"colegiaturas")
+
+			else:
+				submensaje = "El alumno presenta adeudo (pagos atrasados: %d)"%(pagos_atrasados)
+				cadena_fecha = "Ultima fecha que debe cubrir "
+
+				fecha_proxima = qs.proxima_fecha_de_pago-pagos_atrasados*opciones[qs.esquema_de_pago]
+				#fecha_proxima = qs.proxima_fecha_de_pago
+			#fecha_inicio = qs.fecha_abonos_anticipados
+			
 
 			resumen = [ (cadena_fecha,fecha_proxima),
 						("Monto total",qs.monto_total),
