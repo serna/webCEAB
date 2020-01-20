@@ -35,7 +35,7 @@ def descarga(request,archivo):
 	print("### Se ha creado y entregado el archivo")
 	return response
 
-def genera_archivo_PDF(request,alumno,materia):
+def genera_archivo_PDF(request,alumno,materia,privilegios = False):
 	try:
 		qs_alumno = Estudiante.objects.get(id=alumno)
 	except:
@@ -53,7 +53,7 @@ def genera_archivo_PDF(request,alumno,materia):
 		}
 		return render(request, 'msg_registro_inexistente.html',context)
 	hoy = timezone.localtime(timezone.now()).date()
-	if hoy<qs_materia.fecha_inicio or hoy >qs_materia.fecha_termino:
+	if hoy<qs_materia.fecha_inicio or hoy>qs_materia.fecha_termino and privilegios ==False:
 		print("### Fuera de fechas")
 		context = {
 		'titulo': "Fuera de fechas",
