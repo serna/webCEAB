@@ -53,67 +53,68 @@ def genera_archivo_PDF(request,alumno,materia,privilegios = False):
 		}
 		return render(request, 'msg_registro_inexistente.html',context)
 	hoy = timezone.localtime(timezone.now()).date()
-	if hoy<qs_materia.fecha_inicio or hoy>qs_materia.fecha_termino and privilegios ==False:
+	if hoy<qs_materia.fecha_inicio or hoy>qs_materia.fecha_termino:
 		print("### Fuera de fechas")
 		context = {
 		'titulo': "Fuera de fechas",
 		'mensaje': "Este material ya no esta vigente",
 		}
-		return render(request, 'msg_registro_inexistente.html',context)
+		if privilegios ==False:
+		    return render(request, 'msg_registro_inexistente.html',context)
 	nombre_materia = str(qs_materia.nombre).replace(" ","")
 	materia = "%d_%d_%s"%(qs_materia.id,qs_alumno.id,nombre_materia)
 
 	archivo_pdf = "pdfs/" + str(materia) + ".pdf"
 	if os.path.exists(archivo_pdf):
 		print("### El archivo ya existe, solo se descarga")
-		return descarga(request,archivo_pdf)
-	else:
-		print("### El archivo no existe, se genera un archivo nuevo")
-		nombre = str(materia)  + ".tex"
-		a = qs_materia.banco.archivo
-		try:
-			print("### Abriendo el archivo del banco")
-			a.open("r")
-			lineas = a.readlines()
-			a.close()
-
-		except:
-			print("### No se pudo abrir el banco")
-			context = {
-			'titulo': "SIN BANCO DE REACTIVOS",
-			'mensaje': "Esta materia no tiene un banco de reactivos dado de alta",
-			}
-			return render(request, 'msg_registro_inexistente.html',context)
+		if privilegios == False:
+		    return descarga(request,archivo_pdf)
+	print("### El archivo no existe o lo esta generando el administrador, se genera un archivo nuevo")
+	nombre = str(materia)  + ".tex"
+	a = qs_materia.banco.archivo
+	try:
+		print("### Abriendo el archivo del banco")
 		a.open("r")
 		lineas = a.readlines()
 		a.close()
-		for i in range(len(lineas)):
-			#linea = lineas[i].replace("\\\\","\\")
-			#print("Directo del archivo",lineas[i],type(lineas[i]))
-			linea = str(lineas[i])
-			if linea[0]=="b":
-				lineas[i] = linea[1:]
-			else:
-				lineas[i] = linea
-			#lineas[i] = lineas[i].replace("|","")
-			#print("Directo del archivo",lineas[i])
-		contenido = {
-		"alumno":"%d %s %s %s"%(qs_alumno.id,qs_alumno.Aspirante.nombre,qs_alumno.Aspirante.apellido_paterno,qs_alumno.Aspirante.apellido_materno),
-		"materia": "%s"%(nombre_materia),
-		"claveMateria": qs_materia.id,
-		"n_preguntas": qs_materia.banco.numero_de_reactivos,
-		"folio": qs_alumno.numero_de_control,
-		"en_orden": qs_materia.banco.preguntas_en_el_mismo_orden,
-		"lineas": lineas,
-		"nombreBanco":qs_materia.banco.nombre_del_examen
+
+	except:
+		print("### No se pudo abrir el banco")
+		context = {
+		'titulo': "SIN BANCO DE REACTIVOS",
+		'mensaje': "Esta materia no tiene un banco de reactivos dado de alta",
 		}
-		tex.crea_archivo(nombre,contenido)
-		if os.path.exists(archivo_pdf):
-			print("### El archivo se descarga inmediatamente despues de haber sido creado")
-			return descarga(request,archivo_pdf)
-		
-		context={"mensaje":"No se pudo generar el material"}
-		return render(request, "tabla_general.html", context)
+		return render(request, 'msg_registro_inexistente.html',context)
+	a.open("r")
+	lineas = a.readlines()
+	a.close()
+	for i in range(len(lineas)):
+		#linea = lineas[i].replace("\\\\","\\")
+		#print("Directo del archivo",lineas[i],type(lineas[i]))
+		linea = str(lineas[i])
+		if linea[0]=="b":
+			lineas[i] = linea[1:]
+		else:
+			lineas[i] = linea
+		#lineas[i] = lineas[i].replace("|","")
+		#print("Directo del archivo",lineas[i])
+	contenido = {
+	"alumno":"%d %s %s %s"%(qs_alumno.id,qs_alumno.Aspirante.nombre,qs_alumno.Aspirante.apellido_paterno,qs_alumno.Aspirante.apellido_materno),
+	"materia": "%s"%(nombre_materia),
+	"claveMateria": qs_materia.id,
+	"n_preguntas": qs_materia.banco.numero_de_reactivos,
+	"folio": qs_alumno.numero_de_control,
+	"en_orden": qs_materia.banco.preguntas_en_el_mismo_orden,
+	"lineas": lineas,
+	"nombreBanco":qs_materia.banco.nombre_del_examen
+	}
+	tex.crea_archivo(nombre,contenido)
+	if os.path.exists(archivo_pdf):
+		print("### El archivo se descarga inmediatamente despues de haber sido creado")
+		return descarga(request,archivo_pdf)
+
+	context={"mensaje":"No se pudo generar el material"}
+	return render(request, "tabla_general.html", context)
 
 def genera_pdf(request):
 	# Create the HttpResponse object with the appropriate PDF headers.
@@ -285,8 +286,13 @@ def evaluacion_digital(request,alumno,materia):
 
 			#nombre = form.cleaned_data['nombre']
 			#claveAlumno = form.cleaned_data['clave_de_alumno']
-			numeroPreguntas = form.cleaned_data['numero_de_preguntas']
-			claveExamen = form.cleaned_data['clave_del_examen']
+			#numeroPreguntas = form.cleaned_data['numero_de_preguntas']
+			qs_materia = Materia.objects.get(id=materia)
+			id_banco = qs_materia.banco.id
+			numeroPreguntas = Catalogo.objects.get(id=id_banco).numero_de_reactivos
+			print("La materia es ",qs_materia,"banco",id_banco,"n preguntas",numeroPreguntas)
+			#claveExamen = form.cleaned_data['clave_del_examen']
+			claveExamen = "1111"
 			#versionExamen = form.cleaned_data['version_examen']
 			listaRespuestas = []
 			cadenaRespuestas = ""
@@ -1868,7 +1874,7 @@ def generaPDF(request):
 		if form.is_valid():
 			alumno = form.cleaned_data['numero_del_alumno']
 			materia = form.cleaned_data['numero_de_la_materia']
-			return genera_archivo_PDF(request,alumno,materia)
+			return genera_archivo_PDF(request,alumno,materia,True)
 
 	form = form_alumno_materia()
 
