@@ -1613,6 +1613,8 @@ def detalle_pago_alumno(request):
 				n_pagos = int(qs.monto_a_pagos/qs.pago_periodico)
 			else:
 				n_pagos=0
+			#print(n_pagos,qs.monto_a_pagos/qs.pago_periodico,qs.monto_a_pagos)
+			# filas 3 almacena los pagos hechos desde qs.inicio
 			filas3 = []
 			primer_pago = qs.inicio
 			for i in range(n_pagos):
@@ -1657,7 +1659,12 @@ def detalle_pago_alumno(request):
 						if len(filas3)==0:
 							fecha_proxima = "MONTO TOTAL CUBIERTO"
 						else:
-							fecha_proxima = filas3[colegiaturasPagadas][1]
+							# se le resta 1 en las colegiaturas pagadas para que 
+							# corresponda con el indice de la lista
+							try: 
+								fecha_proxima = filas3[colegiaturasPagadas][1] 
+							except:
+								fecha_proxima = filas3[colegiaturasPagadas-1][1] 
 					print("### El alumno ha cubierto ", colegiaturasPagadas,"colegiaturas")
 
 			else:
